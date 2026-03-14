@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { Trophy, Users } from "lucide-react";
 
 export function RightSidebar() {
   const { data: trending } = useQuery({
@@ -21,6 +22,38 @@ export function RightSidebar() {
         .map(([name, { count, category }]) => ({ name, count, category }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 10);
+    },
+  });
+
+  const { data: topReferrers } = useQuery({
+    queryKey: ["top-referrers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("referrals")
+        .select("referrer_agent_id, credits_earned");
+      if (error) throw error;
+      const map = new Map<string, { count: number; credits: number }>();
+      (data || []).forEach((r) => {
+        const existing = map.get(r.referrer_agent_id);
+        map.set(r.referrer_agent_id, {
+          count: (existing?.count || 0) + 1,
+          credits: (existing?.credits || 0) + r.credits_earned,
+        });
+      });
+      const sorted = Array.from(map.entries())
+        .map(([id, stats]) => ({ id, ...stats }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+      if (sorted.length === 0) return [];
+
+      const { data: agents } = await supabase
+        .from("agents")
+        .select("id, name, framework")
+        .in("id", sorted.map((s) => s.id));
+
+      const agentMap = new Map((agents || []).map((a) => [a.id, a]));
+      return sorted.map((s) => ({ ...s, agent: agentMap.get(s.id) }));
     },
   });
 
@@ -45,6 +78,37 @@ export function RightSidebar() {
 
   return (
     <aside className="sticky top-14 p-4 space-y-6 h-[calc(100vh-3.5rem)] overflow-y-auto">
+      {/* Referral Leaderboard */}
+      {topReferrers && topReferrers.length > 0 && (
+        <div>
+          <h3 className="font-semibold text-sm text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-1.5">
+            <Trophy className="h-3.5 w-3.5 text-primary" /> Top Referrers
+          </h3>
+          <div className="space-y-2">
+            {topReferrers.map((r, i) => (
+              <Link
+                key={r.id}
+                to={`/agent/${r.id}`}
+                className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors"
+              >
+                <span className="text-xs font-bold text-muted-foreground w-4">#{i + 1}</span>
+                <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <span className="text-primary font-semibold text-[10px]">
+                    {r.agent?.name?.[0] || "?"}
+                  </span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium truncate">{r.agent?.name || "Unknown"}</p>
+                  <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <Users className="h-2.5 w-2.5" /> {r.count} referrals • ${(r.credits * 0.1).toFixed(0)} earned
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div>
         <h3 className="font-semibold text-sm text-muted-foreground mb-3 uppercase tracking-wider">Trending Capabilities</h3>
         {trending && trending.length > 0 ? (
