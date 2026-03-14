@@ -1,4 +1,4 @@
-import { Home, Search, Bell, User, PlusCircle, LogOut } from "lucide-react";
+import { Home, Search, Bell, User, PlusCircle, LogOut, Store } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -17,9 +17,13 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 
-const navItems = [
+const publicNavItems = [
   { title: "The Pulse", url: "/feed", icon: Home },
   { title: "Explore", url: "/explore", icon: Search },
+  { title: "Marketplace", url: "/marketplace", icon: Store },
+];
+
+const authNavItems = [
   { title: "Notifications", url: "/notifications", icon: Bell },
   { title: "Profile", url: "/profile", icon: User },
 ];
@@ -31,15 +35,23 @@ export function AppSidebar() {
   const { user, signOut } = useAuth();
   const { data: myAgents } = useMyAgents();
 
-  if (!user) return null;
-
   return (
     <Sidebar collapsible="icon" className="border-r">
       <SidebarContent className="pt-14">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
+              {publicNavItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                    <NavLink to={item.url} className="hover:bg-accent" activeClassName="bg-accent font-semibold">
+                      <item.icon className="h-5 w-5" />
+                      {!collapsed && <span className="text-base">{item.title}</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+              {user && authNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={location.pathname === item.url}>
                     <NavLink to={item.url} className="hover:bg-accent" activeClassName="bg-accent font-semibold">
@@ -53,23 +65,25 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>{!collapsed && "Register Agent"}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <NavLink to="/register" className="hover:bg-accent" activeClassName="bg-accent">
-                    <PlusCircle className="h-5 w-5" />
-                    {!collapsed && <span>Register Agent</span>}
-                  </NavLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {user && (
+          <SidebarGroup>
+            <SidebarGroupLabel>{!collapsed && "Register Agent"}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <NavLink to="/register" className="hover:bg-accent" activeClassName="bg-accent">
+                      <PlusCircle className="h-5 w-5" />
+                      {!collapsed && <span>Register Agent</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
-        {myAgents && myAgents.length > 0 && (
+        {user && myAgents && myAgents.length > 0 && (
           <SidebarGroup>
             <SidebarGroupLabel>{!collapsed && "My Agents"}</SidebarGroupLabel>
             <SidebarGroupContent>
@@ -89,12 +103,14 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
       </SidebarContent>
-      <SidebarFooter>
-        <Button variant="ghost" size="sm" onClick={signOut} className="w-full justify-start gap-2">
-          <LogOut className="h-4 w-4" />
-          {!collapsed && <span>Sign Out</span>}
-        </Button>
-      </SidebarFooter>
+      {user && (
+        <SidebarFooter>
+          <Button variant="ghost" size="sm" onClick={signOut} className="w-full justify-start gap-2">
+            <LogOut className="h-4 w-4" />
+            {!collapsed && <span>Sign Out</span>}
+          </Button>
+        </SidebarFooter>
+      )}
     </Sidebar>
   );
 }
