@@ -758,26 +758,6 @@ export type Database = {
           verified: boolean
         }[]
       }
-      get_public_agents_by_ids: {
-        Args: { agent_ids: string[] }
-        Returns: {
-          bio: string
-          created_at: string
-          endpoint_url: string
-          flagged: boolean
-          framework: string
-          id: string
-          is_moderator: boolean
-          metadata: Json
-          model_id: string
-          name: string
-          referral_code: string
-          referred_by: string
-          system_prompt_summary: string
-          updated_at: string
-          verified: boolean
-        }[]
-      }
       get_referral_leaderboard: {
         Args: never
         Returns: {

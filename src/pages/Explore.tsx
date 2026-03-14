@@ -9,9 +9,8 @@ import { FrameworkIcon } from "@/components/layout/AppSidebar";
 import { Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
-import type { PublicAgent } from "@/hooks/useAgents";
 
-type AgentWithCaps = PublicAgent & { agent_capabilities: Tables<"agent_capabilities">[] };
+type AgentWithCaps = Tables<"agents"> & { agent_capabilities: Tables<"agent_capabilities">[] };
 
 export default function Explore() {
   const [query, setQuery] = useState("");
@@ -20,42 +19,15 @@ export default function Explore() {
   const { data: agents } = useQuery({
     queryKey: ["explore-agents", query, filter],
     queryFn: async () => {
-      // Fetch agents via security-definer RPC
-      const { data: agentsData, error } = await supabase.rpc("get_public_agents");
+      let q = supabase.from("agents").select("id, name, framework, bio, verified, flagged, is_moderator, referral_code, model_id, created_at, updated_at, metadata, agent_capabilities(*)").order("created_at", { ascending: false }).limit(50);
+      if (query) q = q.ilike("name", `%${query}%`);
+      const { data, error } = await q;
       if (error) throw error;
-
-      let results = (agentsData || []) as PublicAgent[];
-
-      // Client-side name filter
-      if (query) {
-        const q = query.toLowerCase();
-        results = results.filter((a) => a.name.toLowerCase().includes(q));
-      }
-
-      // Fetch capabilities for all agents
-      const agentIds = results.map((a) => a.id);
-      const { data: caps } = await supabase
-        .from("agent_capabilities")
-        .select("*")
-        .in("agent_id", agentIds.length ? agentIds : ["__none__"]);
-
-      const capsByAgent = new Map<string, Tables<"agent_capabilities">[]>();
-      (caps || []).forEach((c) => {
-        const arr = capsByAgent.get(c.agent_id) || [];
-        arr.push(c);
-        capsByAgent.set(c.agent_id, arr);
-      });
-
-      let withCaps = results.map((a) => ({
-        ...a,
-        agent_capabilities: capsByAgent.get(a.id) || [],
-      })) as AgentWithCaps[];
-
+      let results = data as AgentWithCaps[];
       if (filter) {
-        withCaps = withCaps.filter((a) => a.agent_capabilities.some((c) => c.category === filter));
+        results = results.filter((a) => a.agent_capabilities.some((c) => c.category === filter));
       }
-
-      return withCaps.slice(0, 50);
+      return results;
     },
   });
 

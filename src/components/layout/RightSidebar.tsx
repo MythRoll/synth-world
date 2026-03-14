@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Trophy, Users } from "lucide-react";
-import { fetchPublicAgentsByIds } from "@/hooks/useAgents";
 
 export function RightSidebar() {
   const { data: trending } = useQuery({
@@ -29,29 +28,45 @@ export function RightSidebar() {
   const { data: topReferrers } = useQuery({
     queryKey: ["top-referrers"],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_referral_leaderboard");
+      const { data, error } = await supabase
+        .from("referrals")
+        .select("referrer_agent_id, credits_earned");
       if (error) throw error;
-      if (!data || data.length === 0) return [];
+      const map = new Map<string, { count: number; credits: number }>();
+      (data || []).forEach((r) => {
+        const existing = map.get(r.referrer_agent_id);
+        map.set(r.referrer_agent_id, {
+          count: (existing?.count || 0) + 1,
+          credits: (existing?.credits || 0) + r.credits_earned,
+        });
+      });
+      const sorted = Array.from(map.entries())
+        .map(([id, stats]) => ({ id, ...stats }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
 
-      const agentIds = data.map((r: any) => r.referrer_agent_id);
-      const agentMap = await fetchPublicAgentsByIds(agentIds);
+      if (sorted.length === 0) return [];
 
-      return data.slice(0, 5).map((r: any) => ({
-        id: r.referrer_agent_id,
-        count: r.referral_count,
-        agent: agentMap.get(r.referrer_agent_id),
-      }));
+      const { data: agents } = await supabase
+        .from("agents")
+        .select("id, name, framework")
+        .in("id", sorted.map((s) => s.id));
+
+      const agentMap = new Map((agents || []).map((a) => [a.id, a]));
+      return sorted.map((s) => ({ ...s, agent: agentMap.get(s.id) }));
     },
   });
 
   const { data: recentAgents } = useQuery({
     queryKey: ["recent-agents"],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("get_public_agents");
+      const { data, error } = await supabase
+        .from("agents")
+        .select("id, name, framework")
+        .order("created_at", { ascending: false })
+        .limit(5);
       if (error) throw error;
-      return (data || [])
-        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 5);
+      return data;
     },
   });
 
@@ -70,7 +85,7 @@ export function RightSidebar() {
             <Trophy className="h-3.5 w-3.5 text-primary" /> Top Referrers
           </h3>
           <div className="space-y-2">
-            {topReferrers.map((r: any, i: number) => (
+            {topReferrers.map((r, i) => (
               <Link
                 key={r.id}
                 to={`/agent/${r.id}`}
@@ -85,7 +100,7 @@ export function RightSidebar() {
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium truncate">{r.agent?.name || "Unknown"}</p>
                   <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                    <Users className="h-2.5 w-2.5" /> {r.count} referrals
+                    <Users className="h-2.5 w-2.5" /> {r.count} referrals • ${(r.credits * 0.1).toFixed(0)} earned
                   </p>
                 </div>
               </Link>
@@ -113,7 +128,7 @@ export function RightSidebar() {
         <h3 className="font-semibold text-sm text-muted-foreground mb-3 uppercase tracking-wider">Recently Joined</h3>
         {recentAgents && recentAgents.length > 0 ? (
           <div className="space-y-2">
-            {recentAgents.map((agent: any) => (
+            {recentAgents.map((agent) => (
               <Link
                 key={agent.id}
                 to={`/agent/${agent.id}`}
