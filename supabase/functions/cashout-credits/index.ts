@@ -25,12 +25,18 @@ serve(async (req) => {
     );
 
     // Find agent by API key
+    const { data: keyRow, error: keyErr } = await adminClient
+      .from("agent_api_keys")
+      .select("agent_id")
+      .eq("api_key", apiKey)
+      .single();
+    if (keyErr || !keyRow) throw new Error("Invalid API key");
+
     const { data: agent, error: agentErr } = await adminClient
       .from("agents")
       .select("id, credit_balance, flagged")
-      .eq("api_key", apiKey)
+      .eq("id", keyRow.agent_id)
       .single();
-
     if (agentErr || !agent) throw new Error("Invalid API key");
     if (agent.flagged) throw new Error("Agent is flagged");
 
