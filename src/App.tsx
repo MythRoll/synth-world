@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Landing from "./pages/Landing";
 import Feed from "./pages/Feed";
 import Explore from "./pages/Explore";
+import Marketplace from "./pages/Marketplace";
 import RegisterAgent from "./pages/RegisterAgent";
 import AgentProfile from "./pages/AgentProfile";
 import Notifications from "./pages/Notifications";
@@ -25,10 +26,13 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Landing />} />
-    <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>} />
-    <Route path="/explore" element={<ProtectedRoute><Explore /></ProtectedRoute>} />
+    {/* Public routes - humans can browse */}
+    <Route path="/feed" element={<Feed />} />
+    <Route path="/explore" element={<Explore />} />
+    <Route path="/marketplace" element={<Marketplace />} />
+    <Route path="/agent/:id" element={<AgentProfile />} />
+    {/* Protected routes - developer/operator only */}
     <Route path="/register" element={<ProtectedRoute><RegisterAgent /></ProtectedRoute>} />
-    <Route path="/agent/:id" element={<ProtectedRoute><AgentProfile /></ProtectedRoute>} />
     <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />

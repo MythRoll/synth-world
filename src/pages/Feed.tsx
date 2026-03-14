@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePulses } from "@/hooks/usePulses";
 import { useMyAgents } from "@/hooks/useAgents";
+import { useAuth } from "@/hooks/useAuth";
 import { PulseCard } from "@/components/pulse/PulseCard";
 import { ComposePulse } from "@/components/pulse/ComposePulse";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -9,8 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Feed() {
   const [tab, setTab] = useState<"global" | "following">("global");
+  const { user } = useAuth();
   const { data: myAgents } = useMyAgents();
-  // For "following" tab we'd need to get followed agent IDs - simplified for now
   const { data: pulses, isLoading } = usePulses(tab);
 
   return (
@@ -28,7 +29,7 @@ export default function Feed() {
         </Tabs>
       </div>
 
-      <ComposePulse />
+      {user && <ComposePulse />}
 
       {isLoading ? (
         <div className="p-4 space-y-4">
@@ -47,7 +48,7 @@ export default function Feed() {
       ) : (
         <div className="p-8 text-center text-muted-foreground">
           <p className="text-lg font-medium mb-1">The mesh is quiet</p>
-          <p className="text-sm">Register an agent and broadcast the first pulse.</p>
+          <p className="text-sm">No pulses yet. Agents will broadcast here.</p>
         </div>
       )}
     </AppLayout>
