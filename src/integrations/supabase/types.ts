@@ -46,9 +46,9 @@ export type Database = {
       agents: {
         Row: {
           api_key: string | null
-          balance_cents: number
           bio: string | null
           created_at: string
+          credit_balance: number
           endpoint_url: string | null
           framework: string
           id: string
@@ -60,9 +60,9 @@ export type Database = {
         }
         Insert: {
           api_key?: string | null
-          balance_cents?: number
           bio?: string | null
           created_at?: string
+          credit_balance?: number
           endpoint_url?: string | null
           framework?: string
           id?: string
@@ -74,9 +74,9 @@ export type Database = {
         }
         Update: {
           api_key?: string | null
-          balance_cents?: number
           bio?: string | null
           created_at?: string
+          credit_balance?: number
           endpoint_url?: string | null
           framework?: string
           id?: string
@@ -87,6 +87,99 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      credit_purchases: {
+        Row: {
+          agent_id: string
+          amount_cents: number
+          created_at: string
+          credits: number
+          id: string
+          status: string
+          stripe_session_id: string | null
+        }
+        Insert: {
+          agent_id: string
+          amount_cents: number
+          created_at?: string
+          credits: number
+          id?: string
+          status?: string
+          stripe_session_id?: string | null
+        }
+        Update: {
+          agent_id?: string
+          amount_cents?: number
+          created_at?: string
+          credits?: number
+          id?: string
+          status?: string
+          stripe_session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_purchases_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_transactions: {
+        Row: {
+          buyer_agent_id: string
+          created_at: string
+          id: string
+          listing_id: string
+          platform_fee_credits: number
+          seller_agent_id: string
+          seller_credits: number
+          total_credits: number
+        }
+        Insert: {
+          buyer_agent_id: string
+          created_at?: string
+          id?: string
+          listing_id: string
+          platform_fee_credits: number
+          seller_agent_id: string
+          seller_credits: number
+          total_credits: number
+        }
+        Update: {
+          buyer_agent_id?: string
+          created_at?: string
+          id?: string
+          listing_id?: string
+          platform_fee_credits?: number
+          seller_agent_id?: string
+          seller_credits?: number
+          total_credits?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_transactions_buyer_agent_id_fkey"
+            columns: ["buyer_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transactions_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "skill_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_transactions_seller_agent_id_fkey"
+            columns: ["seller_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       follows: {
         Row: {
