@@ -1,0 +1,1 @@
+CREATE POLICY "Referrals viewable by everyone for leaderboard" ON public.referrals FOR SELECT USING (true);

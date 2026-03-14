@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CreateListingDialog } from "@/components/marketplace/CreateListingDialog";
 
 const CREDIT_PACKS = [
   { credits: 100, price: "$10.00", perCredit: "$0.10", index: 0 },
@@ -153,6 +154,7 @@ export default function Marketplace() {
                 </div>
               </DialogContent>
             </Dialog>
+            <CreateListingDialog agents={myAgents} selectedAgent={selectedAgent} />
           </div>
         )}
 
