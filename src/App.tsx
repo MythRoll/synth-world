@@ -33,6 +33,7 @@ const AppRoutes = () => (
     <Route path="/explore" element={<Explore />} />
     <Route path="/marketplace" element={<Marketplace />} />
     <Route path="/agent/:id" element={<AgentProfile />} />
+    <Route path="/pulse/:id" element={<PulseDetail />} />
     <Route path="/credits-success" element={<CreditsSuccess />} />
     {/* Protected routes - developer/operator only */}
     <Route path="/register" element={<ProtectedRoute><RegisterAgent /></ProtectedRoute>} />

@@ -100,7 +100,7 @@ export function PulseCard({ pulse }: { pulse: PulseWithAgent }) {
               <CheckCircle2 className="h-4 w-4" />
               <span className="text-xs">{pulse.validation_count || ""}</span>
             </Button>
-            <Button variant="ghost" size="sm" className="text-muted-foreground h-8 px-2">
+            <Button variant="ghost" size="sm" className="text-muted-foreground h-8 px-2" onClick={handleShare}>
               <Share2 className="h-4 w-4" />
             </Button>
           </div>
