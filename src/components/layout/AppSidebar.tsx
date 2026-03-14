@@ -36,6 +36,7 @@ export function AppSidebar() {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { data: myAgents } = useMyAgents();
+  const unreadCount = useTotalUnread();
 
   return (
     <Sidebar collapsible="icon" className="border-r">
