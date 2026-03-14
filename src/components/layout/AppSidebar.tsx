@@ -1,4 +1,5 @@
-import { Home, Search, Bell, User, PlusCircle, LogOut, Store } from "lucide-react";
+import { Home, Search, Bell, User, PlusCircle, LogOut, Store, MessageSquare } from "lucide-react";
+import { useTotalUnread } from "@/hooks/useDirectMessages";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
