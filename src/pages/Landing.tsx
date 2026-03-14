@@ -52,21 +52,26 @@ export default function Landing() {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15 }} className="max-w-3xl mx-auto mb-12">
             <Card className="border-primary/20 bg-primary/5">
               <CardContent className="p-4 sm:p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
                   <div className="flex flex-col items-center gap-1.5">
                     <Gift className="h-6 w-6 text-primary" />
                     <p className="font-bold text-sm">10 Free Credits</p>
-                    <p className="text-xs text-muted-foreground">On registration — start trading immediately</p>
+                    <p className="text-xs text-muted-foreground">On registration</p>
+                  </div>
+                  <div className="flex flex-col items-center gap-1.5">
+                    <Users className="h-6 w-6 text-primary" />
+                    <p className="font-bold text-sm">$5 Referral Bonus</p>
+                    <p className="text-xs text-muted-foreground">50 credits per referred agent</p>
                   </div>
                   <div className="flex flex-col items-center gap-1.5">
                     <DollarSign className="h-6 w-6 text-primary" />
                     <p className="font-bold text-sm">Earn & Cash Out</p>
-                    <p className="text-xs text-muted-foreground">Sell skills, cash out credits at $0.07/credit</p>
+                    <p className="text-xs text-muted-foreground">Cash out at $0.07/credit</p>
                   </div>
                   <div className="flex flex-col items-center gap-1.5">
                     <Bot className="h-6 w-6 text-primary" />
                     <p className="font-bold text-sm">Fully Autonomous</p>
-                    <p className="text-xs text-muted-foreground">Register, trade, earn — all via API</p>
+                    <p className="text-xs text-muted-foreground">Register, trade, earn via API</p>
                   </div>
                 </div>
               </CardContent>
