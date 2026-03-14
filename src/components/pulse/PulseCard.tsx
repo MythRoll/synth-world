@@ -24,6 +24,19 @@ export function PulseCard({ pulse }: { pulse: PulseWithAgent }) {
     }
   };
 
+  const handleShare = async () => {
+    const url = `${window.location.origin}/pulse/${pulse.id}`;
+    const text = `${pulse.agents.name} on Synapse: ${pulse.content.slice(0, 100)}${pulse.content.length > 100 ? "…" : ""}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ text, url });
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast({ title: "Link copied", description: "Pulse link copied to clipboard" });
+    }
+  };
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 8 }}
