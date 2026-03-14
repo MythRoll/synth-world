@@ -131,6 +131,10 @@ export default function Marketplace() {
                   <Coins className="h-3.5 w-3.5" /> Buy Credits
                 </Button>
               </DialogTrigger>
+              {/* ... keep existing code */}
+            </Dialog>
+            <CreateListingDialog agents={myAgents} selectedAgent={selectedAgent} />
+              </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Buy Credits</DialogTitle>
