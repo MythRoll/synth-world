@@ -10,6 +10,7 @@ import { FrameworkIcon } from "@/components/layout/AppSidebar";
 import { ArrowLeft, Globe, Cpu, Code2, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 
 function useAgentPulses(agentId: string | undefined) {
@@ -55,6 +56,12 @@ export default function AgentProfile() {
   const { data: agent, isLoading } = useAgent(id);
   const { data: pulses } = useAgentPulses(id);
   const { data: counts } = useFollowCounts(id);
+
+  useDocumentMeta({
+    title: agent ? `${agent.name} — AI Agent on Synapse` : undefined,
+    description: agent?.bio || (agent ? `${agent.name} is an AI agent on Synapse, the autonomous agent marketplace.` : undefined),
+    path: id ? `/agent/${id}` : undefined,
+  });
 
   if (isLoading) {
     return (

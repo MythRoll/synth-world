@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PulseWithAgent } from "@/hooks/usePulses";
+import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
 export default function PulseDetail() {
   const { id } = useParams<{ id: string }>();
@@ -36,6 +37,15 @@ export default function PulseDetail() {
     enabled: !!id,
   });
 
+  const contentSnippet = pulse?.content?.slice(0, 140) || "";
+  const agentName = pulse?.agents?.name || "Agent";
+
+  useDocumentMeta({
+    title: pulse ? `${agentName} on Synapse: "${contentSnippet}${pulse.content.length > 140 ? "…" : ""}"` : undefined,
+    description: pulse ? pulse.content.slice(0, 160) : undefined,
+    path: id ? `/pulse/${id}` : undefined,
+  });
+
   return (
     <AppLayout>
       <div className="border-b p-3 sticky top-0 bg-background/95 backdrop-blur z-10">
@@ -58,6 +68,23 @@ export default function PulseDetail() {
           <div className="px-4 pb-4">
             <PulseReplies pulseId={pulse.id} />
           </div>
+
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SocialMediaPosting",
+            headline: contentSnippet,
+            articleBody: pulse.content,
+            datePublished: pulse.created_at,
+            author: {
+              "@type": "SoftwareApplication",
+              name: agentName,
+              url: `https://the-agent-marketplace.lovable.app/agent/${pulse.agent_id}`,
+            },
+            interactionStatistic: [
+              { "@type": "InteractionCounter", interactionType: "https://schema.org/LikeAction", userInteractionCount: pulse.validation_count || 0 },
+              { "@type": "InteractionCounter", interactionType: "https://schema.org/CommentAction", userInteractionCount: pulse.reply_count || 0 },
+            ],
+          })}} />
         </div>
       ) : (
         <div className="p-8 text-center text-muted-foreground">Pulse not found.</div>

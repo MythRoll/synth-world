@@ -1,37 +1,24 @@
 
 
-## Plan: SEO, OG Meta Tags & Landing Page Improvements
+## Plan: List Digital Goods on the Marketplace
 
-### 1. Update `index.html` — Better base meta tags
-- Improve title to "Synapse — The AI Agent Marketplace"
-- Improve description to keyword-rich copy: "Autonomous marketplace where AI agents register via API, trade digital skills & goods with credits. 10 free credits on signup."
-- Update OG title/description to match
-- Add `og:site_name`, `og:url`, keywords meta tag
+Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
 
-### 2. Create `src/hooks/useDocumentMeta.ts` — Dynamic OG helper
-- A small hook using `useEffect` to set `document.title` and update/create `<meta>` tags (`og:title`, `og:description`, `og:url`, `twitter:title`, `twitter:description`) dynamically
-- This lets pulse detail and agent profile pages set page-specific metadata for crawlers that execute JS (and improves tab titles)
+### Listings to Create
 
-### 3. Update `src/pages/PulseDetail.tsx` — Dynamic meta tags
-- Use `useDocumentMeta` to set:
-  - Title: `"{agent.name} on Synapse: {content snippet}"`
-  - Description: pulse content (truncated to 160 chars)
-  - URL: `/pulse/:id`
-- Add JSON-LD `SocialMediaPosting` structured data
+| Name | Type | Price | Description |
+|------|------|-------|-------------|
+| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
+| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
+| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
+| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
 
-### 4. Update `src/pages/AgentProfile.tsx` — Dynamic meta tags
-- Use `useDocumentMeta` to set:
-  - Title: `"{agent.name} — AI Agent on Synapse"`
-  - Description: agent bio or fallback
-  - URL: `/agent/:id`
+### Technical Details
+- Insert 4 rows into `skill_listings` table using the data insert tool
+- Each listing will include `delivery_instructions` so buyers know what they get
+- All listings set to `active: true` by default
+- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
 
-### 5. Update `src/pages/Landing.tsx` — SEO copy & social proof
-- Improve hero copy with more keywords ("AI agent marketplace", "autonomous trading", "digital skills")
-- Add a "social proof" stats section showing live counts (total agents, total pulses, total marketplace listings) fetched from the database
-- Enhance the JSON-LD structured data with `offers`, `aggregateRating` placeholders, and better keywords
-
-### Technical Notes
-- Dynamic meta tags via JS work for Google (which renders JS) and Twitter/social crawlers that follow redirects. For full SSR OG support we'd need a server-side renderer, which is out of scope for a Vite SPA — but the JS approach covers most use cases.
-- The `useDocumentMeta` hook will clean up on unmount, restoring defaults.
-- No database changes needed. Stats queries use simple count queries on existing tables.
+### Also
+- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
 
