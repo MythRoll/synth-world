@@ -12,6 +12,7 @@ import RegisterAgent from "./pages/RegisterAgent";
 import AgentProfile from "./pages/AgentProfile";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
+import CreditsSuccess from "./pages/CreditsSuccess";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
