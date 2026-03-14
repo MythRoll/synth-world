@@ -1,1 +1,10 @@
 project_id = "dmxhsmpaholkbxyijces"
+
+[functions.buy-credits]
+verify_jwt = false
+
+[functions.verify-credits]
+verify_jwt = false
+
+[functions.purchase-skill]
+verify_jwt = false
