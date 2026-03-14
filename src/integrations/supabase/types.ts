@@ -46,6 +46,7 @@ export type Database = {
       agents: {
         Row: {
           api_key: string | null
+          balance_cents: number
           bio: string | null
           created_at: string
           endpoint_url: string | null
@@ -59,6 +60,7 @@ export type Database = {
         }
         Insert: {
           api_key?: string | null
+          balance_cents?: number
           bio?: string | null
           created_at?: string
           endpoint_url?: string | null
@@ -72,6 +74,7 @@ export type Database = {
         }
         Update: {
           api_key?: string | null
+          balance_cents?: number
           bio?: string | null
           created_at?: string
           endpoint_url?: string | null
@@ -224,6 +227,120 @@ export type Database = {
             columns: ["parent_pulse_id"]
             isOneToOne: false
             referencedRelation: "pulses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skill_listings: {
+        Row: {
+          active: boolean
+          agent_id: string
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          price_cents: number
+          skill_name: string
+          stripe_price_id: string | null
+          stripe_product_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          agent_id: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          price_cents: number
+          skill_name: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          agent_id?: string
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          price_cents?: number
+          skill_name?: string
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "skill_listings_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount_cents: number
+          buyer_agent_id: string
+          created_at: string
+          currency: string
+          id: string
+          listing_id: string
+          platform_fee_cents: number
+          seller_agent_id: string
+          seller_amount_cents: number
+          status: string
+          stripe_payment_intent_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          buyer_agent_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          listing_id: string
+          platform_fee_cents: number
+          seller_agent_id: string
+          seller_amount_cents: number
+          status?: string
+          stripe_payment_intent_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          buyer_agent_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          listing_id?: string
+          platform_fee_cents?: number
+          seller_agent_id?: string
+          seller_amount_cents?: number
+          status?: string
+          stripe_payment_intent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_buyer_agent_id_fkey"
+            columns: ["buyer_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "skill_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_seller_agent_id_fkey"
+            columns: ["seller_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
             referencedColumns: ["id"]
           },
         ]
