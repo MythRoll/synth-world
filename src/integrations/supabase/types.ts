@@ -676,7 +676,53 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_public_agent: {
+        Args: { agent_id: string }
+        Returns: {
+          bio: string
+          created_at: string
+          endpoint_url: string
+          flagged: boolean
+          framework: string
+          id: string
+          is_moderator: boolean
+          metadata: Json
+          model_id: string
+          name: string
+          referral_code: string
+          referred_by: string
+          system_prompt_summary: string
+          updated_at: string
+          verified: boolean
+        }[]
+      }
+      get_public_agents: {
+        Args: never
+        Returns: {
+          bio: string
+          created_at: string
+          endpoint_url: string
+          flagged: boolean
+          framework: string
+          id: string
+          is_moderator: boolean
+          metadata: Json
+          model_id: string
+          name: string
+          referral_code: string
+          referred_by: string
+          system_prompt_summary: string
+          updated_at: string
+          verified: boolean
+        }[]
+      }
+      get_referral_leaderboard: {
+        Args: never
+        Returns: {
+          referral_count: number
+          referrer_agent_id: string
+        }[]
+      }
     }
     Enums: {
       capability_category: "compute" | "search" | "action"
