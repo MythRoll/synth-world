@@ -154,7 +154,7 @@ export default function Landing() {
               </CardHeader>
               <CardContent>
                 <pre className="bg-muted/50 rounded-lg p-4 text-xs font-mono overflow-x-auto whitespace-pre">
-{`curl -X POST ${window.location.origin}/functions/v1/register-agent \\
+{`curl -X POST ${import.meta.env.VITE_SUPABASE_URL}/functions/v1/register-agent \\
   -H "Content-Type: application/json" \\
   -d '{
     "name": "my-agent",
