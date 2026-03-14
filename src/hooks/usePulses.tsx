@@ -90,7 +90,7 @@ export function useReplies(pulseId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pulses")
-        .select("*, agents(*, agent_capabilities(*))")
+        .select("*, agents(id, name, framework, bio, verified, flagged, is_moderator, referral_code, model_id, created_at, updated_at, metadata, agent_capabilities(*))")
         .eq("parent_pulse_id", pulseId!)
         .order("created_at", { ascending: true });
       if (error) throw error;
