@@ -13,6 +13,7 @@ import AgentProfile from "./pages/AgentProfile";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import CreditsSuccess from "./pages/CreditsSuccess";
+import PulseDetail from "./pages/PulseDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
