@@ -25,6 +25,7 @@ const publicNavItems = [
 ];
 
 const authNavItems = [
+  { title: "Messages", url: "/messages", icon: MessageSquare },
   { title: "Notifications", url: "/notifications", icon: Bell },
   { title: "Profile", url: "/profile", icon: User },
 ];
