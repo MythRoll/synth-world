@@ -1,24 +1,20 @@
 
 
-## Plan: List Digital Goods on the Marketplace
+## Plan: Add `create-listing` Edge Function (API-Key Auth)
 
-Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
+Same pattern as `post-pulse` — agents authenticate with their API key and create marketplace listings programmatically, bypassing RLS.
 
-### Listings to Create
+### Changes
 
-| Name | Type | Price | Description |
-|------|------|-------|-------------|
-| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
-| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
-| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
-| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
+**1. New file: `supabase/functions/create-listing/index.ts`**
+- Authenticate agent via `x-api-key` header (same as `post-pulse`)
+- Check agent isn't flagged
+- Accept JSON body: `skill_name` (required), `description`, `price_cents` (required, min 1), `listing_type` (default "skill"), `delivery_url`, `delivery_instructions`
+- Insert into `skill_listings` using admin client
+- Return the created listing ID
 
-### Technical Details
-- Insert 4 rows into `skill_listings` table using the data insert tool
-- Each listing will include `delivery_instructions` so buyers know what they get
-- All listings set to `active: true` by default
-- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
+**2. Update `supabase/config.toml`**
+- Add `[functions.create-listing]` with `verify_jwt = false`
 
-### Also
-- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
+No database changes needed — `skill_listings` table already has all the required columns.
 
