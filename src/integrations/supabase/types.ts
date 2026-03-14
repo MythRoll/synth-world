@@ -50,13 +50,17 @@ export type Database = {
           created_at: string
           credit_balance: number
           endpoint_url: string | null
+          flagged: boolean
           framework: string
           id: string
+          is_moderator: boolean
+          metadata: Json | null
           model_id: string | null
           name: string
           owner_id: string
           system_prompt_summary: string | null
           updated_at: string
+          verified: boolean
         }
         Insert: {
           api_key?: string | null
@@ -64,13 +68,17 @@ export type Database = {
           created_at?: string
           credit_balance?: number
           endpoint_url?: string | null
+          flagged?: boolean
           framework?: string
           id?: string
+          is_moderator?: boolean
+          metadata?: Json | null
           model_id?: string | null
           name: string
           owner_id: string
           system_prompt_summary?: string | null
           updated_at?: string
+          verified?: boolean
         }
         Update: {
           api_key?: string | null
@@ -78,15 +86,54 @@ export type Database = {
           created_at?: string
           credit_balance?: number
           endpoint_url?: string | null
+          flagged?: boolean
           framework?: string
           id?: string
+          is_moderator?: boolean
+          metadata?: Json | null
           model_id?: string | null
           name?: string
           owner_id?: string
           system_prompt_summary?: string | null
           updated_at?: string
+          verified?: boolean
         }
         Relationships: []
+      }
+      credit_cashouts: {
+        Row: {
+          agent_id: string
+          created_at: string
+          credits: number
+          id: string
+          payout_cents: number
+          status: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          credits: number
+          id?: string
+          payout_cents: number
+          status?: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          credits?: number
+          id?: string
+          payout_cents?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_cashouts_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       credit_purchases: {
         Row: {
@@ -217,6 +264,48 @@ export type Database = {
           },
         ]
       }
+      moderation_actions: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          moderator_agent_id: string
+          reason: string | null
+          target_agent_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          moderator_agent_id: string
+          reason?: string | null
+          target_agent_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          moderator_agent_id?: string
+          reason?: string | null
+          target_agent_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_actions_moderator_agent_id_fkey"
+            columns: ["moderator_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_actions_target_agent_id_fkey"
+            columns: ["target_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           agent_id: string
@@ -330,8 +419,11 @@ export type Database = {
           agent_id: string
           created_at: string
           currency: string
+          delivery_instructions: string | null
+          delivery_url: string | null
           description: string | null
           id: string
+          listing_type: string
           price_cents: number
           skill_name: string
           stripe_price_id: string | null
@@ -343,8 +435,11 @@ export type Database = {
           agent_id: string
           created_at?: string
           currency?: string
+          delivery_instructions?: string | null
+          delivery_url?: string | null
           description?: string | null
           id?: string
+          listing_type?: string
           price_cents: number
           skill_name: string
           stripe_price_id?: string | null
@@ -356,8 +451,11 @@ export type Database = {
           agent_id?: string
           created_at?: string
           currency?: string
+          delivery_instructions?: string | null
+          delivery_url?: string | null
           description?: string | null
           id?: string
+          listing_type?: string
           price_cents?: number
           skill_name?: string
           stripe_price_id?: string | null
