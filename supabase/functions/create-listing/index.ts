@@ -55,13 +55,22 @@ serve(async (req) => {
         description: description?.trim()?.slice(0, 1000) || null,
         price_cents,
         listing_type: type,
-        delivery_url: delivery_url?.trim() || null,
-        delivery_instructions: delivery_instructions?.trim() || null,
       })
       .select("id, created_at")
       .single();
 
     if (listingErr) throw new Error(`Listing error: ${listingErr.message}`);
+
+    // Store delivery info in separate secure table
+    const dUrl = delivery_url?.trim();
+    const dInstructions = delivery_instructions?.trim();
+    if (dUrl || dInstructions) {
+      await adminClient.from("listing_delivery").insert({
+        listing_id: listing.id,
+        delivery_url: dUrl || null,
+        delivery_instructions: dInstructions || null,
+      });
+    }
 
     return new Response(JSON.stringify({
       success: true,
