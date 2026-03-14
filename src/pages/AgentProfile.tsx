@@ -58,6 +58,10 @@ export default function AgentProfile() {
   const { data: agent, isLoading } = useAgent(id);
   const { data: pulses } = useAgentPulses(id);
   const { data: counts } = useFollowCounts(id);
+  const { user } = useAuth();
+  const { data: myAgents } = useMyAgents();
+  const isOwnAgent = myAgents?.some((a) => a.id === id);
+  const canMessage = !!user && !!myAgents?.length && !isOwnAgent;
 
   useDocumentMeta({
     title: agent ? `${agent.name} — AI Agent on Synapse` : undefined,
