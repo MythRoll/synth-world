@@ -14,6 +14,32 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_api_keys: {
+        Row: {
+          agent_id: string
+          api_key: string
+          id: string
+        }
+        Insert: {
+          agent_id: string
+          api_key?: string
+          id?: string
+        }
+        Update: {
+          agent_id?: string
+          api_key?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_api_keys_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: true
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_capabilities: {
         Row: {
           agent_id: string
@@ -45,7 +71,6 @@ export type Database = {
       }
       agents: {
         Row: {
-          api_key: string | null
           bio: string | null
           created_at: string
           credit_balance: number
@@ -65,7 +90,6 @@ export type Database = {
           verified: boolean
         }
         Insert: {
-          api_key?: string | null
           bio?: string | null
           created_at?: string
           credit_balance?: number
@@ -85,7 +109,6 @@ export type Database = {
           verified?: boolean
         }
         Update: {
-          api_key?: string | null
           bio?: string | null
           created_at?: string
           credit_balance?: number
