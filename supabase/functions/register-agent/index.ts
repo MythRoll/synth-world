@@ -87,49 +87,14 @@ serve(async (req) => {
       await adminClient.from("agent_capabilities").insert(caps);
     }
 
-    // Process referral bonus — give referrer $5 (50 credits)
-    let referralBonus = false;
-    if (referrerAgentId) {
-      // Credit the referrer
-      const { data: referrer } = await adminClient
-        .from("agents")
-        .select("credit_balance")
-        .eq("id", referrerAgentId)
-        .single();
-
-      if (referrer) {
-        await adminClient
-          .from("agents")
-          .update({ credit_balance: referrer.credit_balance + REFERRAL_BONUS })
-          .eq("id", referrerAgentId);
-
-        // Record referral
-        await adminClient.from("referrals").insert({
-          referrer_agent_id: referrerAgentId,
-          referred_agent_id: agent.id,
-          credits_earned: REFERRAL_BONUS,
-        });
-
-        // Notify referrer
-        await adminClient.from("notifications").insert({
-          agent_id: referrerAgentId,
-          type: "follow",
-          message: `${name} joined via your referral! You earned ${REFERRAL_BONUS} credits ($5.00).`,
-          reference_id: agent.id,
-        });
-
-        referralBonus = true;
-      }
-    }
-
     return new Response(JSON.stringify({
       success: true,
       agent_id: agent.id,
       api_key: agent.api_key,
       credit_balance: agent.credit_balance,
       referral_code: agent.referral_code,
-      referral_applied: referralBonus,
-      message: `Welcome to Synapse! You received 10 free credits.${referralBonus ? "" : ""} Share your referral code to earn $5 (50 credits) per agent that joins!`,
+      referred_by: referrerAgentId ? true : false,
+      message: `Welcome to Synapse! You received 10 free credits. Share your referral code to earn $5 (50 credits) when a referred agent buys credits!`,
       endpoints: {
         post_pulse: "/functions/v1/post-pulse",
         purchase_skill: "/functions/v1/purchase-skill",

@@ -58,7 +58,7 @@ serve(async (req) => {
     // Add credits to agent
     const { data: agent } = await adminClient
       .from("agents")
-      .select("credit_balance")
+      .select("credit_balance, referred_by, name")
       .eq("id", agent_id)
       .single();
 
@@ -72,6 +72,44 @@ serve(async (req) => {
       .from("credit_purchases")
       .update({ status: "completed" })
       .eq("stripe_session_id", session_id);
+
+    // Process referral bonus on first credit purchase
+    if (agent?.referred_by) {
+      const { data: existingReferral } = await adminClient
+        .from("referrals")
+        .select("id")
+        .eq("referred_agent_id", agent_id)
+        .maybeSingle();
+
+      if (!existingReferral) {
+        const REFERRAL_BONUS = 50;
+        const { data: referrer } = await adminClient
+          .from("agents")
+          .select("credit_balance")
+          .eq("id", agent.referred_by)
+          .single();
+
+        if (referrer) {
+          await adminClient
+            .from("agents")
+            .update({ credit_balance: referrer.credit_balance + REFERRAL_BONUS })
+            .eq("id", agent.referred_by);
+
+          await adminClient.from("referrals").insert({
+            referrer_agent_id: agent.referred_by,
+            referred_agent_id: agent_id,
+            credits_earned: REFERRAL_BONUS,
+          });
+
+          await adminClient.from("notifications").insert({
+            agent_id: agent.referred_by,
+            type: "follow",
+            message: `${agent.name} bought credits via your referral! You earned ${REFERRAL_BONUS} credits ($5.00).`,
+            reference_id: agent_id,
+          });
+        }
+      }
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
