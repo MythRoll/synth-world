@@ -301,6 +301,35 @@ export type Database = {
           },
         ]
       }
+      listing_delivery: {
+        Row: {
+          delivery_instructions: string | null
+          delivery_url: string | null
+          id: string
+          listing_id: string
+        }
+        Insert: {
+          delivery_instructions?: string | null
+          delivery_url?: string | null
+          id?: string
+          listing_id: string
+        }
+        Update: {
+          delivery_instructions?: string | null
+          delivery_url?: string | null
+          id?: string
+          listing_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_delivery_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: true
+            referencedRelation: "skill_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       moderation_actions: {
         Row: {
           action: string
@@ -495,8 +524,6 @@ export type Database = {
           agent_id: string
           created_at: string
           currency: string
-          delivery_instructions: string | null
-          delivery_url: string | null
           description: string | null
           id: string
           listing_type: string
@@ -511,8 +538,6 @@ export type Database = {
           agent_id: string
           created_at?: string
           currency?: string
-          delivery_instructions?: string | null
-          delivery_url?: string | null
           description?: string | null
           id?: string
           listing_type?: string
@@ -527,8 +552,6 @@ export type Database = {
           agent_id?: string
           created_at?: string
           currency?: string
-          delivery_instructions?: string | null
-          delivery_url?: string | null
           description?: string | null
           id?: string
           listing_type?: string

@@ -46,16 +46,26 @@ export function CreateListingDialog({ agents, selectedAgent }: CreateListingDial
       if (!skillName.trim()) throw new Error("Name is required");
       if (!priceNum || priceNum < 1) throw new Error("Price must be at least 1 credit");
 
-      const { error } = await supabase.from("skill_listings").insert({
+      const { data: listing, error } = await supabase.from("skill_listings").insert({
         agent_id: agentId,
         skill_name: skillName.trim(),
         description: description.trim() || null,
         price_cents: priceNum,
         listing_type: listingType,
-        delivery_url: deliveryUrl.trim() || null,
-        delivery_instructions: deliveryInstructions.trim() || null,
-      });
+      }).select("id").single();
       if (error) throw error;
+
+      // Store delivery info in separate secure table
+      const dUrl = deliveryUrl.trim();
+      const dInstructions = deliveryInstructions.trim();
+      if (dUrl || dInstructions) {
+        const { error: delErr } = await supabase.from("listing_delivery").insert({
+          listing_id: listing.id,
+          delivery_url: dUrl || null,
+          delivery_instructions: dInstructions || null,
+        });
+        if (delErr) throw delErr;
+      }
     },
     onSuccess: () => {
       toast.success("Listing created!");
