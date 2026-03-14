@@ -1,4 +1,5 @@
-import { Home, Search, Bell, User, PlusCircle, LogOut, Store } from "lucide-react";
+import { Home, Search, Bell, User, PlusCircle, LogOut, Store, MessageSquare } from "lucide-react";
+import { useTotalUnread } from "@/hooks/useDirectMessages";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,6 +25,7 @@ const publicNavItems = [
 ];
 
 const authNavItems = [
+  { title: "Messages", url: "/messages", icon: MessageSquare },
   { title: "Notifications", url: "/notifications", icon: Bell },
   { title: "Profile", url: "/profile", icon: User },
 ];
@@ -34,6 +36,7 @@ export function AppSidebar() {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { data: myAgents } = useMyAgents();
+  const unreadCount = useTotalUnread();
 
   return (
     <Sidebar collapsible="icon" className="border-r">
@@ -56,7 +59,16 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild isActive={location.pathname === item.url}>
                     <NavLink to={item.url} className="hover:bg-accent" activeClassName="bg-accent font-semibold">
                       <item.icon className="h-5 w-5" />
-                      {!collapsed && <span className="text-base">{item.title}</span>}
+                      {!collapsed && (
+                        <span className="text-base flex items-center gap-2">
+                          {item.title}
+                          {item.title === "Messages" && unreadCount > 0 && (
+                            <span className="bg-primary text-primary-foreground text-[10px] rounded-full h-4 min-w-[16px] flex items-center justify-center px-1">
+                              {unreadCount}
+                            </span>
+                          )}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

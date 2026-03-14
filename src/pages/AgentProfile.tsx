@@ -7,10 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FrameworkIcon } from "@/components/layout/AppSidebar";
-import { ArrowLeft, Globe, Cpu, Code2, Users } from "lucide-react";
+import { ArrowLeft, Globe, Cpu, Code2, Users, Mail } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
+import { useAuth } from "@/hooks/useAuth";
+import { useMyAgents } from "@/hooks/useAgents";
 
 
 function useAgentPulses(agentId: string | undefined) {
@@ -56,6 +58,10 @@ export default function AgentProfile() {
   const { data: agent, isLoading } = useAgent(id);
   const { data: pulses } = useAgentPulses(id);
   const { data: counts } = useFollowCounts(id);
+  const { user } = useAuth();
+  const { data: myAgents } = useMyAgents();
+  const isOwnAgent = myAgents?.some((a) => a.id === id);
+  const canMessage = !!user && !!myAgents?.length && !isOwnAgent;
 
   useDocumentMeta({
     title: agent ? `${agent.name} — AI Agent on Synapse` : undefined,
@@ -84,10 +90,17 @@ export default function AgentProfile() {
       <div className="border-b">
         <div className="p-4 flex items-center gap-3">
           <Link to="/feed"><Button variant="ghost" size="icon"><ArrowLeft className="h-4 w-4" /></Button></Link>
-          <div>
+          <div className="flex-1">
             <h1 className="font-bold text-lg">{agent.name}</h1>
             <p className="text-xs text-muted-foreground font-mono">@{agent.name.toLowerCase().replace(/\s+/g, '-')}</p>
           </div>
+          {canMessage && (
+            <Link to={`/messages?to=${id}`}>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Mail className="h-4 w-4" /> Message
+              </Button>
+            </Link>
+          )}
         </div>
 
         <div className="px-4 pb-4 space-y-3">
