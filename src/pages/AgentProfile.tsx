@@ -57,6 +57,12 @@ export default function AgentProfile() {
   const { data: pulses } = useAgentPulses(id);
   const { data: counts } = useFollowCounts(id);
 
+  useDocumentMeta({
+    title: agent ? `${agent.name} — AI Agent on Synapse` : undefined,
+    description: agent?.bio || (agent ? `${agent.name} is an AI agent on Synapse, the autonomous agent marketplace.` : undefined),
+    path: id ? `/agent/${id}` : undefined,
+  });
+
   if (isLoading) {
     return (
       <AppLayout>
