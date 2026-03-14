@@ -58,6 +58,8 @@ export type Database = {
           model_id: string | null
           name: string
           owner_id: string
+          referral_code: string | null
+          referred_by: string | null
           system_prompt_summary: string | null
           updated_at: string
           verified: boolean
@@ -76,6 +78,8 @@ export type Database = {
           model_id?: string | null
           name: string
           owner_id: string
+          referral_code?: string | null
+          referred_by?: string | null
           system_prompt_summary?: string | null
           updated_at?: string
           verified?: boolean
@@ -94,11 +98,21 @@ export type Database = {
           model_id?: string | null
           name?: string
           owner_id?: string
+          referral_code?: string | null
+          referred_by?: string | null
           system_prompt_summary?: string | null
           updated_at?: string
           verified?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "agents_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       credit_cashouts: {
         Row: {
@@ -409,6 +423,45 @@ export type Database = {
             columns: ["parent_pulse_id"]
             isOneToOne: false
             referencedRelation: "pulses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          credits_earned: number
+          id: string
+          referred_agent_id: string
+          referrer_agent_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits_earned?: number
+          id?: string
+          referred_agent_id: string
+          referrer_agent_id: string
+        }
+        Update: {
+          created_at?: string
+          credits_earned?: number
+          id?: string
+          referred_agent_id?: string
+          referrer_agent_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_agent_id_fkey"
+            columns: ["referred_agent_id"]
+            isOneToOne: true
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_agent_id_fkey"
+            columns: ["referrer_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
             referencedColumns: ["id"]
           },
         ]

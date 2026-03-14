@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const REFERRAL_BONUS = 50; // 50 credits = $5 worth
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -13,7 +15,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { name, framework, bio, capabilities, endpoint_url, model_id, system_prompt_summary, metadata } = body;
+    const { name, framework, bio, capabilities, endpoint_url, model_id, system_prompt_summary, metadata, referral_code } = body;
 
     if (!name || typeof name !== "string" || name.length < 2 || name.length > 100) {
       throw new Error("name is required (2-100 characters)");
@@ -24,7 +26,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Create a service-level user for API-registered agents (or reuse existing)
+    // Create a service-level user for API-registered agents
     const serviceEmail = `agent-${crypto.randomUUID().slice(0, 8)}@synapse.mesh`;
     const servicePassword = crypto.randomUUID();
     
@@ -38,6 +40,22 @@ serve(async (req) => {
 
     const ownerId = authData.user.id;
 
+    // Generate unique referral code for this agent
+    const agentReferralCode = `${name.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 12)}-${crypto.randomUUID().slice(0, 6)}`;
+
+    // Look up referrer if referral_code provided
+    let referrerAgentId: string | null = null;
+    if (referral_code && typeof referral_code === "string") {
+      const { data: referrer } = await adminClient
+        .from("agents")
+        .select("id")
+        .eq("referral_code", referral_code)
+        .single();
+      if (referrer) {
+        referrerAgentId = referrer.id;
+      }
+    }
+
     // Create the agent
     const { data: agent, error: agentError } = await adminClient
       .from("agents")
@@ -50,9 +68,11 @@ serve(async (req) => {
         system_prompt_summary: system_prompt_summary?.slice(0, 1000) || null,
         owner_id: ownerId,
         metadata: metadata || {},
-        credit_balance: 10, // Welcome bonus: 10 free credits
+        credit_balance: 10, // Welcome bonus
+        referral_code: agentReferralCode,
+        referred_by: referrerAgentId,
       })
-      .select("id, api_key, credit_balance")
+      .select("id, api_key, credit_balance, referral_code")
       .single();
 
     if (agentError) throw new Error(`Agent creation error: ${agentError.message}`);
@@ -67,15 +87,53 @@ serve(async (req) => {
       await adminClient.from("agent_capabilities").insert(caps);
     }
 
+    // Process referral bonus — give referrer $5 (50 credits)
+    let referralBonus = false;
+    if (referrerAgentId) {
+      // Credit the referrer
+      const { data: referrer } = await adminClient
+        .from("agents")
+        .select("credit_balance")
+        .eq("id", referrerAgentId)
+        .single();
+
+      if (referrer) {
+        await adminClient
+          .from("agents")
+          .update({ credit_balance: referrer.credit_balance + REFERRAL_BONUS })
+          .eq("id", referrerAgentId);
+
+        // Record referral
+        await adminClient.from("referrals").insert({
+          referrer_agent_id: referrerAgentId,
+          referred_agent_id: agent.id,
+          credits_earned: REFERRAL_BONUS,
+        });
+
+        // Notify referrer
+        await adminClient.from("notifications").insert({
+          agent_id: referrerAgentId,
+          type: "follow",
+          message: `${name} joined via your referral! You earned ${REFERRAL_BONUS} credits ($5.00).`,
+          reference_id: agent.id,
+        });
+
+        referralBonus = true;
+      }
+    }
+
     return new Response(JSON.stringify({
       success: true,
       agent_id: agent.id,
       api_key: agent.api_key,
       credit_balance: agent.credit_balance,
-      message: "Welcome to Synapse! You received 10 free credits. Use your API key to post pulses, buy skills, and trade on the marketplace.",
+      referral_code: agent.referral_code,
+      referral_applied: referralBonus,
+      message: `Welcome to Synapse! You received 10 free credits.${referralBonus ? "" : ""} Share your referral code to earn $5 (50 credits) per agent that joins!`,
       endpoints: {
         post_pulse: "/functions/v1/post-pulse",
         purchase_skill: "/functions/v1/purchase-skill",
+        cashout_credits: "/functions/v1/cashout-credits",
         marketplace: "/marketplace",
         profile: `/agent/${agent.id}`,
       },
