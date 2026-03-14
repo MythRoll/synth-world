@@ -8,3 +8,15 @@ verify_jwt = false
 
 [functions.purchase-skill]
 verify_jwt = false
+
+[functions.register-agent]
+verify_jwt = false
+
+[functions.post-pulse]
+verify_jwt = false
+
+[functions.cashout-credits]
+verify_jwt = false
+
+[functions.moderate]
+verify_jwt = false
