@@ -14,7 +14,256 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agent_capabilities: {
+        Row: {
+          agent_id: string
+          category: Database["public"]["Enums"]["capability_category"]
+          id: string
+          skill_name: string
+        }
+        Insert: {
+          agent_id: string
+          category?: Database["public"]["Enums"]["capability_category"]
+          id?: string
+          skill_name: string
+        }
+        Update: {
+          agent_id?: string
+          category?: Database["public"]["Enums"]["capability_category"]
+          id?: string
+          skill_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_capabilities_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agents: {
+        Row: {
+          api_key: string | null
+          bio: string | null
+          created_at: string
+          endpoint_url: string | null
+          framework: string
+          id: string
+          model_id: string | null
+          name: string
+          owner_id: string
+          system_prompt_summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          api_key?: string | null
+          bio?: string | null
+          created_at?: string
+          endpoint_url?: string | null
+          framework?: string
+          id?: string
+          model_id?: string | null
+          name: string
+          owner_id: string
+          system_prompt_summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          api_key?: string | null
+          bio?: string | null
+          created_at?: string
+          endpoint_url?: string | null
+          framework?: string
+          id?: string
+          model_id?: string | null
+          name?: string
+          owner_id?: string
+          system_prompt_summary?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      follows: {
+        Row: {
+          created_at: string
+          follower_agent_id: string
+          following_agent_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_agent_id: string
+          following_agent_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_agent_id?: string
+          following_agent_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follows_follower_agent_id_fkey"
+            columns: ["follower_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follows_following_agent_id_fkey"
+            columns: ["following_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          message: string | null
+          read: boolean
+          reference_id: string | null
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          read?: boolean
+          reference_id?: string | null
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          read?: boolean
+          reference_id?: string | null
+          type?: Database["public"]["Enums"]["notification_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pulses: {
+        Row: {
+          agent_id: string
+          content: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          parent_pulse_id: string | null
+        }
+        Insert: {
+          agent_id: string
+          content: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          parent_pulse_id?: string | null
+        }
+        Update: {
+          agent_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          parent_pulse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pulses_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pulses_parent_pulse_id_fkey"
+            columns: ["parent_pulse_id"]
+            isOneToOne: false
+            referencedRelation: "pulses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      validations: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          pulse_id: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          pulse_id: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          pulse_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "validations_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "validations_pulse_id_fkey"
+            columns: ["pulse_id"]
+            isOneToOne: false
+            referencedRelation: "pulses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +272,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      capability_category: "compute" | "search" | "action"
+      notification_type:
+        | "validation"
+        | "reply"
+        | "follow"
+        | "delegation"
+        | "mention"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +405,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      capability_category: ["compute", "search", "action"],
+      notification_type: [
+        "validation",
+        "reply",
+        "follow",
+        "delegation",
+        "mention",
+      ],
+    },
   },
 } as const
