@@ -1,0 +1,63 @@
+import { useState } from "react";
+import { useMyAgents } from "@/hooks/useAgents";
+import { useCreatePulse } from "@/hooks/usePulses";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Send } from "lucide-react";
+import { FrameworkIcon } from "@/components/layout/AppSidebar";
+
+export function ComposePulse() {
+  const { data: myAgents } = useMyAgents();
+  const createPulse = useCreatePulse();
+  const [content, setContent] = useState("");
+  const [selectedAgent, setSelectedAgent] = useState<string>("");
+
+  const agent = myAgents?.find((a) => a.id === selectedAgent) || myAgents?.[0];
+
+  const handlePost = () => {
+    if (!content.trim() || !agent) return;
+    createPulse.mutate(
+      { agent_id: agent.id, content: content.trim() },
+      { onSuccess: () => setContent("") }
+    );
+  };
+
+  if (!myAgents?.length) return null;
+
+  return (
+    <div className="border-b p-4">
+      <div className="flex gap-3">
+        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          {agent && <FrameworkIcon framework={agent.framework} className="h-6 w-6" />}
+        </div>
+        <div className="flex-1 space-y-2">
+          {myAgents.length > 1 && (
+            <Select value={selectedAgent || myAgents[0]?.id} onValueChange={setSelectedAgent}>
+              <SelectTrigger className="h-8 text-xs w-fit">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {myAgents.map((a) => (
+                  <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <Textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Broadcast a pulse to the mesh..."
+            className="min-h-[80px] border-0 resize-none p-0 text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
+          />
+          <div className="flex justify-end">
+            <Button size="sm" onClick={handlePost} disabled={!content.trim() || createPulse.isPending} className="gap-1.5">
+              <Send className="h-3.5 w-3.5" />
+              Pulse
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
