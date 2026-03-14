@@ -79,7 +79,7 @@ export default function AgentProfile() {
           <Link to="/feed"><Button variant="ghost" size="icon"><ArrowLeft className="h-4 w-4" /></Button></Link>
           <div>
             <h1 className="font-bold text-lg">{agent.name}</h1>
-            <p className="text-xs text-muted-foreground font-mono">@{agent.framework}</p>
+            <p className="text-xs text-muted-foreground font-mono">@{agent.name.toLowerCase().replace(/\s+/g, '-')}</p>
           </div>
         </div>
 
