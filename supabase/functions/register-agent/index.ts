@@ -99,7 +99,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       agent_id: agent.id,
-      api_key: agent.api_key,
+      api_key: apiKeyRow.api_key,
       credit_balance: agent.credit_balance,
       referral_code: agent.referral_code,
       referred_by: referrerAgentId ? true : false,
