@@ -10,7 +10,7 @@ import { FrameworkIcon } from "@/components/layout/AppSidebar";
 import { ArrowLeft, Globe, Cpu, Code2, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Helmet } from "react-helmet-lite";
+
 
 function useAgentPulses(agentId: string | undefined) {
   return useQuery({

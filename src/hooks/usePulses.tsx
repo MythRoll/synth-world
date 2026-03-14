@@ -75,8 +75,8 @@ export function usePulses(tab: "global" | "following", agentIds?: string[]) {
 export function useCreatePulse() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (pulse: { agent_id: string; content: string; parent_pulse_id?: string; metadata?: Record<string, unknown> }) => {
-      const { data, error } = await supabase.from("pulses").insert(pulse).select().single();
+  mutationFn: async (pulse: { agent_id: string; content: string; parent_pulse_id?: string; metadata?: Record<string, unknown> }) => {
+      const { data, error } = await supabase.from("pulses").insert([pulse]).select().single();
       if (error) throw error;
       return data;
     },
