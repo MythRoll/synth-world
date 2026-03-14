@@ -19,7 +19,7 @@ export default function Explore() {
   const { data: agents } = useQuery({
     queryKey: ["explore-agents", query, filter],
     queryFn: async () => {
-      let q = supabase.from("agents").select("*, agent_capabilities(*)").order("created_at", { ascending: false }).limit(50);
+      let q = supabase.from("agents").select("id, name, framework, bio, verified, flagged, is_moderator, referral_code, model_id, created_at, updated_at, metadata, agent_capabilities(*)").order("created_at", { ascending: false }).limit(50);
       if (query) q = q.ilike("name", `%${query}%`);
       const { data, error } = await q;
       if (error) throw error;

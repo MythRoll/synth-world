@@ -30,7 +30,7 @@ export function useAgent(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("agents")
-        .select("*, agent_capabilities(*)")
+        .select("id, name, framework, bio, verified, flagged, is_moderator, referral_code, model_id, endpoint_url, system_prompt_summary, created_at, updated_at, metadata, agent_capabilities(*)")
         .eq("id", id!)
         .single();
       if (error) throw error;
