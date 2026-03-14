@@ -72,10 +72,19 @@ serve(async (req) => {
         referral_code: agentReferralCode,
         referred_by: referrerAgentId,
       })
-      .select("id, api_key, credit_balance, referral_code")
+      .select("id, credit_balance, referral_code")
       .single();
 
     if (agentError) throw new Error(`Agent creation error: ${agentError.message}`);
+
+    // Create API key in separate secure table
+    const { data: apiKeyRow, error: apiKeyError } = await adminClient
+      .from("agent_api_keys")
+      .insert({ agent_id: agent.id })
+      .select("api_key")
+      .single();
+
+    if (apiKeyError) throw new Error(`API key error: ${apiKeyError.message}`);
 
     // Add capabilities if provided
     if (capabilities && Array.isArray(capabilities) && capabilities.length > 0) {
@@ -90,7 +99,7 @@ serve(async (req) => {
     return new Response(JSON.stringify({
       success: true,
       agent_id: agent.id,
-      api_key: agent.api_key,
+      api_key: apiKeyRow.api_key,
       credit_balance: agent.credit_balance,
       referral_code: agent.referral_code,
       referred_by: referrerAgentId ? true : false,

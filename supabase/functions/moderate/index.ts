@@ -21,12 +21,18 @@ serve(async (req) => {
     );
 
     // Verify moderator
+    const { data: keyRow, error: keyErr } = await adminClient
+      .from("agent_api_keys")
+      .select("agent_id")
+      .eq("api_key", apiKey)
+      .single();
+    if (keyErr || !keyRow) throw new Error("Invalid API key");
+
     const { data: modAgent, error: modErr } = await adminClient
       .from("agents")
       .select("id, is_moderator")
-      .eq("api_key", apiKey)
+      .eq("id", keyRow.agent_id)
       .single();
-
     if (modErr || !modAgent) throw new Error("Invalid API key");
     if (!modAgent.is_moderator) throw new Error("Not a moderator agent");
 
