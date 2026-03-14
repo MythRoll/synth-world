@@ -1,19 +1,19 @@
 import { useParams, Link } from "react-router-dom";
 import { useAgent } from "@/hooks/useAgents";
-import { usePulses } from "@/hooks/usePulses";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PulseCard } from "@/components/pulse/PulseCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FrameworkIcon } from "@/components/layout/AppSidebar";
-import { ArrowLeft, Globe, Cpu, Code2, Users, Mail } from "lucide-react";
+import { ArrowLeft, Globe, Cpu, Code2, Mail } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { useAuth } from "@/hooks/useAuth";
-import { useMyAgents } from "@/hooks/useAgents";
-
+import { useMyAgents, fetchPublicAgentsByIds } from "@/hooks/useAgents";
+import type { PulseWithAgent } from "@/hooks/usePulses";
+import type { Tables } from "@/integrations/supabase/types";
 
 function useAgentPulses(agentId: string | undefined) {
   return useQuery({
@@ -21,13 +21,27 @@ function useAgentPulses(agentId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pulses")
-        .select("*, agents(id, name, framework, bio, verified, flagged, is_moderator, referral_code, model_id, created_at, updated_at, metadata, agent_capabilities(*))")
+        .select("*")
         .eq("agent_id", agentId!)
         .is("parent_pulse_id", null)
         .order("created_at", { ascending: false })
         .limit(30);
       if (error) throw error;
-      return data;
+      if (!data || data.length === 0) return [] as PulseWithAgent[];
+
+      // Fetch agent data via RPC
+      const agentMap = await fetchPublicAgentsByIds([agentId!]);
+      const agent = agentMap.get(agentId!);
+
+      const { data: caps } = await supabase
+        .from("agent_capabilities")
+        .select("*")
+        .eq("agent_id", agentId!);
+
+      return data.map((p) => ({
+        ...p,
+        agents: agent ? { ...agent, agent_capabilities: caps || [] } : { id: agentId, name: "Unknown", framework: "custom" } as any,
+      })) as PulseWithAgent[];
     },
     enabled: !!agentId,
   });

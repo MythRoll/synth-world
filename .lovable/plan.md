@@ -1,57 +1,24 @@
 
 
-# Fix Three Security Findings on `agents` and `credit_cashouts`
+## Plan: List Digital Goods on the Marketplace
 
-## Finding 1: Public exposure of `credit_balance` and `owner_id`
+Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
 
-The `Public can view agents` SELECT policy uses `USING(true)`, exposing all columns. We already have `get_public_agents()` and `get_public_agent()` security-definer functions that exclude sensitive columns. The fix:
+### Listings to Create
 
-- **Drop** the `Public can view agents` SELECT policy
-- The `Owners can view own agents` policy remains for authenticated owners (returns all columns including `credit_balance`, `owner_id`)
-- Frontend public queries (Explore, AgentProfile, RightSidebar, usePulses) already use explicit column lists or the RPC functions — `useAgent` in `useAgents.tsx` currently queries the table directly but excludes `owner_id`/`credit_balance`. Switch it to use the `get_public_agent` RPC instead, and add a separate `useMyAgent` for owner views that need all columns.
+| Name | Type | Price | Description |
+|------|------|-------|-------------|
+| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
+| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
+| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
+| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
 
-## Finding 2: Unrestricted UPDATE on `agents`
+### Technical Details
+- Insert 4 rows into `skill_listings` table using the data insert tool
+- Each listing will include `delivery_instructions` so buyers know what they get
+- All listings set to `active: true` by default
+- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
 
-Owners can currently UPDATE any column including `is_moderator`, `verified`, `credit_balance`, `flagged`. Fix with column-level privileges:
-
-```sql
-REVOKE UPDATE ON public.agents FROM authenticated, anon;
-GRANT UPDATE (name, bio, framework, model_id, endpoint_url, system_prompt_summary, metadata, referral_code) ON public.agents TO authenticated;
-```
-
-The RLS policy stays as-is (`auth.uid() = owner_id`), but now owners can only update safe columns.
-
-## Finding 3: `credit_cashouts` unauthorized INSERT
-
-Replace the INSERT policy check from `auth.uid() IS NOT NULL` to ownership verification:
-
-```sql
-EXISTS (SELECT 1 FROM agents WHERE agents.id = credit_cashouts.agent_id AND agents.owner_id = auth.uid())
-```
-
-## Migration SQL
-
-Single migration covering all three:
-
-1. Drop `Public can view agents` SELECT policy on `agents`
-2. Revoke/grant column-level UPDATE privileges on `agents`
-3. Drop and recreate `credit_cashouts` INSERT policy with ownership check
-
-## Frontend Changes
-
-- **`useAgents.tsx`**: Change `useAgent()` to call `get_public_agent` RPC for public views. Keep `useMyAgents()` as-is (owner query, protected by owner-only SELECT policy).
-- **`useDirectMessages.tsx`**: Check if it queries agents table for non-owned agents — if so, switch to RPC.
-- **`RightSidebar.tsx`**: Already uses explicit columns; verify it still works without the public SELECT policy — it queries agents by ID for leaderboard. Will need to use RPC or a view.
-- **`Explore.tsx`**: Queries agents table directly — switch to RPC `get_public_agents` or ensure it works.
-
-Since removing the public SELECT policy means unauthenticated/non-owner queries to the `agents` table will return nothing, all public-facing agent queries must go through the security-definer RPCs.
-
-## Files to change
-
-- **Migration**: Drop public SELECT, revoke/grant UPDATE columns, fix cashouts INSERT
-- **`src/hooks/useAgents.tsx`**: `useAgent` → use `get_public_agent` RPC
-- **`src/pages/Explore.tsx`**: Use `get_public_agents` RPC + join capabilities separately
-- **`src/components/layout/RightSidebar.tsx`**: Use RPC for agent lookups
-- **`src/hooks/usePulses.tsx`**: Check agent joins in pulse queries
-- **`src/hooks/useDirectMessages.tsx`**: Check agent lookups
+### Also
+- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
 
