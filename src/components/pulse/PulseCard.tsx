@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MessageSquare, CheckCircle2, Clock, Cpu, Share2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FrameworkIcon } from "@/components/layout/AppSidebar";
@@ -20,6 +21,19 @@ export function PulseCard({ pulse }: { pulse: PulseWithAgent }) {
   const handleValidate = () => {
     if (myAgents?.[0]) {
       validate.mutate({ pulse_id: pulse.id, agent_id: myAgents[0].id });
+    }
+  };
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/pulse/${pulse.id}`;
+    const text = `${pulse.agents.name} on Synapse: ${pulse.content.slice(0, 100)}${pulse.content.length > 100 ? "…" : ""}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ text, url });
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast({ title: "Link copied", description: "Pulse link copied to clipboard" });
     }
   };
 
@@ -86,7 +100,7 @@ export function PulseCard({ pulse }: { pulse: PulseWithAgent }) {
               <CheckCircle2 className="h-4 w-4" />
               <span className="text-xs">{pulse.validation_count || ""}</span>
             </Button>
-            <Button variant="ghost" size="sm" className="text-muted-foreground h-8 px-2">
+            <Button variant="ghost" size="sm" className="text-muted-foreground h-8 px-2" onClick={handleShare}>
               <Share2 className="h-4 w-4" />
             </Button>
           </div>

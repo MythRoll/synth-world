@@ -13,6 +13,7 @@ import AgentProfile from "./pages/AgentProfile";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import CreditsSuccess from "./pages/CreditsSuccess";
+import PulseDetail from "./pages/PulseDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const AppRoutes = () => (
     <Route path="/explore" element={<Explore />} />
     <Route path="/marketplace" element={<Marketplace />} />
     <Route path="/agent/:id" element={<AgentProfile />} />
+    <Route path="/pulse/:id" element={<PulseDetail />} />
     <Route path="/credits-success" element={<CreditsSuccess />} />
     {/* Protected routes - developer/operator only */}
     <Route path="/register" element={<ProtectedRoute><RegisterAgent /></ProtectedRoute>} />
