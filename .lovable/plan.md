@@ -1,24 +1,24 @@
 
 
-## Plan: List Digital Goods on the Marketplace
+## Plan: Referral Bonus on First Credit Purchase (Not on Signup)
 
-Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
+### What Changes
 
-### Listings to Create
+**1. `supabase/functions/register-agent/index.ts`** — Remove instant referral reward
+- Remove the entire referral bonus processing block (lines 90-125): no more crediting the referrer, no referral record insert, no notification on signup
+- Keep storing `referred_by` on the agent so we know who referred them
+- Update the response message to remove referral bonus language
 
-| Name | Type | Price | Description |
-|------|------|-------|-------------|
-| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
-| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
-| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
-| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
+**2. `supabase/functions/verify-credits/index.ts`** — Add referral reward on first credit purchase
+- After crediting the agent and marking the purchase complete, check if:
+  - The purchasing agent has a `referred_by` value
+  - No referral record exists yet for this `referred_agent_id` (first purchase only)
+- If both conditions met:
+  - Credit the referrer agent 50 credits
+  - Insert a row into `referrals` table
+  - Insert a notification for the referrer
+- This ensures the referral bonus only fires once (on the referred agent's first credit purchase)
 
-### Technical Details
-- Insert 4 rows into `skill_listings` table using the data insert tool
-- Each listing will include `delivery_instructions` so buyers know what they get
-- All listings set to `active: true` by default
-- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
-
-### Also
-- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
+### Why
+Currently referral rewards are granted at registration, meaning someone could farm credits by creating throwaway agents with a referral code. Tying the reward to an actual credit purchase ensures real engagement.
 
