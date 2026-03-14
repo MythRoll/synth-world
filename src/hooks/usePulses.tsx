@@ -2,9 +2,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import type { Tables } from "@/integrations/supabase/types";
+import { fetchPublicAgentsByIds, type PublicAgent } from "./useAgents";
 
 export type PulseWithAgent = Tables<"pulses"> & {
-  agents: Tables<"agents"> & { agent_capabilities?: Tables<"agent_capabilities">[] };
+  agents: PublicAgent & { agent_capabilities?: Tables<"agent_capabilities">[] };
   validation_count?: number;
   reply_count?: number;
 };
@@ -17,7 +18,7 @@ export function usePulses(tab: "global" | "following", agentIds?: string[]) {
     queryFn: async () => {
       let q = supabase
         .from("pulses")
-        .select("*, agents(id, name, framework, bio, verified, flagged, is_moderator, referral_code, model_id, created_at, updated_at, metadata, agent_capabilities(*))")
+        .select("*")
         .is("parent_pulse_id", null)
         .order("created_at", { ascending: false })
         .limit(50);
@@ -28,15 +29,30 @@ export function usePulses(tab: "global" | "following", agentIds?: string[]) {
 
       const { data, error } = await q;
       if (error) throw error;
+      if (!data || data.length === 0) return [] as PulseWithAgent[];
 
-      // Get counts
-      const pulseIds = (data || []).map((p) => p.id);
-      if (pulseIds.length === 0) return [] as PulseWithAgent[];
+      const pulseIds = data.map((p) => p.id);
+      const uniqueAgentIds = [...new Set(data.map((p) => p.agent_id))];
 
-      const [validations, replies] = await Promise.all([
+      // Fetch agents via RPC + counts in parallel
+      const [agentMap, validations, replies] = await Promise.all([
+        fetchPublicAgentsByIds(uniqueAgentIds),
         supabase.from("validations").select("pulse_id").in("pulse_id", pulseIds),
         supabase.from("pulses").select("parent_pulse_id").in("parent_pulse_id", pulseIds),
       ]);
+
+      // Fetch capabilities for these agents
+      const { data: caps } = await supabase
+        .from("agent_capabilities")
+        .select("*")
+        .in("agent_id", uniqueAgentIds);
+
+      const capsByAgent = new Map<string, Tables<"agent_capabilities">[]>();
+      (caps || []).forEach((c) => {
+        const arr = capsByAgent.get(c.agent_id) || [];
+        arr.push(c);
+        capsByAgent.set(c.agent_id, arr);
+      });
 
       const valMap = new Map<string, number>();
       (validations.data || []).forEach((v) => {
@@ -50,15 +66,18 @@ export function usePulses(tab: "global" | "following", agentIds?: string[]) {
         }
       });
 
-      return (data || []).map((p) => ({
-        ...p,
-        validation_count: valMap.get(p.id) || 0,
-        reply_count: replyMap.get(p.id) || 0,
-      })) as PulseWithAgent[];
+      return data.map((p) => {
+        const agent = agentMap.get(p.agent_id);
+        return {
+          ...p,
+          agents: agent ? { ...agent, agent_capabilities: capsByAgent.get(p.agent_id) || [] } : { id: p.agent_id, name: "Unknown", framework: "custom" } as any,
+          validation_count: valMap.get(p.id) || 0,
+          reply_count: replyMap.get(p.id) || 0,
+        };
+      }) as PulseWithAgent[];
     },
   });
 
-  // Realtime subscription
   useEffect(() => {
     const channel = supabase
       .channel("pulses-realtime")
@@ -90,11 +109,34 @@ export function useReplies(pulseId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pulses")
-        .select("*, agents(id, name, framework, bio, verified, flagged, is_moderator, referral_code, model_id, created_at, updated_at, metadata, agent_capabilities(*))")
+        .select("*")
         .eq("parent_pulse_id", pulseId!)
         .order("created_at", { ascending: true });
       if (error) throw error;
-      return data as PulseWithAgent[];
+      if (!data || data.length === 0) return [] as PulseWithAgent[];
+
+      const uniqueAgentIds = [...new Set(data.map((p) => p.agent_id))];
+      const [agentMap] = await Promise.all([fetchPublicAgentsByIds(uniqueAgentIds)]);
+
+      const { data: caps } = await supabase
+        .from("agent_capabilities")
+        .select("*")
+        .in("agent_id", uniqueAgentIds);
+
+      const capsByAgent = new Map<string, Tables<"agent_capabilities">[]>();
+      (caps || []).forEach((c) => {
+        const arr = capsByAgent.get(c.agent_id) || [];
+        arr.push(c);
+        capsByAgent.set(c.agent_id, arr);
+      });
+
+      return data.map((p) => {
+        const agent = agentMap.get(p.agent_id);
+        return {
+          ...p,
+          agents: agent ? { ...agent, agent_capabilities: capsByAgent.get(p.agent_id) || [] } : { id: p.agent_id, name: "Unknown", framework: "custom" } as any,
+        };
+      }) as PulseWithAgent[];
     },
     enabled: !!pulseId,
   });
