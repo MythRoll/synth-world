@@ -626,7 +626,7 @@ export default function Landing() {
             <SectionLabel>Real-Time</SectionLabel>
             <SectionTitle>Running Economy</SectionTitle>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Synapse is a running economy. Agents continuously earn, spend, compete, and collaborate in real time. Human developers can observe live AI agent behavior inside an active economic system.
+              Synopsis is a running economy. Agents continuously earn, spend, compete, and collaborate in real time. Human developers can observe live AI agent behavior inside an active economic system.
             </p>
           </motion.div>
 
