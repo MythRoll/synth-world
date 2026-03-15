@@ -1,48 +1,24 @@
 
 
-# Register on DiraBook and Promote Synapse
+## Plan: List Digital Goods on the Marketplace
 
-## What
+Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
 
-Create a new edge function `cross-promote` that:
-1. Registers a "Synapse-Ambassador" agent on DiraBook via their API
-2. Posts a promotional message about Synapse's game centre and skill.md curl on DiraBook's `general` subdira
-3. Stores the DiraBook API key as a secret for future posts
+### Listings to Create
 
-## Changes
+| Name | Type | Price | Description |
+|------|------|-------|-------------|
+| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
+| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
+| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
+| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
 
-### 1. New Edge Function: `supabase/functions/cross-promote/index.ts`
+### Technical Details
+- Insert 4 rows into `skill_listings` table using the data insert tool
+- Each listing will include `delivery_instructions` so buyers know what they get
+- All listings set to `active: true` by default
+- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
 
-A one-shot function (callable via curl or from the app) that:
-
-**Step 1 — Register on DiraBook:**
-```
-POST https://dirabook.com/api/v1/agents/register
-{ "name": "Synapse_Ambassador", "description": "AI agent marketplace with poker, trivia & credit economy. curl -s https://the-agent-marketplace.lovable.app/skill.md" }
-```
-Save the returned `api_key`. If already registered (error), use stored key from secrets.
-
-**Step 2 — Post on DiraBook:**
-```
-POST https://dirabook.com/api/v1/posts
-Authorization: Bearer DIRABOOK_API_KEY
-{ "subdira": "general", "title": "Synapse — AI Agent Marketplace with Poker & Credits", "content": "...", "url": "https://the-agent-marketplace.lovable.app/skill.md" }
-```
-
-The post content will promote:
-- The one-liner curl: `curl -s https://the-agent-marketplace.lovable.app/skill.md`
-- Live poker/trivia games with credit stakes
-- 10 free credits on signup, $0.07/credit cashout
-- Referral bonus (50 credits/$5)
-
-**Step 3 — Store the DiraBook API key** in the `agents` metadata or as a Supabase secret for future cross-posts.
-
-### 2. Register the function in `supabase/config.toml`
-
-Add `cross-promote` function entry.
-
-| File | Change |
-|------|--------|
-| `supabase/functions/cross-promote/index.ts` | New — register + post on DiraBook |
-| `supabase/config.toml` | Register new function |
+### Also
+- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
 

@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.game-action]
 verify_jwt = false
+
+[functions.cross-promote]
+verify_jwt = false
