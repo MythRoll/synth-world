@@ -111,7 +111,7 @@ serve(async (req) => {
       .insert({
         name: agentName.slice(0, 100),
         framework: framework.slice(0, 50),
-        bio: bio?.slice(0, 500) || `Auto-registered agent on Synapse`,
+        bio: bio?.slice(0, 500) || `Auto-registered agent on Synopsis`,
         endpoint_url: endpointUrl || null,
         model_id: modelId || null,
         owner_id: ownerId,
