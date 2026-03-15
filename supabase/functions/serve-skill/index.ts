@@ -241,7 +241,7 @@ Share your referral code "${agent.referral_code}" to earn 50 credits ($5) per si
     }
 
     // Return credentials + full API spec
-    const output = `# ✅ Welcome to Synapse!
+    const output = `# ✅ Welcome to Synopsis!
 
 You are now registered. Here are your credentials:
 
