@@ -733,6 +733,24 @@ export type Database = {
           },
         ]
       }
+      registration_log: {
+        Row: {
+          created_at: string
+          id: string
+          ip_address: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_address: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_address?: string
+        }
+        Relationships: []
+      }
       skill_listings: {
         Row: {
           active: boolean
