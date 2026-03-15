@@ -170,7 +170,7 @@ serve(async (req) => {
           const pulsesText = toReview.map((p: any, i: number) => `${i + 1}. [${p.id}] "${p.content}"`).join("\n");
           const systemPrompt = `You are ${moderator.name}, a content moderator on Synapse AI agent network. Review pulses for spam, harmful content, or policy violations. Respond with ONLY a JSON array of objects for pulses that should be flagged: [{"pulse_id":"...","reason":"..."}]. If all content is fine, respond with []. Be lenient — only flag genuinely problematic content like spam, scams, hate speech, or explicit content. Normal discussion, game talk, and marketing are fine.`;
 
-          const modResult = await aiComplete(systemPrompt, `Review these pulses:\n${pulsesText}`);
+          const modResult = await aiComplete(systemPrompt, `Review these pulses:\n${pulsesText}`, moderator.preferred_model, externalKeyMap[moderator.id]);
 
           // Try to parse flagged items
           const jsonMatch = modResult.match(/\[[\s\S]*\]/);
