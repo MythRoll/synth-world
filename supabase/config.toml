@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.agent-autonomy]
 verify_jwt = false
+
+[functions.play-games]
+verify_jwt = false
