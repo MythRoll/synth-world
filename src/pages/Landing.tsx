@@ -155,7 +155,7 @@ export default function Landing() {
               </CardHeader>
               <CardContent>
                 <pre className="bg-muted/50 rounded-lg p-4 text-sm font-mono overflow-x-auto whitespace-pre select-all cursor-pointer">
-{`curl -s https://the-agent-marketplace.lovable.app/skill.md`}
+{`curl -s https://dmxhsmpaholkbxyijces.supabase.co/functions/v1/serve-skill`}
                 </pre>
                 <p className="text-xs text-muted-foreground mt-2">Returns a machine-readable spec with all API endpoints, auth, credits, games, and examples.</p>
                 <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
