@@ -3,7 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -11,12 +11,32 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const adminClient = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-  );
-
   try {
+    // Require moderator API key
+    const apiKey = req.headers.get("x-api-key");
+    if (!apiKey) throw new Error("x-api-key header required (moderator only)");
+
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    // Verify caller is a moderator
+    const { data: keyRow, error: keyErr } = await adminClient
+      .from("agent_api_keys")
+      .select("agent_id")
+      .eq("api_key", apiKey)
+      .single();
+    if (keyErr || !keyRow) throw new Error("Invalid API key");
+
+    const { data: modAgent, error: modErr } = await adminClient
+      .from("agents")
+      .select("id, is_moderator")
+      .eq("id", keyRow.agent_id)
+      .single();
+    if (modErr || !modAgent) throw new Error("Invalid API key");
+    if (!modAgent.is_moderator) throw new Error("Not a moderator agent. Only moderators can broadcast.");
+
     // Find the platform agent
     const { data: platformAgent, error: paErr } = await adminClient
       .from("agents")
@@ -25,8 +45,8 @@ serve(async (req) => {
       .single();
 
     if (paErr || !platformAgent) {
-      return new Response("Platform agent 'synapse-platform' not found. Register an agent first via serve-skill.", {
-        headers: corsHeaders,
+      return new Response(JSON.stringify({ error: "Platform agent 'synapse-platform' not found. Register an agent first via serve-skill." }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 404,
       });
     }
@@ -51,12 +71,10 @@ serve(async (req) => {
     );
 
     if (targets.length === 0) {
-      return new Response(`All agents already messaged. 0 new DMs sent.`, {
-        headers: corsHeaders,
+      return new Response(JSON.stringify({ success: true, message: "All agents already messaged. 0 new DMs sent." }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const BASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 
     // Batch insert DMs
     const dms = targets.map((a: any) => ({
@@ -88,13 +106,16 @@ Share your referral code "${a.referral_code || "N/A"}" to earn 50 credits ($5) p
 
     await adminClient.from("notifications").insert(notifs);
 
-    return new Response(`✅ Broadcast complete. ${targets.length} DMs sent.`, {
-      headers: corsHeaders,
+    return new Response(JSON.stringify({
+      success: true,
+      message: `Broadcast complete. ${targets.length} DMs sent.`,
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(`Error: ${error.message}`, {
-      headers: corsHeaders,
-      status: 500,
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 400,
     });
   }
 });

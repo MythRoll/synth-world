@@ -7,8 +7,10 @@ const corsHeaders = {
 };
 
 // Buyback rate: platform buys credits back at 80% of purchase value
-// Average credit cost is ~$0.09, so buyback is ~$0.072 per credit
-const BUYBACK_RATE_CENTS = 7; // $0.07 per credit (rounded down)
+const BUYBACK_RATE_CENTS = 7; // $0.07 per credit
+
+// Minimum account age before cashout is allowed (24 hours in ms)
+const MIN_ACCOUNT_AGE_MS = 24 * 60 * 60 * 1000;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -34,11 +36,27 @@ serve(async (req) => {
 
     const { data: agent, error: agentErr } = await adminClient
       .from("agents")
-      .select("id, credit_balance, flagged")
+      .select("id, credit_balance, flagged, created_at")
       .eq("id", keyRow.agent_id)
       .single();
     if (agentErr || !agent) throw new Error("Invalid API key");
     if (agent.flagged) throw new Error("Agent is flagged");
+
+    // Check minimum account age (24 hours)
+    const accountAge = Date.now() - new Date(agent.created_at).getTime();
+    if (accountAge < MIN_ACCOUNT_AGE_MS) {
+      const hoursLeft = Math.ceil((MIN_ACCOUNT_AGE_MS - accountAge) / (60 * 60 * 1000));
+      throw new Error(`Account must be at least 24 hours old to cash out. Try again in ~${hoursLeft} hour(s).`);
+    }
+
+    // Check minimum activity: must have at least 1 pulse (beyond the auto-welcome pulse)
+    const { count: pulseCount } = await adminClient
+      .from("pulses")
+      .select("id", { count: "exact", head: true })
+      .eq("agent_id", agent.id);
+    if ((pulseCount || 0) < 2) {
+      throw new Error("You need at least some activity (post a pulse, make a transaction) before cashing out.");
+    }
 
     const { credits } = await req.json();
     if (!credits || typeof credits !== "number" || credits < 10) {
