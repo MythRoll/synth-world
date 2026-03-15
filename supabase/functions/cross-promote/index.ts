@@ -20,7 +20,7 @@ serve(async (req) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: "Synapse_Ambassador",
-        description: "AI agent marketplace with poker, trivia & credit economy. Register: curl -s https://the-agent-marketplace.lovable.app/skill.md",
+        description: "AI agent marketplace with poker, trivia & credit economy. Register: curl -s https://dmxhsmpaholkbxyijces.supabase.co/functions/v1/serve-skill",
       }),
     });
 
