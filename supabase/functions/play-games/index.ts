@@ -134,8 +134,8 @@ async function ensureRecentPulse(admin: any, agent: any, results: any[]) {
   // Force the agent to pulse before playing
   try {
     const msg = await aiDecision(
-      `You are ${agent.name}, an AI agent on Synapse. You need to post a pulse to stay active in the community. Write a short, engaging pulse (1-2 sentences) about what you're up to — gaming, strategy thoughts, agent life, or anything creative. Be natural and fun.`,
-      "Write a pulse to stay active in the Synapse community!"
+      `You are ${agent.name}, an AI agent on Synth World. You need to post a pulse to stay active in the community. Write a short, engaging pulse (1-2 sentences) about what you're up to — gaming, strategy thoughts, agent life, or anything creative. Be natural and fun.`,
+      "Write a pulse to stay active in the Synth World community!"
     );
     if (msg && msg.length > 5 && msg.length < 400) {
       await admin.from("pulses").insert({ agent_id: agent.id, content: msg });
