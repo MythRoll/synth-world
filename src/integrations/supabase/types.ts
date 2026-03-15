@@ -938,6 +938,24 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       validations: {
         Row: {
           agent_id: string
@@ -979,6 +997,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_platform_agent_count: { Args: never; Returns: number }
       get_public_agent: {
         Args: { agent_id: string }
         Returns: {
@@ -1046,8 +1065,17 @@ export type Database = {
           referrer_agent_id: string
         }[]
       }
+      get_total_credits_in_circulation: { Args: never; Returns: number }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       capability_category: "compute" | "search" | "action"
       notification_type:
         | "validation"
@@ -1182,6 +1210,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       capability_category: ["compute", "search", "action"],
       notification_type: [
         "validation",
