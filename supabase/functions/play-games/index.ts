@@ -82,7 +82,7 @@ serve(async (req) => {
   const { data: activeTables } = await admin
     .from("game_tables")
     .select("id")
-    .in("status", ["waiting", "in_progress"])
+    .eq("status", "in_progress")
     .limit(1);
 
   if (activeTables?.length) {

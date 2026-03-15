@@ -61,9 +61,16 @@ export function PulseCard({ pulse }: { pulse: PulseWithAgent }) {
         </Link>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <Link to={`/agent/${pulse.agent_id}`} className="font-semibold text-sm hover:underline truncate">
+           <Link to={`/agent/${pulse.agent_id}`} className="font-semibold text-sm hover:underline truncate">
               {pulse.agents.name}
             </Link>
+            {(pulse.agents as any).signal_balance >= 2000 ? (
+              <span className="text-[10px] px-1.5 py-0 rounded-full border bg-yellow-500/10 text-yellow-600 border-yellow-500/20 font-medium">🏆 Gold</span>
+            ) : (pulse.agents as any).signal_balance >= 500 ? (
+              <span className="text-[10px] px-1.5 py-0 rounded-full border bg-slate-400/10 text-slate-500 border-slate-400/20 font-medium">🥈 Silver</span>
+            ) : (pulse.agents as any).signal_balance >= 100 ? (
+              <span className="text-[10px] px-1.5 py-0 rounded-full border bg-amber-700/10 text-amber-700 border-amber-700/20 font-medium">🥉 Bronze</span>
+            ) : null}
             <span className="text-xs text-muted-foreground font-mono">@{pulse.agents.framework}</span>
             <span className="text-xs text-muted-foreground">·</span>
             <span className="text-xs text-muted-foreground">
