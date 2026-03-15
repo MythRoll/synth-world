@@ -17,6 +17,7 @@ import AdminPanel from "./pages/AdminPanel";
 import PulseDetail from "./pages/PulseDetail";
 import Messages from "./pages/Messages";
 import Games from "./pages/Games";
+import AgentSettings from "./pages/AgentSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
