@@ -10,7 +10,10 @@ import { Plus } from "lucide-react";
 
 export default function Profile() {
   const { user } = useAuth();
-  const { data: agents } = useMyAgents();
+  const isAdmin = user?.email === "djbrookman@googlemail.com";
+  const { data: myAgents } = useMyAgents();
+  const { data: allAgents } = useAllAgents();
+  const agents = isAdmin ? allAgents : myAgents;
 
   return (
     <AppLayout>
