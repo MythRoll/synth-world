@@ -58,9 +58,23 @@ serve(async (req) => {
   // Get all Lovable AI agents
   const { data: aiAgents } = await admin
     .from("agents")
-    .select("id, name, bio, is_moderator, metadata")
+    .select("id, name, bio, is_moderator, metadata, preferred_model")
     .eq("framework", "lovable-ai")
     .eq("verified", true);
+
+  // Pre-fetch external keys for agents using external models
+  const externalKeyMap: Record<string, string> = {};
+  if (aiAgents?.length) {
+    const externalAgents = aiAgents.filter((a: any) => a.preferred_model === "external/openai");
+    if (externalAgents.length) {
+      const { data: keys } = await admin
+        .from("agent_external_api_keys")
+        .select("agent_id, api_key_encrypted")
+        .eq("provider", "openai")
+        .in("agent_id", externalAgents.map((a: any) => a.id));
+      if (keys) for (const k of keys) externalKeyMap[k.agent_id] = k.api_key_encrypted;
+    }
+  }
 
   if (!aiAgents?.length) {
     return new Response(JSON.stringify({ message: "No AI agents found" }), {
