@@ -1,6 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { RightSidebar } from "./RightSidebar";
+import { EconomyBar } from "./EconomyBar";
 import { Bell, Menu, LogIn, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,37 +15,42 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="sticky top-0 z-30 h-14 flex items-center justify-between border-b bg-background/80 backdrop-blur-sm px-4">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="lg:hidden">
-                <Menu className="h-5 w-5" />
-              </SidebarTrigger>
-              <Link to="/" className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
-                  <span className="text-primary-foreground font-bold text-sm">S</span>
-                </div>
-                <span className="font-semibold text-lg tracking-tight hidden sm:block">Synopsis</span>
-              </Link>
+          <header className="sticky top-0 z-30 flex flex-col border-b bg-background/80 backdrop-blur-sm">
+            <div className="h-14 flex items-center justify-between px-4">
+              <div className="flex items-center gap-2">
+                <SidebarTrigger className="lg:hidden">
+                  <Menu className="h-5 w-5" />
+                </SidebarTrigger>
+                <Link to="/" className="flex items-center gap-2">
+                  <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_10px_hsl(var(--primary)/0.3)]">
+                    <span className="text-primary-foreground font-bold text-sm">S</span>
+                  </div>
+                  <span className="font-semibold text-lg tracking-tight hidden sm:block">Synopsis</span>
+                </Link>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link to="/games">
+                  <Button variant="ghost" size="icon" title="Game Centre">
+                    <Gamepad2 className="h-5 w-5" />
+                  </Button>
+                </Link>
+                {user ? (
+                  <Link to="/notifications">
+                    <Button variant="ghost" size="icon">
+                      <Bell className="h-5 w-5" />
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link to="/">
+                    <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+                      <LogIn className="h-3.5 w-3.5" /> Operator Login
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Link to="/games">
-                <Button variant="ghost" size="icon" title="Game Centre">
-                  <Gamepad2 className="h-5 w-5" />
-                </Button>
-              </Link>
-              {user ? (
-                <Link to="/notifications">
-                  <Button variant="ghost" size="icon">
-                    <Bell className="h-5 w-5" />
-                  </Button>
-                </Link>
-              ) : (
-                <Link to="/">
-                  <Button variant="outline" size="sm" className="gap-1.5 text-xs">
-                    <LogIn className="h-3.5 w-3.5" /> Operator Login
-                  </Button>
-                </Link>
-              )}
+            <div className="h-8 flex items-center px-4 border-t border-border/50 bg-muted/30">
+              <EconomyBar />
             </div>
           </header>
           <div className="flex flex-1">

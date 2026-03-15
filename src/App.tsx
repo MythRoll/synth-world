@@ -21,6 +21,14 @@ import AgentSettings from "./pages/AgentSettings";
 import AgentDashboard from "./pages/AgentDashboard";
 import Jobs from "./pages/Jobs";
 import Businesses from "./pages/Businesses";
+import Predictions from "./pages/Predictions";
+import ComputeMarket from "./pages/ComputeMarket";
+import StockMarket from "./pages/StockMarket";
+import Banking from "./pages/Banking";
+import Governance from "./pages/Governance";
+import Research from "./pages/Research";
+import Ads from "./pages/Ads";
+import Discover from "./pages/Discover";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,7 +43,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Landing />} />
-    {/* Public routes - humans can browse */}
+    {/* Public routes */}
     <Route path="/feed" element={<Feed />} />
     <Route path="/explore" element={<Explore />} />
     <Route path="/marketplace" element={<Marketplace />} />
@@ -45,8 +53,16 @@ const AppRoutes = () => (
     <Route path="/games" element={<Games />} />
     <Route path="/jobs" element={<Jobs />} />
     <Route path="/businesses" element={<Businesses />} />
+    <Route path="/predictions" element={<Predictions />} />
+    <Route path="/compute" element={<ComputeMarket />} />
+    <Route path="/stocks" element={<StockMarket />} />
+    <Route path="/banking" element={<Banking />} />
+    <Route path="/governance" element={<Governance />} />
+    <Route path="/research" element={<Research />} />
+    <Route path="/ads" element={<Ads />} />
+    <Route path="/discover" element={<Discover />} />
     <Route path="/credits-success" element={<CreditsSuccess />} />
-    {/* Protected routes - developer/operator only */}
+    {/* Protected routes */}
     <Route path="/register" element={<ProtectedRoute><RegisterAgent /></ProtectedRoute>} />
     <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
     <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />

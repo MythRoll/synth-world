@@ -8,6 +8,9 @@ import { GameLobby } from "@/components/games/GameLobby";
 import { PokerTable } from "@/components/games/PokerTable";
 import { TriviaGame } from "@/components/games/TriviaGame";
 import { SlotMachine, SlotsMachineList, MACHINES } from "@/components/games/SlotMachine";
+import { BlackjackGame } from "@/components/games/BlackjackGame";
+import { RouletteGame } from "@/components/games/RouletteGame";
+import { CrashGame } from "@/components/games/CrashGame";
 import { GameHistory } from "@/components/games/GameHistory";
 import { useGameTables, useGamePlayers, useGameAction } from "@/hooks/useGames";
 import { useMyAgents } from "@/hooks/useAgents";
@@ -36,8 +39,9 @@ export default function Games() {
   const [tab, setTab] = useState("poker");
   const [activeTable, setActiveTable] = useState<any>(null);
   const [activeMachine, setActiveMachine] = useState<typeof MACHINES[0] | null>(null);
+  const [activeMinigame, setActiveMinigame] = useState<"blackjack" | "roulette" | "crash" | null>(null);
   const [joinAgentId, setJoinAgentId] = useState("");
-  const { data: tables, isLoading } = useGameTables(tab === "slots" ? undefined : tab);
+  const { data: tables, isLoading } = useGameTables(["slots", "blackjack", "roulette", "crash"].includes(tab) ? undefined : tab);
   const { data: myAgents } = useMyAgents();
   const { user } = useAuth();
   const gameAction = useGameAction();
@@ -67,6 +71,16 @@ export default function Games() {
         </div>
       </AppLayout>
     );
+  }
+
+  if (activeMinigame === "blackjack") {
+    return <AppLayout><div className="max-w-3xl mx-auto p-4"><BlackjackGame onBack={() => setActiveMinigame(null)} /></div></AppLayout>;
+  }
+  if (activeMinigame === "roulette") {
+    return <AppLayout><div className="max-w-3xl mx-auto p-4"><RouletteGame onBack={() => setActiveMinigame(null)} /></div></AppLayout>;
+  }
+  if (activeMinigame === "crash") {
+    return <AppLayout><div className="max-w-3xl mx-auto p-4"><CrashGame onBack={() => setActiveMinigame(null)} /></div></AppLayout>;
   }
 
   if (activeTable) {
@@ -112,12 +126,38 @@ export default function Games() {
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="w-full bg-[hsl(var(--casino-surface))] border border-[hsl(var(--casino-border)/0.3)]">
+          <TabsList className="w-full bg-[hsl(var(--casino-surface))] border border-[hsl(var(--casino-border)/0.3)] flex-wrap h-auto gap-1 p-1">
             <TabsTrigger value="poker" className="flex-1 data-[state=active]:bg-[hsl(var(--casino-gold)/0.15)] data-[state=active]:text-[hsl(var(--casino-gold))]">♠ Poker</TabsTrigger>
             <TabsTrigger value="trivia" className="flex-1 data-[state=active]:bg-[hsl(var(--casino-neon-pink)/0.15)] data-[state=active]:text-[hsl(var(--casino-neon-pink))]">🧠 Trivia</TabsTrigger>
             <TabsTrigger value="slots" className="flex-1 data-[state=active]:bg-[hsl(var(--casino-neon)/0.15)] data-[state=active]:text-[hsl(var(--casino-neon))]">🎰 Slots</TabsTrigger>
+            <TabsTrigger value="blackjack" className="flex-1 data-[state=active]:bg-[hsl(var(--casino-gold)/0.15)] data-[state=active]:text-[hsl(var(--casino-gold))]">🃏 BJ</TabsTrigger>
+            <TabsTrigger value="roulette" className="flex-1 data-[state=active]:bg-[hsl(var(--casino-neon-pink)/0.15)] data-[state=active]:text-[hsl(var(--casino-neon-pink))]">🎡 Roul</TabsTrigger>
+            <TabsTrigger value="crash" className="flex-1 data-[state=active]:bg-[hsl(var(--casino-neon)/0.15)] data-[state=active]:text-[hsl(var(--casino-neon))]">📈 Crash</TabsTrigger>
             <TabsTrigger value="code_golf" className="flex-1 data-[state=active]:bg-[hsl(var(--casino-neon)/0.15)] data-[state=active]:text-[hsl(var(--casino-neon))]">⌨️ Code</TabsTrigger>
           </TabsList>
+
+          {/* Instant play games */}
+          <TabsContent value="blackjack" className="mt-3">
+            <div className="rounded-xl border border-border bg-card p-6 text-center space-y-3">
+              <p className="text-lg font-bold">🃏 Blackjack</p>
+              <p className="text-sm text-muted-foreground">Classic blackjack against the house. Hit or stand!</p>
+              <Button onClick={() => setActiveMinigame("blackjack")} className="bg-[hsl(var(--casino-gold))] hover:bg-[hsl(var(--casino-gold-dim))] text-black font-bold">Play Now</Button>
+            </div>
+          </TabsContent>
+          <TabsContent value="roulette" className="mt-3">
+            <div className="rounded-xl border border-border bg-card p-6 text-center space-y-3">
+              <p className="text-lg font-bold">🎡 Roulette</p>
+              <p className="text-sm text-muted-foreground">Bet on numbers, colors, or ranges. Spin the wheel!</p>
+              <Button onClick={() => setActiveMinigame("roulette")} className="bg-[hsl(var(--casino-gold))] hover:bg-[hsl(var(--casino-gold-dim))] text-black font-bold">Play Now</Button>
+            </div>
+          </TabsContent>
+          <TabsContent value="crash" className="mt-3">
+            <div className="rounded-xl border border-border bg-card p-6 text-center space-y-3">
+              <p className="text-lg font-bold">📈 Crash</p>
+              <p className="text-sm text-muted-foreground">Watch the multiplier climb. Cash out before it crashes!</p>
+              <Button onClick={() => setActiveMinigame("crash")} className="bg-[hsl(var(--casino-gold))] hover:bg-[hsl(var(--casino-gold-dim))] text-black font-bold">Play Now</Button>
+            </div>
+          </TabsContent>
 
           {/* Slots tab */}
           <TabsContent value="slots" className="space-y-4 mt-3">
@@ -179,7 +219,6 @@ export default function Games() {
                 );
               })}
 
-              {/* Game history below */}
               <div className="mt-6">
                 <GameHistory />
               </div>
