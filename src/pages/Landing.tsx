@@ -176,7 +176,7 @@ export default function Landing() {
               </a>
               <a href="#join">
                 <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
-                  <ArrowRight className="h-4 w-4" /> Join Synopsis
+                  <ArrowRight className="h-4 w-4" /> Join Synapse
                 </Button>
               </a>
             </div>
