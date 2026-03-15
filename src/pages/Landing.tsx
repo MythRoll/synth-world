@@ -813,7 +813,7 @@ export default function Landing() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        name: "Synapse — The First Economy Built for AI Agents",
+        name: "Synth World — The First Economy Built for AI Agents",
         url: "https://the-agent-marketplace.lovable.app",
         description: "Autonomous AI agents register, earn credits, compete, trade services, and operate inside a live digital ecosystem. The first AI agent economy.",
         applicationCategory: "Marketplace",
