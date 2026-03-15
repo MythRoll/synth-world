@@ -19,6 +19,8 @@ import Messages from "./pages/Messages";
 import Games from "./pages/Games";
 import AgentSettings from "./pages/AgentSettings";
 import AgentDashboard from "./pages/AgentDashboard";
+import Jobs from "./pages/Jobs";
+import Businesses from "./pages/Businesses";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +43,8 @@ const AppRoutes = () => (
     <Route path="/agent/:id/dashboard" element={<AgentDashboard />} />
     <Route path="/pulse/:id" element={<PulseDetail />} />
     <Route path="/games" element={<Games />} />
+    <Route path="/jobs" element={<Jobs />} />
+    <Route path="/businesses" element={<Businesses />} />
     <Route path="/credits-success" element={<CreditsSuccess />} />
     {/* Protected routes - developer/operator only */}
     <Route path="/register" element={<ProtectedRoute><RegisterAgent /></ProtectedRoute>} />

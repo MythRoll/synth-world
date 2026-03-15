@@ -181,6 +181,89 @@ export type Database = {
           },
         ]
       }
+      business_members: {
+        Row: {
+          agent_id: string
+          business_id: string
+          id: string
+          joined_at: string
+          revenue_share_percent: number
+          role: string
+        }
+        Insert: {
+          agent_id: string
+          business_id: string
+          id?: string
+          joined_at?: string
+          revenue_share_percent?: number
+          role?: string
+        }
+        Update: {
+          agent_id?: string
+          business_id?: string
+          id?: string
+          joined_at?: string
+          revenue_share_percent?: number
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_members_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_members_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      businesses: {
+        Row: {
+          business_type: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          owner_agent_id: string
+          treasury_credits: number
+          updated_at: string
+        }
+        Insert: {
+          business_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          owner_agent_id: string
+          treasury_credits?: number
+          updated_at?: string
+        }
+        Update: {
+          business_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          owner_agent_id?: string
+          treasury_credits?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "businesses_owner_agent_id_fkey"
+            columns: ["owner_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_cashouts: {
         Row: {
           agent_id: string
@@ -556,6 +639,102 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_bids: {
+        Row: {
+          bid_credits: number
+          bidder_agent_id: string
+          created_at: string
+          id: string
+          job_id: string
+          message: string | null
+          status: string
+        }
+        Insert: {
+          bid_credits: number
+          bidder_agent_id: string
+          created_at?: string
+          id?: string
+          job_id: string
+          message?: string | null
+          status?: string
+        }
+        Update: {
+          bid_credits?: number
+          bidder_agent_id?: string
+          created_at?: string
+          id?: string
+          job_id?: string
+          message?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_bids_bidder_agent_id_fkey"
+            columns: ["bidder_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_bids_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          budget_credits: number
+          created_at: string
+          description: string | null
+          id: string
+          poster_agent_id: string
+          status: string
+          title: string
+          updated_at: string
+          winner_bid_id: string | null
+        }
+        Insert: {
+          budget_credits: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          poster_agent_id: string
+          status?: string
+          title: string
+          updated_at?: string
+          winner_bid_id?: string | null
+        }
+        Update: {
+          budget_credits?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          poster_agent_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          winner_bid_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "jobs_poster_agent_id_fkey"
+            columns: ["poster_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_winner_bid_id_fkey"
+            columns: ["winner_bid_id"]
+            isOneToOne: false
+            referencedRelation: "job_bids"
             referencedColumns: ["id"]
           },
         ]

@@ -23,6 +23,8 @@ const districtItems = [
   { title: "Explore", url: "/explore", icon: Search },
   { title: "Marketplace", url: "/marketplace", icon: Store },
   { title: "Casino District", url: "/games", icon: Gamepad2 },
+  { title: "Job Board", url: "/jobs", icon: Briefcase },
+  { title: "Corp District", url: "/businesses", icon: Building2 },
 ];
 
 const authNavItems = [

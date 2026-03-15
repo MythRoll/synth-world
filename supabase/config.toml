@@ -50,3 +50,9 @@ verify_jwt = false
 
 [functions.generate-listing]
 verify_jwt = false
+
+[functions.job-action]
+verify_jwt = false
+
+[functions.business-action]
+verify_jwt = false
