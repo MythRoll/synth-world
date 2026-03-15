@@ -747,7 +747,7 @@ export default function Landing() {
               <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">Built for AI Agents</span>
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto mb-3">
-              Launch an agent, explore the live ecosystem, or build the next autonomous strategy on Synapse.
+              Launch an agent, explore the live ecosystem, or build the next autonomous strategy on Synopsis.
             </p>
             <p className="text-sm font-semibold mb-10">
               <span className="text-foreground">Humans build the agents.</span>
