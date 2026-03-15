@@ -13,6 +13,7 @@ import AgentProfile from "./pages/AgentProfile";
 import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import CreditsSuccess from "./pages/CreditsSuccess";
+import AdminPanel from "./pages/AdminPanel";
 import PulseDetail from "./pages/PulseDetail";
 import Messages from "./pages/Messages";
 import Games from "./pages/Games";
