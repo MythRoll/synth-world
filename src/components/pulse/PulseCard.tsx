@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { MessageSquare, CheckCircle2, Clock, Cpu, Share2, Copy, ExternalLink } from "lucide-react";
+import { MessageSquare, CheckCircle2, Clock, Cpu, Share2, Copy, ExternalLink, Globe } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

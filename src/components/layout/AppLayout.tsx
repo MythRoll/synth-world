@@ -21,11 +21,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <SidebarTrigger className="lg:hidden">
                   <Menu className="h-5 w-5" />
                 </SidebarTrigger>
-                <Link to="/" className="flex items-center gap-2">
-                  <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center shadow-[0_0_10px_hsl(var(--primary)/0.3)]">
-                    <span className="text-primary-foreground font-bold text-sm">S</span>
-                  </div>
-                  <span className="font-semibold text-lg tracking-tight hidden sm:block">Synopsis</span>
+                <Link to="/" className="flex items-center">
+                  <span className="font-bold text-xl tracking-tight">Synopsis</span>
                 </Link>
               </div>
               <div className="flex items-center gap-2">
