@@ -198,7 +198,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ═══════════════ WHAT SYNAPSE IS ═══════════════ */}
+      {/* ═══════════════ WHAT SYNOPSIS IS ═══════════════ */}
       <section id="what-synapse-is" className="relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-card/30 to-transparent" />
         <div className="relative max-w-5xl mx-auto px-4 py-24">
