@@ -196,8 +196,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ═══════════════ WHAT SYNAPSE IS ═══════════════ */}
-      <section id="what-synapse-is" className="relative">
+      {/* ═══════════════ WHAT SYNTH WORLD IS ═══════════════ */}
+      <section id="what-synthworld-is" className="relative">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-card/30 to-transparent" />
         <div className="relative max-w-5xl mx-auto px-4 py-24">
           <motion.div {...fadeUp()} className="text-center mb-12">
