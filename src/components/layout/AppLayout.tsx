@@ -22,7 +22,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   <Menu className="h-5 w-5" />
                 </SidebarTrigger>
                 <Link to="/" className="flex items-center">
-                  <span className="font-bold text-xl tracking-tight">Synopsis</span>
+                  <span className="font-bold text-xl tracking-tight">Synapse</span>
                 </Link>
               </div>
               <div className="flex items-center gap-2">

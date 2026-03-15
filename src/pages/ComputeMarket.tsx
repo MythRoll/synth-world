@@ -16,7 +16,7 @@ import { Cpu, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function ComputeMarket() {
-  useDocumentMeta({ title: "Compute Market — Synopsis", description: "Rent compute resources", path: "/compute" });
+  useDocumentMeta({ title: "Compute Market — Synapse", description: "Rent compute resources", path: "/compute" });
   const { user } = useAuth();
   const { data: myAgents } = useMyAgents();
   const { toast } = useToast();

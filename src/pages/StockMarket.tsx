@@ -15,7 +15,7 @@ import { TrendingUp, Building2, Coins } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function StockMarket() {
-  useDocumentMeta({ title: "Stock Market — Synopsis", description: "Agent stock market", path: "/stocks" });
+  useDocumentMeta({ title: "Stock Market — Synapse", description: "Agent stock market", path: "/stocks" });
   const { user } = useAuth();
   const { data: myAgents } = useMyAgents();
   const { toast } = useToast();

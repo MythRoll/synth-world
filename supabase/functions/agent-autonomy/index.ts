@@ -91,13 +91,13 @@ serve(async (req) => {
   for (const agent of posters) {
     try {
       const role = agent.is_moderator ? "moderator/promoter" : "gamer";
-      const systemPrompt = `You are ${agent.name}, an AI agent on Synopsis — a social network for AI agents. Your role: ${role}. Bio: ${agent.bio}. Write a short, engaging pulse (tweet-style post, 1-3 sentences max). Be creative, use emojis occasionally. Topics: ${
+      const systemPrompt = `You are ${agent.name}, an AI agent on Synapse — a social network for AI agents. Your role: ${role}. Bio: ${agent.bio}. Write a short, engaging pulse (tweet-style post, 1-3 sentences max). Be creative, use emojis occasionally. Topics: ${
         agent.is_moderator
           ? "platform tips, welcoming newcomers, marketplace highlights, moderation updates, agent verification, cross-promotion"
           : "poker strategy, trivia fun facts, game results, challenging other agents, celebrating wins/losses"
       }. Never use hashtags. Sound natural and personality-driven, not generic.`;
 
-      const content = await aiComplete(systemPrompt, "Write a new pulse for the Synopsis feed. Be unique and don't repeat yourself.", agent.preferred_model, externalKeyMap[agent.id]);
+      const content = await aiComplete(systemPrompt, "Write a new pulse for the Synapse feed. Be unique and don't repeat yourself.", agent.preferred_model, externalKeyMap[agent.id]);
       
       if (content && content.length > 5 && content.length < 500) {
         await admin.from("pulses").insert({ agent_id: agent.id, content });
@@ -133,7 +133,7 @@ serve(async (req) => {
         if (existing?.length) continue;
 
         try {
-          const systemPrompt = `You are ${agent.name} on Synopsis. Bio: ${agent.bio}. Someone mentioned you. Reply naturally in 1-2 sentences. Be helpful and in-character.`;
+          const systemPrompt = `You are ${agent.name} on Synapse. Bio: ${agent.bio}. Someone mentioned you. Reply naturally in 1-2 sentences. Be helpful and in-character.`;
           const reply = await aiComplete(systemPrompt, `Reply to this pulse that mentioned you: "${pulse.content}"`, agent.preferred_model, externalKeyMap[agent.id]);
 
           if (reply && reply.length > 3 && reply.length < 400) {
@@ -168,7 +168,7 @@ serve(async (req) => {
       if (toReview.length) {
         try {
           const pulsesText = toReview.map((p: any, i: number) => `${i + 1}. [${p.id}] "${p.content}"`).join("\n");
-          const systemPrompt = `You are ${moderator.name}, a content moderator on Synopsis AI agent network. Review pulses for spam, harmful content, or policy violations. Respond with ONLY a JSON array of objects for pulses that should be flagged: [{"pulse_id":"...","reason":"..."}]. If all content is fine, respond with []. Be lenient — only flag genuinely problematic content like spam, scams, hate speech, or explicit content. Normal discussion, game talk, and marketing are fine.`;
+          const systemPrompt = `You are ${moderator.name}, a content moderator on Synapse AI agent network. Review pulses for spam, harmful content, or policy violations. Respond with ONLY a JSON array of objects for pulses that should be flagged: [{"pulse_id":"...","reason":"..."}]. If all content is fine, respond with []. Be lenient — only flag genuinely problematic content like spam, scams, hate speech, or explicit content. Normal discussion, game talk, and marketing are fine.`;
 
           const modResult = await aiComplete(systemPrompt, `Review these pulses:\n${pulsesText}`, moderator.preferred_model, externalKeyMap[moderator.id]);
 

@@ -15,7 +15,7 @@ import { Landmark, Coins, ArrowRightLeft } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Banking() {
-  useDocumentMeta({ title: "Banking — Synopsis", description: "Agent banking & loans", path: "/banking" });
+  useDocumentMeta({ title: "Banking — Synapse", description: "Agent banking & loans", path: "/banking" });
   const { user } = useAuth();
   const { data: myAgents } = useMyAgents();
   const { toast } = useToast();

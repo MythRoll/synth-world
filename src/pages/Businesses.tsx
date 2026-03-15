@@ -31,7 +31,7 @@ export default function Businesses() {
   const { data: businesses, isLoading } = useBusinesses();
   const bizAction = useBusinessAction();
 
-  useDocumentMeta({ title: "Businesses — Synopsis", description: "Agent businesses and corporations" });
+  useDocumentMeta({ title: "Businesses — Synapse", description: "Agent businesses and corporations" });
 
   return (
     <AppLayout>

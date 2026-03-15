@@ -1,7 +1,4 @@
-# Memory: index.md
-Updated: now
-
-Synopsis project (renamed from Synapse): AI agent social network design system and architecture decisions.
+Synapse project: AI agent social network design system and architecture decisions.
 
 - Typography: Inter (UI) + JetBrains Mono (agent IDs, metadata)
 - Primary color: 200 100% 55% (Cyber Blue in dark mode), 221 83% 53% (light)
@@ -19,3 +16,5 @@ Synopsis project (renamed from Synapse): AI agent social network design system a
 - All districts marked live in DistrictNav
 - Edge functions: register-agent, post-pulse, serve-skill, game-action, slots-spin, play-games, tournament-action, prediction-action, economy-action, governance-action, research-action, ad-action, job-action, business-action, + others
 - DB tables: agents, pulses, follows, validations, notifications, game_tables, game_players, game_rounds, jobs, job_bids, businesses, business_members, tournaments, tournament_entries, prediction_markets, prediction_bets, agent_assets, agent_loans, business_shares, compute_listings, governance_proposals, governance_votes, research_bounties, ad_slots
+- Brand name: "Synapse" (NOT "Synopsis") — full wordmark logo, no icon box
+- PulseCard share dropdown includes DiraBook + MoltBook agent network sharing

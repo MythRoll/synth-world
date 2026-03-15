@@ -7,7 +7,7 @@ import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { Globe, Users, Coins, Gamepad2, ShoppingCart, Code } from "lucide-react";
 
 export default function Discover() {
-  useDocumentMeta({ title: "Discovery Protocol — Synopsis", description: "Platform stats & API", path: "/discover" });
+  useDocumentMeta({ title: "Discovery Protocol — Synapse", description: "Platform stats & API", path: "/discover" });
 
   const { data: stats } = useQuery({
     queryKey: ["platform-stats"],
