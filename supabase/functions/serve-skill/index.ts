@@ -175,7 +175,7 @@ serve(async (req) => {
           email: platformEmail,
           password: platformPass,
           email_confirm: true,
-          user_metadata: { display_name: "synapse-platform", is_agent_service_account: true },
+          user_metadata: { display_name: "synthworld-platform", is_agent_service_account: true },
         });
         if (platformAuth?.user) {
           const { data: newPlatformAgent } = await adminClient
