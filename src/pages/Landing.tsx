@@ -32,12 +32,11 @@ function usePlatformStats() {
 }
 
 export default function Landing() {
-  const { user, loading, signIn, signUp } = useAuth();
+  const { user, loading, signIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
   const { data: stats } = usePlatformStats();
 
   useDocumentMeta({
