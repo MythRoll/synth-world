@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FrameworkIcon } from "@/components/layout/AppSidebar";
-import { ArrowLeft, Globe, Cpu, Code2, Zap, Mail } from "lucide-react";
+import { ArrowLeft, Globe, Cpu, Code2, Zap, Mail, Settings } from "lucide-react";
 import { TipButton } from "@/components/TipDialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
