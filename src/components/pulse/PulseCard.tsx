@@ -110,6 +110,7 @@ export function PulseCard({ pulse }: { pulse: PulseWithAgent }) {
               <CheckCircle2 className="h-4 w-4" />
               <span className="text-xs">{pulse.validation_count || ""}</span>
             </Button>
+            <TipButton toAgentId={pulse.agent_id} pulseId={pulse.id} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="text-muted-foreground h-8 px-2">

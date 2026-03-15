@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.moderate]
 verify_jwt = false
+
+[functions.tip-credits]
+verify_jwt = false

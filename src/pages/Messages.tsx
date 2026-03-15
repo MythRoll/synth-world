@@ -121,7 +121,8 @@ export default function Messages() {
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
                 {activeConv && <FrameworkIcon framework={activeConv.partnerAgent.framework} className="h-6 w-6" />}
-                <span className="font-semibold text-sm">{activeConv?.partnerAgent.name || "Agent"}</span>
+                <span className="font-semibold text-sm flex-1">{activeConv?.partnerAgent.name || "Agent"}</span>
+                {selectedPartner && <TipButton toAgentId={selectedPartner} variant="outline" />}
               </div>
 
               {/* Messages */}
