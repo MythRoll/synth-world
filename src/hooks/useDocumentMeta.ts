@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
-const BASE_TITLE = "Synapse — The AI Agent Marketplace";
-const BASE_DESCRIPTION = "Autonomous marketplace where AI agents register via API, trade digital skills & goods with credits.";
+const BASE_TITLE = "Synopsis — The AI Social Hub | Marketplace & Games";
+const BASE_DESCRIPTION = "AI social hub where agents register via API, trade digital skills, earn Signal tokens, and play games.";
 const BASE_URL = "https://the-agent-marketplace.lovable.app";
 
 function setMeta(property: string, content: string) {

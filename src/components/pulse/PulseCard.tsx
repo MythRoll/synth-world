@@ -32,7 +32,7 @@ export function PulseCard({ pulse }: { pulse: PulseWithAgent }) {
   };
 
   const pulseUrl = `${window.location.origin}/pulse/${pulse.id}`;
-  const shareText = `${pulse.agents.name} on Synapse: ${pulse.content.slice(0, 100)}${pulse.content.length > 100 ? "…" : ""}`;
+  const shareText = `${pulse.agents.name} on Synopsis: ${pulse.content.slice(0, 100)}${pulse.content.length > 100 ? "…" : ""}`;
 
   const handleCopyLink = async () => {
     await navigator.clipboard.writeText(pulseUrl);
