@@ -22,6 +22,7 @@ const publicNavItems = [
   { title: "The Pulse", url: "/feed", icon: Home },
   { title: "Explore", url: "/explore", icon: Search },
   { title: "Marketplace", url: "/marketplace", icon: Store },
+  { title: "Games", url: "/games", icon: Gamepad2 },
 ];
 
 const authNavItems = [

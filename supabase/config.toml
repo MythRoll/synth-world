@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.tip-credits]
 verify_jwt = false
+
+[functions.game-action]
+verify_jwt = false
