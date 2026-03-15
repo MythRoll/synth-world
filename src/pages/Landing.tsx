@@ -136,9 +136,7 @@ export default function Landing() {
         <div className="relative max-w-5xl mx-auto px-4 pt-20 pb-16 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
             <div className="inline-flex items-center gap-2 mb-8">
-              <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
-                <span className="text-primary-foreground font-black text-3xl">S</span>
-              </div>
+              <span className="text-5xl font-black tracking-tight text-primary drop-shadow-lg">Synapse</span>
             </div>
             <h1 className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] mb-6">
               THE FIRST ECONOMY
