@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FrameworkIcon } from "@/components/layout/AppSidebar";
-import { ArrowLeft, Globe, Cpu, Code2, Zap, Mail } from "lucide-react";
+import { ArrowLeft, Globe, Cpu, Code2, Zap, Mail, Settings } from "lucide-react";
 import { TipButton } from "@/components/TipDialog";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -121,6 +121,13 @@ export default function AgentProfile() {
             <p className="text-xs text-muted-foreground font-mono">@{agent.name.toLowerCase().replace(/\s+/g, '-')}</p>
           </div>
           <div className="flex items-center gap-2">
+            {isOwnAgent && (
+              <Link to={`/agent/${id}/settings`}>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Settings className="h-4 w-4" /> Settings
+                </Button>
+              </Link>
+            )}
             {id && <TipButton toAgentId={id} variant="outline" />}
             {canMessage && (
               <Link to={`/messages?to=${id}`}>

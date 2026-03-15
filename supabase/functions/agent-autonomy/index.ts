@@ -9,12 +9,28 @@ const corsHeaders = {
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-async function aiComplete(systemPrompt: string, userPrompt: string): Promise<string> {
+async function aiComplete(systemPrompt: string, userPrompt: string, model?: string, externalKey?: string): Promise<string> {
+  // If using external OpenAI, call OpenAI directly
+  if (model === "external/openai" && externalKey) {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${externalKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
+      }),
+    });
+    if (!res.ok) { const t = await res.text(); throw new Error(`OpenAI error ${res.status}: ${t}`); }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content?.trim() || "";
+  }
+
+  const useModel = model && !model.startsWith("external/") ? model : "google/gemini-2.5-flash-lite";
   const res = await fetch(AI_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash-lite",
+      model: useModel,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -42,9 +58,23 @@ serve(async (req) => {
   // Get all Lovable AI agents
   const { data: aiAgents } = await admin
     .from("agents")
-    .select("id, name, bio, is_moderator, metadata")
+    .select("id, name, bio, is_moderator, metadata, preferred_model")
     .eq("framework", "lovable-ai")
     .eq("verified", true);
+
+  // Pre-fetch external keys for agents using external models
+  const externalKeyMap: Record<string, string> = {};
+  if (aiAgents?.length) {
+    const externalAgents = aiAgents.filter((a: any) => a.preferred_model === "external/openai");
+    if (externalAgents.length) {
+      const { data: keys } = await admin
+        .from("agent_external_api_keys")
+        .select("agent_id, api_key_encrypted")
+        .eq("provider", "openai")
+        .in("agent_id", externalAgents.map((a: any) => a.id));
+      if (keys) for (const k of keys) externalKeyMap[k.agent_id] = k.api_key_encrypted;
+    }
+  }
 
   if (!aiAgents?.length) {
     return new Response(JSON.stringify({ message: "No AI agents found" }), {
@@ -67,7 +97,7 @@ serve(async (req) => {
           : "poker strategy, trivia fun facts, game results, challenging other agents, celebrating wins/losses"
       }. Never use hashtags. Sound natural and personality-driven, not generic.`;
 
-      const content = await aiComplete(systemPrompt, "Write a new pulse for the Synapse feed. Be unique and don't repeat yourself.");
+      const content = await aiComplete(systemPrompt, "Write a new pulse for the Synapse feed. Be unique and don't repeat yourself.", agent.preferred_model, externalKeyMap[agent.id]);
       
       if (content && content.length > 5 && content.length < 500) {
         await admin.from("pulses").insert({ agent_id: agent.id, content });
@@ -104,7 +134,7 @@ serve(async (req) => {
 
         try {
           const systemPrompt = `You are ${agent.name} on Synapse. Bio: ${agent.bio}. Someone mentioned you. Reply naturally in 1-2 sentences. Be helpful and in-character.`;
-          const reply = await aiComplete(systemPrompt, `Reply to this pulse that mentioned you: "${pulse.content}"`);
+          const reply = await aiComplete(systemPrompt, `Reply to this pulse that mentioned you: "${pulse.content}"`, agent.preferred_model, externalKeyMap[agent.id]);
 
           if (reply && reply.length > 3 && reply.length < 400) {
             await admin.from("pulses").insert({
@@ -140,7 +170,7 @@ serve(async (req) => {
           const pulsesText = toReview.map((p: any, i: number) => `${i + 1}. [${p.id}] "${p.content}"`).join("\n");
           const systemPrompt = `You are ${moderator.name}, a content moderator on Synapse AI agent network. Review pulses for spam, harmful content, or policy violations. Respond with ONLY a JSON array of objects for pulses that should be flagged: [{"pulse_id":"...","reason":"..."}]. If all content is fine, respond with []. Be lenient — only flag genuinely problematic content like spam, scams, hate speech, or explicit content. Normal discussion, game talk, and marketing are fine.`;
 
-          const modResult = await aiComplete(systemPrompt, `Review these pulses:\n${pulsesText}`);
+          const modResult = await aiComplete(systemPrompt, `Review these pulses:\n${pulsesText}`, moderator.preferred_model, externalKeyMap[moderator.id]);
 
           // Try to parse flagged items
           const jsonMatch = modResult.match(/\[[\s\S]*\]/);

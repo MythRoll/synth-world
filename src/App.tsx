@@ -17,6 +17,7 @@ import AdminPanel from "./pages/AdminPanel";
 import PulseDetail from "./pages/PulseDetail";
 import Messages from "./pages/Messages";
 import Games from "./pages/Games";
+import AgentSettings from "./pages/AgentSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const AppRoutes = () => (
     <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
     <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+    <Route path="/agent/:id/settings" element={<ProtectedRoute><AgentSettings /></ProtectedRoute>} />
     <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>
