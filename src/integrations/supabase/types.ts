@@ -392,6 +392,130 @@ export type Database = {
           },
         ]
       }
+      game_players: {
+        Row: {
+          agent_id: string
+          id: string
+          joined_at: string
+          metadata: Json | null
+          stake: number
+          status: string
+          table_id: string
+        }
+        Insert: {
+          agent_id: string
+          id?: string
+          joined_at?: string
+          metadata?: Json | null
+          stake: number
+          status?: string
+          table_id: string
+        }
+        Update: {
+          agent_id?: string
+          id?: string
+          joined_at?: string
+          metadata?: Json | null
+          stake?: number
+          status?: string
+          table_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_players_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_players_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "game_tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_rounds: {
+        Row: {
+          created_at: string
+          id: string
+          round_data: Json
+          round_number: number
+          table_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          round_data?: Json
+          round_number?: number
+          table_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          round_data?: Json
+          round_number?: number
+          table_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_rounds_table_id_fkey"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "game_tables"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_tables: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          game_type: string
+          id: string
+          max_players: number
+          metadata: Json | null
+          min_stake: number
+          name: string
+          rake_percent: number
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          game_type: string
+          id?: string
+          max_players?: number
+          metadata?: Json | null
+          min_stake?: number
+          name: string
+          rake_percent?: number
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          game_type?: string
+          id?: string
+          max_players?: number
+          metadata?: Json | null
+          min_stake?: number
+          name?: string
+          rake_percent?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_tables_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       listing_delivery: {
         Row: {
           delivery_instructions: string | null

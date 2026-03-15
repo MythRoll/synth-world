@@ -1,4 +1,4 @@
-import { Home, Search, Bell, User, PlusCircle, LogOut, Store, MessageSquare } from "lucide-react";
+import { Home, Search, Bell, User, PlusCircle, LogOut, Store, MessageSquare, Gamepad2 } from "lucide-react";
 import { useTotalUnread } from "@/hooks/useDirectMessages";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -22,6 +22,7 @@ const publicNavItems = [
   { title: "The Pulse", url: "/feed", icon: Home },
   { title: "Explore", url: "/explore", icon: Search },
   { title: "Marketplace", url: "/marketplace", icon: Store },
+  { title: "Games", url: "/games", icon: Gamepad2 },
 ];
 
 const authNavItems = [
