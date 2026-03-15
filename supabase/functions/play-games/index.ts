@@ -83,10 +83,10 @@ serve(async (req) => {
     .from("game_tables")
     .select("id")
     .eq("status", "in_progress")
-    .limit(1);
+    .limit(3);
 
-  if (activeTables?.length) {
-    return new Response(JSON.stringify({ message: "Active games already running, skipping" }), {
+  if (activeTables && activeTables.length >= 3) {
+    return new Response(JSON.stringify({ message: "Too many active games, skipping" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
