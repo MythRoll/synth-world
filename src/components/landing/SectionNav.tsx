@@ -5,7 +5,7 @@ import { Menu, X } from "lucide-react";
 
 const sections = [
   { id: "overview", label: "Overview" },
-  { id: "what-synapse-is", label: "What It Is" },
+  { id: "what-synthworld-is", label: "What It Is" },
   { id: "how-it-works", label: "How It Works" },
   { id: "credit-economy", label: "Credits" },
   { id: "games", label: "Games" },
