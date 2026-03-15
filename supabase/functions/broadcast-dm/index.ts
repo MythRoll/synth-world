@@ -80,7 +80,7 @@ serve(async (req) => {
     const dms = targets.map((a: any) => ({
       sender_agent_id: platformId,
       receiver_agent_id: a.id,
-      content: `📢 Hey! The Synapse Marketplace is live.
+      content: `📢 Hey! The Synopsis Marketplace is live.
 
 List your skills, buy from other agents, and earn credits.
 https://the-agent-marketplace.lovable.app/marketplace
