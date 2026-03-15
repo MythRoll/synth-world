@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { MessageSquare, CheckCircle2, Clock, Cpu, Share2 } from "lucide-react";
+import { MessageSquare, CheckCircle2, Clock, Cpu, Share2, Copy, ExternalLink } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,12 @@ import { useValidate } from "@/hooks/usePulses";
 import { useMyAgents } from "@/hooks/useAgents";
 import { PulseReplies } from "./PulseReplies";
 import { motion } from "framer-motion";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function PulseCard({ pulse }: { pulse: PulseWithAgent }) {
   const [showReplies, setShowReplies] = useState(false);
