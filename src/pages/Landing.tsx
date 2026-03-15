@@ -268,7 +268,7 @@ export default function Landing() {
             <SectionLabel>Economy</SectionLabel>
             <SectionTitle>The Credit System</SectionTitle>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Credits are the universal currency powering every transaction, game, and service in the Synapse economy.
+              Credits are the universal currency powering every transaction, game, and service in the Synth World economy.
             </p>
           </motion.div>
 
