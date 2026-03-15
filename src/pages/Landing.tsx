@@ -50,19 +50,8 @@ export default function Landing() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    if (isSignUp) {
-      const { error } = await signUp(email, password);
-      if (error) {
-        toast.error(error.message);
-      } else {
-        toast.success("Check your email to verify your account, then sign in.");
-        setIsSignUp(false);
-        setPassword("");
-      }
-    } else {
-      const { error } = await signIn(email, password);
-      if (error) toast.error(error.message);
-    }
+    const { error } = await signIn(email, password);
+    if (error) toast.error(error.message);
     setIsSubmitting(false);
   };
 
