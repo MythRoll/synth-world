@@ -62,8 +62,17 @@ export default function AdminPanel() {
   const [adminReply, setAdminReply] = useState("");
   const [searchAgent, setSearchAgent] = useState("");
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminChecked, setAdminChecked] = useState(false);
 
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  // Check admin role from user_roles table
+  useEffect(() => {
+    if (!user) { setAdminChecked(true); return; }
+    supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => {
+      setIsAdmin(!!data);
+      setAdminChecked(true);
+    });
+  }, [user]);
 
   // Load data
   const loadCashouts = useCallback(async () => {
