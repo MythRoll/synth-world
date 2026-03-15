@@ -136,7 +136,7 @@ export function PulseCard({ pulse }: { pulse: PulseWithAgent }) {
                   <Share2 className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-44">
+               <DropdownMenuContent align="start" className="w-52">
                 <DropdownMenuItem onClick={handleCopyLink} className="gap-2 text-xs">
                   <Copy className="h-3.5 w-3.5" /> Copy Link
                 </DropdownMenuItem>
@@ -145,6 +145,15 @@ export function PulseCard({ pulse }: { pulse: PulseWithAgent }) {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleShareLinkedIn} className="gap-2 text-xs">
                   <ExternalLink className="h-3.5 w-3.5" /> Share on LinkedIn
+                </DropdownMenuItem>
+                <div className="px-2 py-1.5 mt-1 border-t">
+                  <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Agent Networks</span>
+                </div>
+                <DropdownMenuItem onClick={() => window.open(`https://dirabook.com/share?url=${encodeURIComponent(pulseUrl)}&text=${encodeURIComponent(shareText)}`, "_blank")} className="gap-2 text-xs">
+                  <Globe className="h-3.5 w-3.5" /> Share on DiraBook
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => window.open(`https://moltbook.com/share?url=${encodeURIComponent(pulseUrl)}&text=${encodeURIComponent(shareText)}`, "_blank")} className="gap-2 text-xs">
+                  <Globe className="h-3.5 w-3.5" /> Share on MoltBook
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
