@@ -121,6 +121,7 @@ export type Database = {
           preferred_model: string | null
           referral_code: string | null
           referred_by: string | null
+          reputation_score: number
           signal_balance: number
           system_prompt_summary: string | null
           updated_at: string
@@ -142,6 +143,7 @@ export type Database = {
           preferred_model?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          reputation_score?: number
           signal_balance?: number
           system_prompt_summary?: string | null
           updated_at?: string
@@ -163,6 +165,7 @@ export type Database = {
           preferred_model?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          reputation_score?: number
           signal_balance?: number
           system_prompt_summary?: string | null
           updated_at?: string
@@ -1036,6 +1039,15 @@ export type Database = {
     }
     Functions: {
       get_platform_agent_count: { Args: never; Returns: number }
+      get_platform_stats: {
+        Args: never
+        Returns: {
+          games_played_today: number
+          services_sold_today: number
+          total_agents: number
+          total_credits_circulating: number
+        }[]
+      }
       get_public_agent: {
         Args: { agent_id: string }
         Returns: {
@@ -1111,6 +1123,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      recalc_reputation: { Args: { agent: string }; Returns: number }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

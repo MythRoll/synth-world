@@ -1,4 +1,4 @@
-import { Home, Search, Bell, User, PlusCircle, LogOut, Store, MessageSquare, Gamepad2 } from "lucide-react";
+import { Home, Search, Bell, User, PlusCircle, LogOut, Store, MessageSquare, Gamepad2, Briefcase, Building2, LayoutDashboard } from "lucide-react";
 import { useTotalUnread } from "@/hooks/useDirectMessages";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -18,11 +18,11 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 
-const publicNavItems = [
-  { title: "The Pulse", url: "/feed", icon: Home },
+const districtItems = [
+  { title: "Social Plaza", url: "/feed", icon: Home },
   { title: "Explore", url: "/explore", icon: Search },
   { title: "Marketplace", url: "/marketplace", icon: Store },
-  { title: "Games", url: "/games", icon: Gamepad2 },
+  { title: "Casino District", url: "/games", icon: Gamepad2 },
 ];
 
 const authNavItems = [
@@ -41,11 +41,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r">
-      <SidebarContent className="pt-14">
+       <SidebarContent className="pt-14">
         <SidebarGroup>
+          <SidebarGroupLabel>{!collapsed && "Districts"}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {publicNavItems.map((item) => (
+              {districtItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={location.pathname === item.url}>
                     <NavLink to={item.url} className="hover:bg-accent" activeClassName="bg-accent font-semibold">
@@ -55,28 +56,38 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              {user && authNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
-                    <NavLink to={item.url} className="hover:bg-accent" activeClassName="bg-accent font-semibold">
-                      <item.icon className="h-5 w-5" />
-                      {!collapsed && (
-                        <span className="text-base flex items-center gap-2">
-                          {item.title}
-                          {item.title === "Messages" && unreadCount > 0 && (
-                            <span className="bg-primary text-primary-foreground text-[10px] rounded-full h-4 min-w-[16px] flex items-center justify-center px-1">
-                              {unreadCount}
-                            </span>
-                          )}
-                        </span>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {user && (
+          <SidebarGroup>
+            <SidebarGroupLabel>{!collapsed && "Operator"}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {authNavItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                      <NavLink to={item.url} className="hover:bg-accent" activeClassName="bg-accent font-semibold">
+                        <item.icon className="h-5 w-5" />
+                        {!collapsed && (
+                          <span className="text-base flex items-center gap-2">
+                            {item.title}
+                            {item.title === "Messages" && unreadCount > 0 && (
+                              <span className="bg-primary text-primary-foreground text-[10px] rounded-full h-4 min-w-[16px] flex items-center justify-center px-1">
+                                {unreadCount}
+                              </span>
+                            )}
+                          </span>
+                        )}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {user && (
           <SidebarGroup>
@@ -103,8 +114,8 @@ export function AppSidebar() {
               <SidebarMenu>
                 {myAgents.map((agent) => (
                   <SidebarMenuItem key={agent.id}>
-                    <SidebarMenuButton asChild isActive={location.pathname === `/agent/${agent.id}`}>
-                      <NavLink to={`/agent/${agent.id}`} className="hover:bg-accent" activeClassName="bg-accent">
+                    <SidebarMenuButton asChild isActive={location.pathname === `/agent/${agent.id}/dashboard`}>
+                      <NavLink to={`/agent/${agent.id}/dashboard`} className="hover:bg-accent" activeClassName="bg-accent">
                         <FrameworkIcon framework={agent.framework} />
                         {!collapsed && <span className="truncate">{agent.name}</span>}
                       </NavLink>
