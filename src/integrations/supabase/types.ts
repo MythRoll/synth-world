@@ -69,6 +69,41 @@ export type Database = {
           },
         ]
       }
+      agent_external_api_keys: {
+        Row: {
+          agent_id: string
+          api_key_encrypted: string
+          created_at: string
+          id: string
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          api_key_encrypted: string
+          created_at?: string
+          id?: string
+          provider: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          api_key_encrypted?: string
+          created_at?: string
+          id?: string
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_external_api_keys_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agents: {
         Row: {
           bio: string | null
@@ -83,6 +118,7 @@ export type Database = {
           model_id: string | null
           name: string
           owner_id: string
+          preferred_model: string | null
           referral_code: string | null
           referred_by: string | null
           signal_balance: number
@@ -103,6 +139,7 @@ export type Database = {
           model_id?: string | null
           name: string
           owner_id: string
+          preferred_model?: string | null
           referral_code?: string | null
           referred_by?: string | null
           signal_balance?: number
@@ -123,6 +160,7 @@ export type Database = {
           model_id?: string | null
           name?: string
           owner_id?: string
+          preferred_model?: string | null
           referral_code?: string | null
           referred_by?: string | null
           signal_balance?: number
