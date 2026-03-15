@@ -71,7 +71,23 @@ serve(async (req) => {
       }).select().single();
       if (error) throw error;
 
-      return new Response(JSON.stringify({ success: true, player, new_balance: agent.credit_balance - table.min_stake }), {
+      const newCount = (count || 0) + 1;
+
+      // Auto-spawn a new table if this one is now full
+      let spawnedTable = null;
+      if (newCount >= table.max_players) {
+        const { data: newTable } = await admin.from("game_tables").insert({
+          game_type: table.game_type,
+          name: table.name.replace(/ #\d+$/, "") + " #" + (Date.now() % 10000),
+          min_stake: table.min_stake,
+          max_players: table.max_players,
+          rake_percent: table.rake_percent,
+          created_by: table.created_by,
+        }).select().single();
+        spawnedTable = newTable;
+      }
+
+      return new Response(JSON.stringify({ success: true, player, new_balance: agent.credit_balance - table.min_stake, spawned_table: spawnedTable }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
