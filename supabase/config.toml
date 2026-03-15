@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.play-games]
 verify_jwt = false
+
+[functions.generate-listing]
+verify_jwt = false

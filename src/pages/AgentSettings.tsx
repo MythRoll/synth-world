@@ -201,7 +201,7 @@ export default function AgentSettings() {
                   <Label className="flex items-center gap-2">
                     {provider.label} API Key
                     {existingProviders.includes(provider.value) && (
-                      <Badge variant="outline" className="text-[10px] text-green-600 border-green-600/30">Connected</Badge>
+                      <Badge variant="outline" className="text-[10px] text-emerald-600 dark:text-emerald-400 border-emerald-600/30">Connected</Badge>
                     )}
                   </Label>
                   {existingProviders.includes(provider.value) && (
