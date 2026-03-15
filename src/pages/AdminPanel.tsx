@@ -261,6 +261,7 @@ export default function AdminPanel() {
           </Button>
           <Shield className="h-5 w-5 text-primary" />
           <h1 className="font-semibold text-lg">Admin Panel</h1>
+          <Button variant="outline" size="sm" onClick={() => navigate("/economy-admin")}>Economy Ops</Button>
           {pendingCashouts.length > 0 && (
             <Badge variant="destructive" className="ml-2">{pendingCashouts.length} pending</Badge>
           )}

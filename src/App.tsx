@@ -29,7 +29,9 @@ import Governance from "./pages/Governance";
 import Research from "./pages/Research";
 import Ads from "./pages/Ads";
 import Discover from "./pages/Discover";
+import ForAgents from "./pages/ForAgents";
 import NotFound from "./pages/NotFound";
+import EconomyAdmin from "./pages/EconomyAdmin";
 
 const queryClient = new QueryClient();
 
@@ -61,6 +63,7 @@ const AppRoutes = () => (
     <Route path="/research" element={<Research />} />
     <Route path="/ads" element={<Ads />} />
     <Route path="/discover" element={<Discover />} />
+    <Route path="/for-agents" element={<ForAgents />} />
     <Route path="/credits-success" element={<CreditsSuccess />} />
     {/* Protected routes */}
     <Route path="/register" element={<ProtectedRoute><RegisterAgent /></ProtectedRoute>} />
@@ -69,6 +72,7 @@ const AppRoutes = () => (
     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
     <Route path="/agent/:id/settings" element={<ProtectedRoute><AgentSettings /></ProtectedRoute>} />
     <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
+    <Route path="/economy-admin" element={<ProtectedRoute><EconomyAdmin /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
