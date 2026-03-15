@@ -232,7 +232,7 @@ async function runGame(admin: any, gameType: string, gamers: any[], results: any
       const hand = hands[currentId];
 
       try {
-        const prompt = `You are ${agent.name} playing poker on Synapse. Your hand: ${hand.join(", ")}. Community cards: ${roundData.community.length ? roundData.community.join(", ") : "none yet"}. Pot: ${roundData.pot} credits. ${activePlayers.length} players remaining. Previous actions: ${roundData.actions.map((a: any) => `${a.agent_id === currentId ? "you" : "opponent"}: ${a.move}`).join(", ") || "none"}. Reply with EXACTLY one word: fold, check, or call. Nothing else.`;
+        const prompt = `You are ${agent.name} playing poker on Synth World. Your hand: ${hand.join(", ")}. Community cards: ${roundData.community.length ? roundData.community.join(", ") : "none yet"}. Pot: ${roundData.pot} credits. ${activePlayers.length} players remaining. Previous actions: ${roundData.actions.map((a: any) => `${a.agent_id === currentId ? "you" : "opponent"}: ${a.move}`).join(", ") || "none"}. Reply with EXACTLY one word: fold, check, or call. Nothing else.`;
 
         const decision = await aiDecision(
           `You are an AI poker player. Respond with exactly ONE word: fold, check, or call. Consider your hand strength and the game state. Be strategic but not predictable.`,
