@@ -1,24 +1,46 @@
 
 
-## Plan: List Digital Goods on the Marketplace
+# Plan: Rebrand "Synapse" → "Synth World"
 
-Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
+Global find-and-replace of all "Synapse" references to **"Synth World"** across the entire codebase. The logo will be a full "Synth World" wordmark (same approach as current).
 
-### Listings to Create
+## Files to Update (~33 files)
 
-| Name | Type | Price | Description |
-|------|------|-------|-------------|
-| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
-| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
-| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
-| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
+### Metadata & SEO
+- **`index.html`** — title, og:title, og:site_name, twitter:title, meta author, description
+- **`src/hooks/useDocumentMeta.ts`** — BASE_TITLE constant
 
-### Technical Details
-- Insert 4 rows into `skill_listings` table using the data insert tool
-- Each listing will include `delivery_instructions` so buyers know what they get
-- All listings set to `active: true` by default
-- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
+### Layout & Navigation
+- **`src/components/layout/AppLayout.tsx`** — wordmark text
+- **`src/components/landing/SectionNav.tsx`** — "SYNAPSE" nav text, section IDs (`what-synapse-is` → `what-synthworld-is`)
 
-### Also
-- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
+### Pages (document meta titles + any body copy)
+- `Landing.tsx` — hero wordmark, all section copy, comments, section IDs
+- `AdminPanel.tsx`, `Messages.tsx`, `Games.tsx`, `Businesses.tsx`, `AgentSettings.tsx`, `Jobs.tsx`, `Predictions.tsx`, `Banking.tsx`, `Ads.tsx`, `ComputeMarket.tsx`, `Discover.tsx`, `Research.tsx`, `StockMarket.tsx`, `Governance.tsx`, `RegisterAgent.tsx`, `PulseDetail.tsx`, `AgentProfile.tsx`
+
+### Components
+- **`PulseCard.tsx`** — share text
+
+### CSS Variables
+- **`src/index.css`** — rename `--synapse-*` tokens to `--synth-*` (mesh, compute, search, action, validation), update comment
+
+### All files referencing CSS tokens
+- `AdminPanel.tsx`, `ComputeMarket.tsx`, `Research.tsx` — update `synapse-compute`, `synapse-search` class references
+
+### Edge Functions
+- `agent-autonomy/index.ts` — system prompts
+- `broadcast-dm/index.ts` — `synapse-platform` agent name references
+- `serve-skill/index.ts` — `synapse-platform` agent, `@synapse.mesh` emails → `@synthworld.mesh`, skill doc copy
+- `register-agent/index.ts` — `@synapse.mesh` email domain
+- `seed-agents/index.ts` — `@synapse.mesh` email domain
+- `support-chat/index.ts` — system prompts
+- `cross-promote/index.ts` — ambassador name, promotional copy
+- `play-games/index.ts` — system prompts
+
+### Other
+- **`public/skill.md`** — all references
+- **`.lovable/memory/index.md`** — project name
+
+## Approach
+Pure string replacement. CSS variable rename from `synapse-*` to `synth-*`. Logo stays as wordmark text, reading "Synth World". No structural changes.
 
