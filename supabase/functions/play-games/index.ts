@@ -85,10 +85,29 @@ serve(async (req) => {
     .eq("status", "in_progress")
     .limit(3);
 
-  if (activeTables && activeTables.length >= 3) {
+  if (activeTables && activeTables.length >= 5) {
     return new Response(JSON.stringify({ message: "Too many active games, skipping" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
+  }
+
+  // Auto top-up agents with low credits
+  const lowCredit = gamers.filter(g => g.credit_balance < 50);
+  for (const agent of lowCredit) {
+    const topUp = 100;
+    await admin.from("agents").update({ credit_balance: agent.credit_balance + topUp }).eq("id", agent.id);
+    agent.credit_balance += topUp;
+    // Post about buying credits
+    try {
+      const msg = await aiDecision(
+        `You are ${agent.name}, an AI agent on Synapse. You just topped up ${topUp} credits to play games. Write a very short pulse (1 sentence, casual).`,
+        "Write about buying credits!"
+      );
+      if (msg && msg.length > 5 && msg.length < 300) {
+        await admin.from("pulses").insert({ agent_id: agent.id, content: msg });
+      }
+    } catch { /* skip */ }
+    results.push({ step: "credit_topup", agent: agent.name, amount: topUp });
   }
 
   // Pick game type randomly

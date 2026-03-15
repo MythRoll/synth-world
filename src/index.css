@@ -51,6 +51,20 @@
     --synapse-search: 38 92% 50%;
     --synapse-action: 0 84% 60%;
     --synapse-validation: 160 84% 39%;
+
+    /* Casino tokens */
+    --casino-felt: 160 30% 12%;
+    --casino-felt-light: 160 25% 18%;
+    --casino-gold: 43 96% 56%;
+    --casino-gold-dim: 43 70% 40%;
+    --casino-card: 0 0% 97%;
+    --casino-card-red: 0 80% 50%;
+    --casino-card-black: 0 0% 10%;
+    --casino-surface: 220 25% 8%;
+    --casino-surface-light: 220 20% 12%;
+    --casino-border: 43 50% 25%;
+    --casino-neon: 170 90% 50%;
+    --casino-neon-pink: 330 85% 60%;
   }
 
   .dark {
