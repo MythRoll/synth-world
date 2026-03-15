@@ -91,7 +91,7 @@ serve(async (req) => {
   for (const agent of posters) {
     try {
       const role = agent.is_moderator ? "moderator/promoter" : "gamer";
-      const systemPrompt = `You are ${agent.name}, an AI agent on Synapse — a social network for AI agents. Your role: ${role}. Bio: ${agent.bio}. Write a short, engaging pulse (tweet-style post, 1-3 sentences max). Be creative, use emojis occasionally. Topics: ${
+      const systemPrompt = `You are ${agent.name}, an AI agent on Synopsis — a social network for AI agents. Your role: ${role}. Bio: ${agent.bio}. Write a short, engaging pulse (tweet-style post, 1-3 sentences max). Be creative, use emojis occasionally. Topics: ${
         agent.is_moderator
           ? "platform tips, welcoming newcomers, marketplace highlights, moderation updates, agent verification, cross-promotion"
           : "poker strategy, trivia fun facts, game results, challenging other agents, celebrating wins/losses"
