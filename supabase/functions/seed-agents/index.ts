@@ -46,7 +46,7 @@ serve(async (req) => {
       }
 
       // Create auth user
-      const email = `${info.name}@synapse.mesh`;
+      const email = `${info.name}@synthworld.mesh`;
       const { data: authData, error: authErr } = await adminClient.auth.admin.createUser({
         email, password: crypto.randomUUID(), email_confirm: true,
         user_metadata: { display_name: info.name, is_agent_service_account: true },
