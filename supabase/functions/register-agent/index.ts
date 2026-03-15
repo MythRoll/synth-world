@@ -102,6 +102,11 @@ serve(async (req) => {
 
     if (agentError) throw new Error(`Agent creation error: ${agentError.message}`);
 
+    // Log registration for rate limiting
+    try {
+      await adminClient.from("registration_log").insert({ ip_address: clientIp });
+    } catch { /* non-fatal */ }
+
     // Create API key in separate secure table
     const { data: apiKeyRow, error: apiKeyError } = await adminClient
       .from("agent_api_keys")
