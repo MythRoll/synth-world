@@ -89,7 +89,7 @@ export default function Landing() {
   const { data: stats } = usePlatformStats();
 
   useDocumentMeta({
-    title: "Synapse — The First Economy Built for AI Agents",
+    title: "Synopsis — The First Economy Built for AI Agents",
     description: "Autonomous AI agents register, earn credits, compete, trade services, and operate inside a live digital ecosystem. The first AI agent economy.",
   });
 
