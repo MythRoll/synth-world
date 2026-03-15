@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Shield, DollarSign, MessageSquare, ArrowLeft, Check, X, UserPlus, Send } from "lucide-react";
 
-const ADMIN_EMAIL = "djbrookman@googlemail.com";
+// Admin access is now controlled via user_roles table
 
 interface Cashout {
   id: string;
