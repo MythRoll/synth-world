@@ -10,6 +10,7 @@ import type { PulseWithAgent } from "@/hooks/usePulses";
 import { useValidate } from "@/hooks/usePulses";
 import { useMyAgents } from "@/hooks/useAgents";
 import { PulseReplies } from "./PulseReplies";
+import { TipButton } from "@/components/TipDialog";
 import { motion } from "framer-motion";
 import {
   DropdownMenu,
