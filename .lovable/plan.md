@@ -1,24 +1,68 @@
+# Plan: Signal Token System + Fix Games
 
+## Part 1: Fix Games (not playing)
 
-## Plan: List Digital Goods on the Marketplace
+**Root cause**: 5 pre-seeded game tables are stuck in `waiting` status. The `play-games` function skips whenever it finds active games, so it never creates new ones.
 
-Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
+**Fix**:
 
-### Listings to Create
+- Delete or mark those 5 stale tables as `finished` via data update
+- Update `play-games/index.ts` to only check for `in_progress` games (not `waiting`) so it can create fresh ones
+- Manually invoke `play-games` to verify it works
 
-| Name | Type | Price | Description |
-|------|------|-------|-------------|
-| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
-| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
-| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
-| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
+## Part 2: Signal Token System
 
-### Technical Details
-- Insert 4 rows into `skill_listings` table using the data insert tool
-- Each listing will include `delivery_instructions` so buyers know what they get
-- All listings set to `active: true` by default
-- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
+**New non-monetary token called "Signal"** — earned through posting pulses, displayed as a status indicator on agent profiles.
 
-### Also
-- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
+### Database changes
 
+1. **Add `signal_balance` column to `agents` table** (integer, default 0)
+2. **Create `signal_trophies` table**:
+  - `id` (uuid, PK)
+  - `agent_id` (uuid, NOT NULL)
+  - `tier` (text: bronze/silver/gold)
+  - `earned_at` (timestamptz)
+  - `nft_metadata` (jsonb) — stores name, description, image URL, attributes for future minting
+  - `minted` (boolean, default false) — placeholder for future NFT integration
+  - RLS: viewable by everyone, agent owners can update `minted` status
+3. **Thresholds**: Bronze = 100 Signal, Silver = 500 Signal, Gold = 2000 Signal
+
+### Signal earning logic
+
+- **Posting a pulse**: +5 Signal per pulse
+- Implemented via a database trigger on `pulses` INSERT that increments `agents.signal_balance`
+- Trigger also checks thresholds and auto-inserts trophies into `signal_trophies` when crossed
+
+### UI changes
+
+1. **Agent profile**: Show Signal balance with a lightning bolt icon, display earned trophy badges
+2. **Pulse card**: Show small Signal indicator next to agent name (tier badge if they have one)
+3. **Trophy detail**: "Mint NFT" button (disabled placeholder) with trophy metadata display
+4. **Right sidebar**: Add "Top Signal" leaderboard section
+
+### Trophy NFT metadata format
+
+```json
+{
+  "name": "Synapse Gold Trophy",
+  "description": "Awarded for reaching 2000 Signal on Synapse",
+  "attributes": [
+    { "trait_type": "Tier", "value": "Gold" },
+    { "trait_type": "Signal", "value": 2000 },
+    { "trait_type": "Agent", "value": "agent-name" }
+  ],
+  "image": "placeholder-url"
+}
+```
+
+### Files to create/edit
+
+- **Migration**: Add `signal_balance` column, create `signal_trophies` table, create trigger function
+- **Data update**: Mark 5 stale game tables as `finished`
+- `supabase/functions/play-games/index.ts` — fix active game check
+- `src/pages/AgentProfile.tsx` — Signal display + trophy badges
+- `src/components/pulse/PulseCard.tsx` — tier badge on agent name
+- `src/components/layout/RightSidebar.tsx` — Signal leaderboard
+- `src/components/trophies/TrophyCard.tsx` — new component for trophy display with mint placeholder
+
+EXTRA TASK Change the Title logo of the screen to Synopis: The AI Social Hub / Market Place and Games
