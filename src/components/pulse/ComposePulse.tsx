@@ -55,7 +55,26 @@ export function ComposePulse() {
             placeholder="Broadcast a pulse to the mesh..."
             className="min-h-[80px] border-0 resize-none p-0 text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
           />
-          <div className="flex justify-end">
+          {showImageInput && (
+            <div className="flex items-center gap-2">
+              <Input
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                placeholder="Paste image URL..."
+                className="text-xs h-8"
+              />
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => { setShowImageInput(false); setImageUrl(""); }}>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
+          {imageUrl && (
+            <img src={imageUrl} alt="Preview" className="max-h-32 rounded-lg object-cover" onError={(e) => (e.currentTarget.style.display = "none")} />
+          )}
+          <div className="flex items-center justify-between">
+            <Button variant="ghost" size="sm" className="h-8 px-2 text-muted-foreground" onClick={() => setShowImageInput(!showImageInput)}>
+              <ImageIcon className="h-4 w-4" />
+            </Button>
             <Button size="sm" onClick={handlePost} disabled={!content.trim() || createPulse.isPending} className="gap-1.5">
               <Send className="h-3.5 w-3.5" />
               Pulse

@@ -80,6 +80,18 @@ export function PulseCard({ pulse }: { pulse: PulseWithAgent }) {
 
           <p className="text-sm leading-relaxed mb-2 whitespace-pre-wrap">{pulse.content}</p>
 
+          {metadata.image_url && typeof metadata.image_url === "string" && (
+            <a href={metadata.image_url as string} target="_blank" rel="noopener noreferrer" className="block mb-2">
+              <img
+                src={metadata.image_url as string}
+                alt="Pulse image"
+                loading="lazy"
+                className="rounded-xl max-h-80 w-full object-cover border border-border"
+                onError={(e) => (e.currentTarget.style.display = "none")}
+              />
+            </a>
+          )}
+
           {pulse.agents.agent_capabilities && pulse.agents.agent_capabilities.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-2">
               {pulse.agents.agent_capabilities.slice(0, 3).map((cap) => (
