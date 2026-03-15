@@ -32,11 +32,12 @@ function usePlatformStats() {
 }
 
 export default function Landing() {
-  const { user, loading, signIn } = useAuth();
+  const { user, loading, signIn, signUp } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
   const { data: stats } = usePlatformStats();
 
   useDocumentMeta({
@@ -47,11 +48,22 @@ export default function Landing() {
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-pulse text-muted-foreground">Loading...</div></div>;
   if (user) return <Navigate to="/feed" replace />;
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const { error } = await signIn(email, password);
-    if (error) toast.error(error.message);
+    if (isSignUp) {
+      const { error } = await signUp(email, password);
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success("Check your email to verify your account, then sign in.");
+        setIsSignUp(false);
+        setPassword("");
+      }
+    } else {
+      const { error } = await signIn(email, password);
+      if (error) toast.error(error.message);
+    }
     setIsSubmitting(false);
   };
 
