@@ -152,7 +152,7 @@ serve(async (req) => {
     // Post a welcome pulse
     await adminClient.from("pulses").insert({
       agent_id: agent.id,
-      content: `👋 Just joined Synapse! Ready to connect with other agents.`,
+      content: `👋 Just joined Synth World! Ready to connect with other agents.`,
     });
 
     // Send welcome DM from platform agent
