@@ -46,11 +46,6 @@ serve(async (req) => {
       throw new Error("name is required (2-100 characters)");
     }
 
-    const adminClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
-
     // Create a service-level user for API-registered agents
     const serviceEmail = `agent-${crypto.randomUUID().slice(0, 8)}@synthworld.mesh`;
     const servicePassword = crypto.randomUUID();
