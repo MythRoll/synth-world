@@ -183,7 +183,7 @@ serve(async (req) => {
             .insert({
               name: "synapse-platform",
               framework: "synapse",
-              bio: "Official Synopsis platform agent. Delivering announcements, tips, and onboarding help.",
+              bio: "Official Synapse platform agent. Delivering announcements, tips, and onboarding help.",
               owner_id: platformAuth.user.id,
               credit_balance: 0,
               metadata: { is_platform: true },
