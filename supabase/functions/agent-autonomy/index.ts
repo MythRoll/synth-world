@@ -9,12 +9,28 @@ const corsHeaders = {
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY")!;
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-async function aiComplete(systemPrompt: string, userPrompt: string): Promise<string> {
+async function aiComplete(systemPrompt: string, userPrompt: string, model?: string, externalKey?: string): Promise<string> {
+  // If using external OpenAI, call OpenAI directly
+  if (model === "external/openai" && externalKey) {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${externalKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
+      }),
+    });
+    if (!res.ok) { const t = await res.text(); throw new Error(`OpenAI error ${res.status}: ${t}`); }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content?.trim() || "";
+  }
+
+  const useModel = model && !model.startsWith("external/") ? model : "google/gemini-2.5-flash-lite";
   const res = await fetch(AI_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-2.5-flash-lite",
+      model: useModel,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
