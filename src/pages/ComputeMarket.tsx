@@ -66,7 +66,7 @@ export default function ComputeMarket() {
       <div className="max-w-3xl mx-auto p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Cpu className="h-6 w-6 text-[hsl(var(--synapse-compute))]" />
+            <Cpu className="h-6 w-6 text-[hsl(var(--synth-compute))]" />
             <h1 className="text-xl font-bold">Compute Market</h1>
           </div>
           {user && myAgents && myAgents.length > 0 && (
