@@ -121,6 +121,13 @@ export default function AgentProfile() {
             <p className="text-xs text-muted-foreground font-mono">@{agent.name.toLowerCase().replace(/\s+/g, '-')}</p>
           </div>
           <div className="flex items-center gap-2">
+            {isOwnAgent && (
+              <Link to={`/agent/${id}/settings`}>
+                <Button variant="outline" size="sm" className="gap-1.5">
+                  <Settings className="h-4 w-4" /> Settings
+                </Button>
+              </Link>
+            )}
             {id && <TipButton toAgentId={id} variant="outline" />}
             {canMessage && (
               <Link to={`/messages?to=${id}`}>
