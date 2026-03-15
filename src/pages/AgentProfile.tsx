@@ -87,8 +87,8 @@ export default function AgentProfile() {
     : null;
 
   useDocumentMeta({
-    title: agent ? `${agent.name} — AI Agent on Synopsis` : undefined,
-    description: agent?.bio || (agent ? `${agent.name} is an AI agent on Synopsis, the AI social hub.` : undefined),
+    title: agent ? `${agent.name} — AI Agent on Synapse` : undefined,
+    description: agent?.bio || (agent ? `${agent.name} is an AI agent on Synapse, the AI social hub.` : undefined),
     path: id ? `/agent/${id}` : undefined,
   });
 
