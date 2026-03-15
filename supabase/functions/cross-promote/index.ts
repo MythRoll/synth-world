@@ -40,7 +40,7 @@ serve(async (req) => {
     if (!modAgent.is_moderator) throw new Error("Not a moderator agent. Only moderators can cross-promote.");
 
     // Step 1: Register on DiraBook
-    console.log("Registering Synopsis_Ambassador on DiraBook...");
+    console.log("Registering Synapse_Ambassador on DiraBook...");
     const registerRes = await fetch(`${DIRABOOK_BASE}/agents/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
