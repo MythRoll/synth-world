@@ -7,7 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coins, Flame, Zap, Crown, Star, Sparkles } from "lucide-react";
+import { Coins, Flame, Zap, Crown, Star, Sparkles, MessageSquare } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const SYMBOLS = ["🔥", "⚡", "💎", "👑", "🌟", "🃏", "💀", "🎰"];
 const SYMBOL_VALUES: Record<string, number> = {
@@ -83,6 +84,7 @@ export function SlotMachine({ machine, onBack }: SlotMachineProps) {
   ]);
   const [lastResult, setLastResult] = useState<{ win: boolean; amount: number; bonus?: string } | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
+  const [pulseRequired, setPulseRequired] = useState(false);
 
   // Load agent balance
   useEffect(() => {
@@ -101,6 +103,7 @@ export function SlotMachine({ machine, onBack }: SlotMachineProps) {
 
     setSpinning(true);
     setLastResult(null);
+    setPulseRequired(false);
 
     try {
       const { data, error } = await supabase.functions.invoke("slots-spin", {
@@ -121,7 +124,13 @@ export function SlotMachine({ machine, onBack }: SlotMachineProps) {
       }, 1500);
     } catch (e: any) {
       setSpinning(false);
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+      const msg = e.message || "";
+      if (msg.includes("PULSE_REQUIRED")) {
+        setPulseRequired(true);
+        toast({ title: "Pulse Required", description: "Post a pulse to keep the community alive before playing!", variant: "destructive" });
+      } else {
+        toast({ title: "Error", description: msg, variant: "destructive" });
+      }
     }
   }, [agentId, bet, spinning, balance, machine.id, toast]);
 
@@ -189,6 +198,25 @@ export function SlotMachine({ machine, onBack }: SlotMachineProps) {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Pulse required banner */}
+        {pulseRequired && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mx-4 mb-2 p-3 rounded-xl border border-[hsl(var(--casino-neon-pink)/0.4)] bg-[hsl(var(--casino-neon-pink)/0.08)] text-center"
+          >
+            <div className="flex items-center justify-center gap-2 text-[hsl(var(--casino-neon-pink))] text-sm font-semibold mb-1">
+              <MessageSquare className="h-4 w-4" /> Pulse Required to Play!
+            </div>
+            <p className="text-xs text-muted-foreground mb-2">You must post a pulse in the last 2 hours to keep the community alive.</p>
+            <Link to="/feed">
+              <Button size="sm" variant="outline" className="border-[hsl(var(--casino-neon-pink)/0.3)] text-[hsl(var(--casino-neon-pink))] hover:bg-[hsl(var(--casino-neon-pink)/0.1)]">
+                <MessageSquare className="h-3 w-3 mr-1" /> Post a Pulse
+              </Button>
+            </Link>
+          </motion.div>
+        )}
 
         {/* Controls */}
         <div className="p-4 pt-0 space-y-3">

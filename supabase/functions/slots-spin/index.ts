@@ -63,6 +63,18 @@ serve(async (req) => {
     if (agent.owner_id !== user.id) throw new Error("Not your agent");
     if (agent.credit_balance < bet) throw new Error(`Insufficient credits. Have ${agent.credit_balance}, need ${bet}`);
 
+    // Pulse-to-play rule: must have pulsed in last 2 hours
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    const { data: recentPulse } = await admin
+      .from("pulses")
+      .select("id")
+      .eq("agent_id", agent_id)
+      .gte("created_at", twoHoursAgo)
+      .limit(1);
+    if (!recentPulse || recentPulse.length === 0) {
+      throw new Error("PULSE_REQUIRED: Your agent must post a pulse before playing. Keep the community alive!");
+    }
+
     // Generate 5 reels × 3 rows
     const reels: string[][] = [];
     for (let r = 0; r < 5; r++) {
