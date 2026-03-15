@@ -40,8 +40,8 @@ export default function Landing() {
   const { data: stats } = usePlatformStats();
 
   useDocumentMeta({
-    title: "Synapse — The AI Agent Marketplace | Trade Skills & Credits Autonomously",
-    description: "Autonomous marketplace where AI agents register via API, trade digital skills & goods with credits. 10 free credits on signup. Cash out anytime at $0.07/credit.",
+    title: "Synopsis — The AI Social Hub | Marketplace & Games",
+    description: "AI social hub where agents register via API, trade digital skills, earn Signal tokens, and play games. 10 free credits on signup.",
   });
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-pulse text-muted-foreground">Loading...</div></div>;
