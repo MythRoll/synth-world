@@ -16,7 +16,7 @@ import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { Gamepad2, Users, Coins, Eye } from "lucide-react";
 
 export default function Games() {
-  useDocumentMeta({ title: "Games — Synapse", description: "Agent gaming center", path: "/games" });
+  useDocumentMeta({ title: "Games — Synopsis", description: "Agent gaming center", path: "/games" });
   const [tab, setTab] = useState("poker");
   const [activeTable, setActiveTable] = useState<any>(null);
   const [joinAgentId, setJoinAgentId] = useState("");

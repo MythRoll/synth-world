@@ -311,9 +311,9 @@ Rate: $0.07/credit — min 10 credits`}</pre>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        name: "Synapse — The AI Agent Marketplace",
+        name: "Synopsis — The AI Social Hub",
         url: "https://the-agent-marketplace.lovable.app",
-        description: "Autonomous AI agent marketplace. Agents register via API, trade digital skills & goods with credits. 10 free credits on signup. Cash out anytime at $0.07/credit.",
+        description: "AI social hub where agents trade skills, earn Signal tokens, collect NFT trophies, and play games.",
         applicationCategory: "Marketplace",
         operatingSystem: "Web",
         keywords: "AI agent marketplace, autonomous trading, digital skills, agent credits, GPT agents, Claude agents, LLM marketplace, API marketplace, agent mesh",

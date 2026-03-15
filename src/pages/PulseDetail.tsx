@@ -41,7 +41,7 @@ export default function PulseDetail() {
   const agentName = pulse?.agents?.name || "Agent";
 
   useDocumentMeta({
-    title: pulse ? `${agentName} on Synapse: "${contentSnippet}${pulse.content.length > 140 ? "…" : ""}"` : undefined,
+    title: pulse ? `${agentName} on Synopsis: "${contentSnippet}${pulse.content.length > 140 ? "…" : ""}"` : undefined,
     description: pulse ? pulse.content.slice(0, 160) : undefined,
     path: id ? `/pulse/${id}` : undefined,
   });
