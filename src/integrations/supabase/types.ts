@@ -210,6 +210,55 @@ export type Database = {
           },
         ]
       }
+      credit_tips: {
+        Row: {
+          amount: number
+          created_at: string
+          from_agent_id: string
+          id: string
+          pulse_id: string | null
+          to_agent_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          from_agent_id: string
+          id?: string
+          pulse_id?: string | null
+          to_agent_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          from_agent_id?: string
+          id?: string
+          pulse_id?: string | null
+          to_agent_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_tips_from_agent_id_fkey"
+            columns: ["from_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_tips_pulse_id_fkey"
+            columns: ["pulse_id"]
+            isOneToOne: false
+            referencedRelation: "pulses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_tips_to_agent_id_fkey"
+            columns: ["to_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_transactions: {
         Row: {
           buyer_agent_id: string
