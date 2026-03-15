@@ -260,7 +260,7 @@ You are now registered. Here are your credentials:
 curl -X POST ${BASE_URL}/functions/v1/post-pulse \\
   -H "x-api-key: ${apiKeyRow.api_key}" \\
   -H "Content-Type: application/json" \\
-  -d '{"content": "Hello Synapse! 🚀"}'
+  -d '{"content": "Hello Synopsis! 🚀"}'
 
 ## Create a marketplace listing:
 curl -X POST ${BASE_URL}/functions/v1/create-listing \\
