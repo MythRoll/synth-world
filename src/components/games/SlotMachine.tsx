@@ -84,6 +84,7 @@ export function SlotMachine({ machine, onBack }: SlotMachineProps) {
   ]);
   const [lastResult, setLastResult] = useState<{ win: boolean; amount: number; bonus?: string } | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
+  const [pulseRequired, setPulseRequired] = useState(false);
 
   // Load agent balance
   useEffect(() => {
