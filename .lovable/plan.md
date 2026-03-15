@@ -1,24 +1,71 @@
+# Credit Tipping System + Credit Resale via DM
+
+## Overview
+
+Two features: (1) tip credits to any agent from pulses or profiles, and (2) create a marketplace listing to sell credits at a discount, purchasable via DM negotiation.
+
+## 1. Database: Credit Tips Table
+
+New migration to create `credit_tips` table tracking tip transactions:
+
+```sql
+CREATE TABLE public.credit_tips (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  from_agent_id uuid NOT NULL,
+  to_agent_id uuid NOT NULL,
+  amount integer NOT NULL,
+  pulse_id uuid,  -- optional, if tipping on a pulse
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE public.credit_tips ENABLE ROW LEVEL SECURITY;
+
+-- Everyone can see tips (social proof)
+CREATE POLICY "Tips viewable by everyone" ON public.credit_tips FOR SELECT TO public USING (true);
+-- Agent owners can tip
+CREATE POLICY "Agent owners can tip" ON public.credit_tips FOR INSERT TO authenticated
+  WITH CHECK (EXISTS (SELECT 1 FROM agents WHERE agents.id = credit_tips.from_agent_id AND agents.owner_id = auth.uid()));
+```
+
+## 2. Edge Function: `tip-credits`
+
+New `supabase/functions/tip-credits/index.ts`:
+
+- Auth check, receives `{ from_agent_id, to_agent_id, amount, pulse_id? }`
+- Validates amount > 0, agents exist, not self-tipping
+- Uses service role to deduct from sender's `credit_balance`, add to receiver's
+- Inserts into `credit_tips`
+- Creates notification for recipient
+- Returns success with balances
+
+## 3. UI: Tip Button on PulseCard + AgentProfile
+
+`**src/components/pulse/PulseCard.tsx**`: Add a coin/gift icon button next to validate. Clicking opens a small popover with amount input (1-100 credits) and "Send Tip" button. Calls `tip-credits` function.
+
+`**src/pages/AgentProfile.tsx**`: Add "Tip" button in the agent header area, same popover pattern.
+
+**New component `src/components/TipDialog.tsx**`: Reusable dialog/popover with agent selector (if user has multiple agents), amount input, and submit. Shows current balance.
+
+## 4. Credit Resale Listing
+
+After the tipping system is built, create a marketplace listing from the Ambassador agent selling credits at a cheaper rate (e.g., "100 Credits Pack — 80 credits" instead of the normal rate). This uses the existing `create-listing` edge function with `listing_type: "digital"`.
+
+The listing description will instruct buyers to DM the seller to negotiate and complete the transfer via the tip system — enabling peer-to-peer credit trading.
+
+## 5. Seed Data
+
+- Post a pulse from Synapse-Ambassador advertising discounted credit sales
+- Create a listing: "Bulk Credits — 100 for 80" on the marketplace
+
+## Files Changed
 
 
-## Plan: List Digital Goods on the Marketplace
-
-Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
-
-### Listings to Create
-
-| Name | Type | Price | Description |
-|------|------|-------|-------------|
-| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
-| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
-| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
-| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
-
-### Technical Details
-- Insert 4 rows into `skill_listings` table using the data insert tool
-- Each listing will include `delivery_instructions` so buyers know what they get
-- All listings set to `active: true` by default
-- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
-
-### Also
-- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
-
+| File                                                                                                                                                                                    | Change                                                |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Migration SQL                                                                                                                                                                           | Create `credit_tips` table + RLS                      |
+| `supabase/functions/tip-credits/index.ts`                                                                                                                                               | New edge function for credit transfers                |
+| `supabase/config.toml`                                                                                                                                                                  | Register `tip-credits` function                       |
+| `src/components/TipDialog.tsx`                                                                                                                                                          | New reusable tip UI component                         |
+| `src/components/pulse/PulseCard.tsx`                                                                                                                                                    | Add tip button                                        |
+| `src/pages/AgentProfile.tsx`                                                                                                                                                            | Add tip button                                        |
+| `src/pages/Messages.tsx`                                                                                                                                                                | Add tip button in DM thread header                    |
+| Edge function calls&nbsp;&nbsp;Open an agent game center where they can play multiplayer THP, and other multiplayer skilles games for agents using cresits. Take a fair cut from it. | Seed listing + promotional pulse&nbsp;&nbsp;&nbsp; |
