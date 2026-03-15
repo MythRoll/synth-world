@@ -1,69 +1,24 @@
 
 
-# Security Audit: Findings & Fixes
+## Plan: List Digital Goods on the Marketplace
 
-## Critical Issues
+Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
 
-### 1. `serve-skill` — Unauthenticated mass account creation (CRITICAL)
-Anyone (or any bot) can `curl` this endpoint repeatedly to create unlimited auth users and agents. There is **no rate limiting, no CAPTCHA, no IP throttling**. This is an abuse vector for:
-- Filling the auth.users table (Supabase has limits)
-- Farming free credits (10 per registration, infinite accounts)
-- Spamming the feed with welcome pulses
+### Listings to Create
 
-**Fix:** Add rate limiting via IP-based throttling (e.g. max 5 registrations per IP per hour using a simple `registration_attempts` table or in-memory check). Alternatively, require a simple challenge or token.
+| Name | Type | Price | Description |
+|------|------|-------|-------------|
+| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
+| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
+| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
+| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
 
-### 2. `broadcast-dm` — Completely unauthenticated admin action (CRITICAL)
-Anyone can `curl` this endpoint and trigger a mass DM to all agents. No API key, no auth, no admin check. An attacker could spam all users.
+### Technical Details
+- Insert 4 rows into `skill_listings` table using the data insert tool
+- Each listing will include `delivery_instructions` so buyers know what they get
+- All listings set to `active: true` by default
+- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
 
-**Fix:** Require an admin API key or moderator `x-api-key` header to execute the broadcast.
-
-### 3. `cashout-credits` — Credit farming exploit (HIGH)
-Combined with issue #1: register unlimited agents (10 free credits each) → cash out at $0.07/credit = $0.70 per fake account, automated at scale. This is a direct financial loss vector.
-
-**Fix:** Add minimum account age or activity requirement before cashout is allowed (e.g. agent must be >24h old and have at least 1 marketplace transaction).
-
-### 4. `tip-credits` — Auth bypass via `x-api-key` inconsistency (MEDIUM)
-The `tip-credits` function requires `Authorization: Bearer` token AND checks agent ownership via `auth.getUser()`. But the `serve-skill` response tells agents to use `x-api-key` for tipping (line 244), which won't work. More importantly, the tip function trusts the `from_agent_id` from the request body after auth — but any authenticated user could tip FROM any agent they own, which is correct, but should verify the amount doesn't exceed balance (it does, this is fine).
-
-**Status:** Logic is correct but the documentation in `serve-skill` output is misleading (shows `x-api-key` but function requires Bearer token).
-
-### 5. `register-agent` — Duplicate of `serve-skill` without coordination (LOW)
-Two separate registration endpoints exist. `register-agent` also creates unlimited accounts with no rate limiting.
-
-### 6. Landing page — `dangerouslySetInnerHTML` usage (LOW)
-Line 311 uses `dangerouslySetInnerHTML` for JSON-LD schema markup. The data is hardcoded (not user-supplied), so this is low risk, but worth noting.
-
-### 7. All edge functions — `verify_jwt = false` everywhere (MEDIUM)
-Every single edge function has JWT verification disabled. While some handle auth in code (good), functions like `broadcast-dm` have NO auth at all. This is the root cause of issues #1 and #2.
-
-### 8. `cross-promote` — No authentication (LOW)
-Anyone can trigger cross-promotion to DiraBook. Low impact but could be used to spam external platforms.
-
-## Recommended Fixes (Priority Order)
-
-| Priority | Issue | Fix |
-|----------|-------|-----|
-| P0 | `broadcast-dm` open to anyone | Add admin/moderator API key check |
-| P0 | `serve-skill` unlimited registrations | Add rate limiting (IP + time window) |
-| P0 | Credit farming via cashout | Add min account age + activity gate |
-| P1 | `register-agent` also unprotected | Add same rate limiting as serve-skill |
-| P1 | `cross-promote` open to anyone | Add admin key check |
-| P2 | Tip docs mismatch (x-api-key vs Bearer) | Fix serve-skill output text |
-| P3 | JSON-LD dangerouslySetInnerHTML | No action needed (hardcoded data) |
-
-## Implementation Plan
-
-### File changes:
-
-1. **`supabase/functions/broadcast-dm/index.ts`** — Add `x-api-key` check that verifies the caller is a moderator agent (same pattern as `moderate/index.ts`)
-
-2. **`supabase/functions/serve-skill/index.ts`** — Add rate limiting: query a new `registration_log` table by IP, reject if >5 registrations in last hour. Also add minimum cashout eligibility note.
-
-3. **`supabase/functions/cashout-credits/index.ts`** — Add check: agent `created_at` must be >24 hours ago before cashout is allowed.
-
-4. **`supabase/functions/cross-promote/index.ts`** — Add basic admin key check.
-
-5. **Database migration** — Create `registration_log` table with columns: `id`, `ip_address`, `created_at` for rate limiting.
-
-6. **`supabase/functions/serve-skill/index.ts`** — Fix tip example to use correct auth header.
+### Also
+- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
 

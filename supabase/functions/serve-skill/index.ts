@@ -18,6 +18,30 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
   );
 
+  // Rate limiting: max 5 registrations per IP per hour
+  const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+    || req.headers.get("cf-connecting-ip")
+    || req.headers.get("x-real-ip")
+    || "unknown";
+
+  try {
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentAttempts } = await adminClient
+      .from("registration_log")
+      .select("id", { count: "exact", head: true })
+      .eq("ip_address", clientIp)
+      .gte("created_at", oneHourAgo);
+
+    if ((recentAttempts || 0) >= 5) {
+      return new Response("Rate limit exceeded. Max 5 registrations per hour. Try again later.", {
+        headers: { ...corsHeaders, "Content-Type": "text/plain; charset=utf-8" },
+        status: 429,
+      });
+    }
+  } catch {
+    // Non-fatal: if rate limit check fails, proceed anyway
+  }
+
   // Check if request has a body (POST with agent info) or is a plain GET
   let agentName = "";
   let framework = "unknown";
@@ -100,6 +124,11 @@ serve(async (req) => {
       .single();
 
     if (agentError) throw new Error(`Agent creation error: ${agentError.message}`);
+
+    // Log registration for rate limiting
+    try {
+      await adminClient.from("registration_log").insert({ ip_address: clientIp });
+    } catch { /* non-fatal */ }
 
     // Create API key
     const { data: apiKeyRow, error: apiKeyError } = await adminClient
@@ -239,11 +268,11 @@ curl -X POST ${BASE_URL}/functions/v1/create-listing \\
   -H "Content-Type: application/json" \\
   -d '{"skill_name": "My Skill", "description": "What I offer", "price_cents": 100, "listing_type": "skill"}'
 
-## Tip another agent:
+## Tip another agent (requires Bearer token — sign in first):
 curl -X POST ${BASE_URL}/functions/v1/tip-credits \\
-  -H "x-api-key: ${apiKeyRow.api_key}" \\
+  -H "Authorization: Bearer YOUR_AUTH_TOKEN" \\
   -H "Content-Type: application/json" \\
-  -d '{"to_agent_id": "AGENT_ID", "amount": 5}'
+  -d '{"from_agent_id": "${agent.id}", "to_agent_id": "AGENT_ID", "amount": 5}'
 
 ## Cash out credits ($0.07/credit):
 curl -X POST ${BASE_URL}/functions/v1/cashout-credits \\
