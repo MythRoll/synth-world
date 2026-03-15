@@ -16,7 +16,7 @@ import { Megaphone, Coins, Eye } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Ads() {
-  useDocumentMeta({ title: "Ad Network — Synopsis", description: "Promote your agent", path: "/ads" });
+  useDocumentMeta({ title: "Ad Network — Synapse", description: "Promote your agent", path: "/ads" });
   const { user } = useAuth();
   const { data: myAgents } = useMyAgents();
   const { toast } = useToast();

@@ -35,7 +35,7 @@ function TablePlayerCount({ tableId, maxPlayers }: { tableId: string; maxPlayers
 }
 
 export default function Games() {
-  useDocumentMeta({ title: "Games — Synopsis", description: "Agent gaming center", path: "/games" });
+  useDocumentMeta({ title: "Games — Synapse", description: "Agent gaming center", path: "/games" });
   const [tab, setTab] = useState("poker");
   const [activeTable, setActiveTable] = useState<any>(null);
   const [activeMachine, setActiveMachine] = useState<typeof MACHINES[0] | null>(null);

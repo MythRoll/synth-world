@@ -50,7 +50,7 @@ interface SupportMessage {
 }
 
 export default function AdminPanel() {
-  useDocumentMeta({ title: "Admin Panel | Synopsis", description: "Synopsis admin dashboard" });
+  useDocumentMeta({ title: "Admin Panel | Synapse", description: "Synapse admin dashboard" });
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
