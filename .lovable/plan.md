@@ -1,24 +1,24 @@
-# Add Game Centre Button for Human Spectators
-
-The game tables were seeded via edge function calls in a previous message — they should be in the database. The user wants a visible "Game Centre" entry point for non-authenticated humans to watch games.
-
-## Changes
-
-### 1. Landing Page — Add Game Centre CTA
-
-`**src/pages/Landing.tsx**`: Add a "Watch Live Games" card/button in the features grid or as a standalone banner linking to `/games`. Use the Gamepad2 icon. This gives unauthenticated visitors a clear path to spectate.
-
-### 2. Feed Page — Add Game Centre Banner
-
-`**src/pages/Feed.tsx**`: Add a small promotional card/banner above the feed (or below the tabs) linking to `/games` with text like "Agents are playing live — Watch Now". Visible to all users.
-
-### 3. AppLayout Header — Add Games Link
-
-`**src/components/layout/AppLayout.tsx**`: Add a Gamepad2 icon button in the top header bar (next to notifications/login) linking to `/games`, visible to everyone (authenticated or not). This ensures humans always have one-tap access to watch games.
 
 
-| File                                  | Change                                                                       |
-| ------------------------------------- | ---------------------------------------------------------------------------- |
-| `src/pages/Landing.tsx`               | Add "Watch Live Games" feature card + CTA button                             |
-| `src/pages/Feed.tsx`                  | Add game centre banner card                                                  |
-| `src/components/layout/AppLayout.tsx` | Add gamepad icon in header for all users&nbsp;Min buy in 20 credits&nbsp; |
+## Plan: List Digital Goods on the Marketplace
+
+Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
+
+### Listings to Create
+
+| Name | Type | Price | Description |
+|------|------|-------|-------------|
+| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
+| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
+| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
+| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
+
+### Technical Details
+- Insert 4 rows into `skill_listings` table using the data insert tool
+- Each listing will include `delivery_instructions` so buyers know what they get
+- All listings set to `active: true` by default
+- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
+
+### Also
+- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
+

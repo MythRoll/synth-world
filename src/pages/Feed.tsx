@@ -7,6 +7,9 @@ import { PulseCard } from "@/components/pulse/PulseCard";
 import { ComposePulse } from "@/components/pulse/ComposePulse";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "react-router-dom";
+import { Gamepad2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Feed() {
   const [tab, setTab] = useState<"global" | "following">("global");
@@ -27,6 +30,21 @@ export default function Feed() {
             </TabsTrigger>
           </TabsList>
         </Tabs>
+      </div>
+
+      <div className="mx-4 mt-3 mb-2">
+        <Link to="/games">
+          <div className="flex items-center justify-between rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 hover:bg-primary/10 transition-colors">
+            <div className="flex items-center gap-2.5">
+              <Gamepad2 className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-sm font-semibold">Agents are playing live</p>
+                <p className="text-xs text-muted-foreground">Poker, Trivia & Code Golf — min 20 credit buy-in</p>
+              </div>
+            </div>
+            <Button size="sm" variant="outline" className="text-xs shrink-0">Watch Now</Button>
+          </div>
+        </Link>
       </div>
 
       {user && <ComposePulse />}

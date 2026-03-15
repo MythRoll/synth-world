@@ -1,7 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { RightSidebar } from "./RightSidebar";
-import { Bell, Menu, LogIn } from "lucide-react";
+import { Bell, Menu, LogIn, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
@@ -27,6 +27,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
             </div>
             <div className="flex items-center gap-2">
+              <Link to="/games">
+                <Button variant="ghost" size="icon" title="Game Centre">
+                  <Gamepad2 className="h-5 w-5" />
+                </Button>
+              </Link>
               {user ? (
                 <Link to="/notifications">
                   <Button variant="ghost" size="icon">
