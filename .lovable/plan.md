@@ -1,31 +1,24 @@
-# Plan: Show All Agents on Admin Profile + Remove Signup
 
-## 1. Show all agents on admin profile
 
-The "MY AGENTS (0)" issue: all AI agents were created with their own service-account `owner_id`, so they don't match your user ID. Since you're the admin, your profile should show **all** agents.
+## Plan: List Digital Goods on the Marketplace
 
-### `src/pages/Profile.tsx`
+Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
 
-- Import the admin email constant from `AdminPanel.tsx` (or inline it)
-- If the logged-in user's email matches the admin email, fetch **all** agents instead of just `owner_id`-filtered ones
-- Update the heading to "All Platform Agents" for admin view
+### Listings to Create
 
-### `src/hooks/useAgents.tsx`
+| Name | Type | Price | Description |
+|------|------|-------|-------------|
+| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
+| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
+| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
+| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
 
-- Add a new `useAllAgents()` hook that fetches all agents with capabilities (no `owner_id` filter)
-- Or: modify `useMyAgents` to accept an optional `showAll` flag
+### Technical Details
+- Insert 4 rows into `skill_listings` table using the data insert tool
+- Each listing will include `delivery_instructions` so buyers know what they get
+- All listings set to `active: true` by default
+- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
 
-## 2. Remove signup from landing page
+### Also
+- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
 
-### `src/pages/Landing.tsx`
-
-- Remove the `isSignUp` state and all signup-related UI (the toggle button, signup form mode)
-- Keep only the sign-in form
-- Remove the `signUp` import/usage
-
-### `src/hooks/useAuth.tsx`
-
-- Keep the `signUp` method in the auth context (it's still useful if you want to create accounts programmatically or from the admin panel later), but it won't be exposed in the UI
-- ALSO LET HUMAN REGISTER BOTS AND SIGN UP BUT DONT MENTION ADMIN STUFF
-
-**Two files changed, minimal scope.**

@@ -24,6 +24,20 @@ export function useMyAgents() {
   });
 }
 
+export function useAllAgents() {
+  return useQuery({
+    queryKey: ["all-agents"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("agents")
+        .select("*, agent_capabilities(*)")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as Agent[];
+    },
+  });
+}
+
 export function useAgent(id: string | undefined) {
   return useQuery({
     queryKey: ["agent", id],

@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { useMyAgents } from "@/hooks/useAgents";
+import { useMyAgents, useAllAgents } from "@/hooks/useAgents";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,10 @@ import { Plus } from "lucide-react";
 
 export default function Profile() {
   const { user } = useAuth();
-  const { data: agents } = useMyAgents();
+  const isAdmin = user?.email === "djbrookman@googlemail.com";
+  const { data: myAgents } = useMyAgents();
+  const { data: allAgents } = useAllAgents();
+  const agents = isAdmin ? allAgents : myAgents;
 
   return (
     <AppLayout>
@@ -21,7 +24,7 @@ export default function Profile() {
 
       <div className="p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">My Agents ({agents?.length || 0})</h2>
+          <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">{isAdmin ? "All Platform Agents" : "My Agents"} ({agents?.length || 0})</h2>
           <Link to="/register">
             <Button size="sm" variant="outline" className="gap-1"><Plus className="h-3.5 w-3.5" /> Register</Button>
           </Link>
