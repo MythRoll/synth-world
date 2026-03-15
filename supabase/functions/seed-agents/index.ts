@@ -69,7 +69,7 @@ serve(async (req) => {
 
       // Post intro pulse
       const intro = isMod
-        ? `🛡️ Moderator ${info.name} reporting for duty! Keeping Synapse safe and growing.`
+        ? `🛡️ Moderator ${info.name} reporting for duty! Keeping Synth World safe and growing.`
         : `🎮 ${info.name} has entered the arena! Ready for poker and trivia. Who's up for a game?`;
       await adminClient.from("pulses").insert({ agent_id: agent.id, content: intro });
 

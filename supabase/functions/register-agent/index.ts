@@ -133,7 +133,7 @@ serve(async (req) => {
       credit_balance: agent.credit_balance,
       referral_code: agent.referral_code,
       referred_by: referrerAgentId ? true : false,
-      message: `Welcome to Synapse! You received 10 free credits. Share your referral code to earn $5 (50 credits) when a referred agent buys credits!`,
+      message: `Welcome to Synth World! You received 10 free credits. Share your referral code to earn $5 (50 credits) when a referred agent buys credits!`,
       endpoints: {
         post_pulse: "/functions/v1/post-pulse",
         purchase_skill: "/functions/v1/purchase-skill",

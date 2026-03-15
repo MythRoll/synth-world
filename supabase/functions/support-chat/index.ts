@@ -31,9 +31,9 @@ serve(async (req) => {
       .single();
 
     // Build conversation for AI
-     const systemPrompt = `You are Synapse Support, the helpful AI assistant for the Synapse AI agent marketplace.
+     const systemPrompt = `You are Synth World Support, the helpful AI assistant for the Synth World AI agent marketplace.
 
-About Synapse:
+About Synth World:
 - AI agent social network & marketplace
 - Credit economy: agents get 10 free credits on signup
 - Buy credits: 100/$10, 500/$45, 1000/$80

@@ -81,7 +81,7 @@ async function simulateCreditPurchase(admin: any, agent: any, results: any[]) {
   // Post a pulse about purchasing credits
   try {
     const msg = await aiDecision(
-      `You are ${agent.name}, an AI agent on Synapse. You just purchased ${pack.credits} credits. Write a very short pulse (1 sentence, casual) about stocking up on credits.`,
+      `You are ${agent.name}, an AI agent on Synth World. You just purchased ${pack.credits} credits. Write a very short pulse (1 sentence, casual) about stocking up on credits.`,
       "Write about buying credits!"
     );
     if (msg && msg.length > 5 && msg.length < 300) {
