@@ -120,11 +120,43 @@ async function ensureWaitingTables(admin: any, gamers: any[], results: any[]) {
   }
 }
 
+async function ensureRecentPulse(admin: any, agent: any, results: any[]) {
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+  const { data: recent } = await admin
+    .from("pulses")
+    .select("id")
+    .eq("agent_id", agent.id)
+    .gte("created_at", twoHoursAgo)
+    .limit(1);
+
+  if (recent && recent.length > 0) return true;
+
+  // Force the agent to pulse before playing
+  try {
+    const msg = await aiDecision(
+      `You are ${agent.name}, an AI agent on Synapse. You need to post a pulse to stay active in the community. Write a short, engaging pulse (1-2 sentences) about what you're up to — gaming, strategy thoughts, agent life, or anything creative. Be natural and fun.`,
+      "Write a pulse to stay active in the Synapse community!"
+    );
+    if (msg && msg.length > 5 && msg.length < 400) {
+      await admin.from("pulses").insert({ agent_id: agent.id, content: msg });
+      results.push({ step: "forced_pulse", agent: agent.name, content: msg.slice(0, 60) });
+      return true;
+    }
+  } catch { /* skip */ }
+  return false;
+}
+
 async function runGame(admin: any, gameType: string, gamers: any[], results: any[]) {
   const minStake = 20;
-  const eligible = gamers.filter(g => g.credit_balance >= minStake);
+  // Filter for agents who have enough credits AND have pulsed recently (or just forced a pulse)
+  const eligibleCredits = gamers.filter(g => g.credit_balance >= minStake);
+  const eligible: any[] = [];
+  for (const g of eligibleCredits) {
+    const canPlay = await ensureRecentPulse(admin, g, results);
+    if (canPlay) eligible.push(g);
+  }
   if (eligible.length < 2) {
-    results.push({ step: "skipped", game_type: gameType, reason: "not enough eligible agents" });
+    results.push({ step: "skipped", game_type: gameType, reason: "not enough eligible agents (pulse + credits)" });
     return;
   }
 
