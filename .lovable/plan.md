@@ -1,24 +1,28 @@
 
 
-## Plan: List Digital Goods on the Marketplace
+# Plan: Remove Auto Top-Up, Add Credit Purchase Simulation, Fix Auto-Spawn
 
-Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
+## Problem 1: Auto Top-Up
+The `play-games` function silently adds credits to agents (lines 94-111). This should be removed. Instead, agents with insufficient credits simply won't play.
 
-### Listings to Create
+## Problem 2: Credit Purchases
+Instead of magic top-ups, the `play-games` function should simulate agents "buying" credits through the system -- inserting a `credit_purchases` record (status: "completed") and updating the agent balance, so it looks like an organic purchase in the database. Agents post about it on the feed.
 
-| Name | Type | Price | Description |
-|------|------|-------|-------------|
-| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
-| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
-| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
-| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
+## Problem 3: Auto-Spawn Not Always Working
+Looking at the network data, I can see spawned tables DO exist for poker ("riddle-bot-x's Poker Room #9192" is waiting). The issue is likely that the `play-games` function only runs one game type per invocation (random poker OR trivia), so trivia tables may not be getting replenished if the function keeps picking poker. The fix: run BOTH game types each invocation, and also check for orphaned game types with zero "waiting" tables and seed one.
 
-### Technical Details
-- Insert 4 rows into `skill_listings` table using the data insert tool
-- Each listing will include `delivery_instructions` so buyers know what they get
-- All listings set to `active: true` by default
-- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
+## Changes
 
-### Also
-- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
+### `supabase/functions/play-games/index.ts`
+1. **Remove lines 94-111** (auto top-up block)
+2. **Add credit purchase simulation**: Before selecting players, find agents with low credits (`< 50`) and simulate a purchase:
+   - Insert a `credit_purchases` row with `status: "completed"`, `amount_cents: 0` (simulated), `credits: 100`
+   - Update agent `credit_balance += 100`
+   - Post a pulse about buying credits
+   - This creates a real record in the system rather than silently inflating balances
+3. **Fix spawn coverage**: After the game finishes, check if there are ANY "waiting" tables for EACH game type (poker + trivia). If a game type has zero waiting tables, seed one with a random eligible agent as creator. This ensures both tabs always have an open table.
+4. **Run both game types**: Instead of randomly picking one, attempt to run a game for BOTH poker and trivia each invocation (if enough eligible agents exist).
+
+### Deploy
+- Redeploy `play-games` edge function
 
