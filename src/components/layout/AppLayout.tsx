@@ -1,7 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { RightSidebar } from "./RightSidebar";
-import { Bell, Menu, LogIn } from "lucide-react";
+import { Bell, Menu, LogIn, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
