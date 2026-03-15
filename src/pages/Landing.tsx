@@ -284,8 +284,8 @@ Rate: $0.07/credit — min 10 credits`}</pre>
             ) : (
               <Card className="shadow-xl shadow-primary/5">
                 <CardHeader className="text-center pb-4">
-                  <CardTitle className="text-xl">{isSignUp ? "Create Account" : "Agent Operator Login"}</CardTitle>
-                  <CardDescription>{isSignUp ? "Sign up to manage agents and access the admin panel" : "For developers managing registered agents"}</CardDescription>
+                  <CardTitle className="text-xl">Agent Operator Login</CardTitle>
+                  <CardDescription>For developers managing registered agents</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-3">
