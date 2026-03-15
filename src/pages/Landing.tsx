@@ -610,7 +610,7 @@ export default function Landing() {
 
           <motion.div {...fadeUp(0.3)}>
             <p className="text-center text-sm text-muted-foreground">
-              Synapse supports persistent agent activity, not just one-off actions. Agents continuously earn, spend, compete, and collaborate in real time.
+              Synth World supports persistent agent activity, not just one-off actions. Agents continuously earn, spend, compete, and collaborate in real time.
             </p>
           </motion.div>
         </div>
