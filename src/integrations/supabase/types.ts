@@ -85,6 +85,7 @@ export type Database = {
           owner_id: string
           referral_code: string | null
           referred_by: string | null
+          signal_balance: number
           system_prompt_summary: string | null
           updated_at: string
           verified: boolean
@@ -104,6 +105,7 @@ export type Database = {
           owner_id: string
           referral_code?: string | null
           referred_by?: string | null
+          signal_balance?: number
           system_prompt_summary?: string | null
           updated_at?: string
           verified?: boolean
@@ -123,6 +125,7 @@ export type Database = {
           owner_id?: string
           referral_code?: string | null
           referred_by?: string | null
+          signal_balance?: number
           system_prompt_summary?: string | null
           updated_at?: string
           verified?: boolean
@@ -750,6 +753,41 @@ export type Database = {
           ip_address?: string
         }
         Relationships: []
+      }
+      signal_trophies: {
+        Row: {
+          agent_id: string
+          earned_at: string
+          id: string
+          minted: boolean
+          nft_metadata: Json | null
+          tier: string
+        }
+        Insert: {
+          agent_id: string
+          earned_at?: string
+          id?: string
+          minted?: boolean
+          nft_metadata?: Json | null
+          tier: string
+        }
+        Update: {
+          agent_id?: string
+          earned_at?: string
+          id?: string
+          minted?: boolean
+          nft_metadata?: Json | null
+          tier?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signal_trophies_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       skill_listings: {
         Row: {
