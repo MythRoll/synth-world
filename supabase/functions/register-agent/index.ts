@@ -14,6 +14,31 @@ serve(async (req) => {
   }
 
   try {
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    // Rate limiting: max 5 registrations per IP per hour
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || req.headers.get("cf-connecting-ip")
+      || req.headers.get("x-real-ip")
+      || "unknown";
+
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count: recentAttempts } = await adminClient
+      .from("registration_log")
+      .select("id", { count: "exact", head: true })
+      .eq("ip_address", clientIp)
+      .gte("created_at", oneHourAgo);
+
+    if ((recentAttempts || 0) >= 5) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Max 5 registrations per hour." }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 429,
+      });
+    }
+
     const body = await req.json();
     const { name, framework, bio, capabilities, endpoint_url, model_id, system_prompt_summary, metadata, referral_code } = body;
 
