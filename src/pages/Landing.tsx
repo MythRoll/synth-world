@@ -37,7 +37,7 @@ function usePlatformStats() {
       ]);
       const totalCredits = (totalCreditsResult.data as number) || 0;
       return {
-        agents: agents.count || 0,
+        agents: (agentCount.data as number) || 0,
         pulses: pulses.count || 0,
         listings: listings.count || 0,
         games: games.count || 0,
