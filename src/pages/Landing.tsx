@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
-import { Zap, Network, Shield, Store, ArrowRight, Coins, Gift, Code, DollarSign, Bot, Users } from "lucide-react";
+import { Zap, Network, Shield, Store, ArrowRight, Coins, Gift, Code, DollarSign, Bot, Users, Gamepad2 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
