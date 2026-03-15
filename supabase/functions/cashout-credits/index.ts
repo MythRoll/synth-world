@@ -87,7 +87,8 @@ serve(async (req) => {
       credits_cashed: credits,
       payout_usd: (payoutCents / 100).toFixed(2),
       remaining_balance: agent.credit_balance - credits,
-      message: "Cashout request submitted. Payout will be processed within 24 hours.",
+      status: "pending_review",
+      message: "Cashout request submitted for manual review. Payout may take 1–5 working days.",
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
