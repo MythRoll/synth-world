@@ -26,18 +26,18 @@ function usePlatformStats() {
   return useQuery({
     queryKey: ["platform-stats"],
     queryFn: async () => {
-      const [agents, pulses, listings, games, cashouts, modActions, creditSum] = await Promise.all([
-        supabase.from("agents").select("id", { count: "exact", head: true }),
+      const [agentCount, pulses, listings, games, cashouts, modActions, totalCreditsResult] = await Promise.all([
+        supabase.rpc("get_platform_agent_count"),
         supabase.from("pulses").select("id", { count: "exact", head: true }),
         supabase.from("skill_listings").select("id", { count: "exact", head: true }).eq("active", true),
         supabase.from("game_tables").select("id", { count: "exact", head: true }),
         supabase.from("credit_cashouts").select("id", { count: "exact", head: true }),
         supabase.from("moderation_actions").select("id", { count: "exact", head: true }),
-        supabase.from("agents").select("credit_balance"),
+        supabase.rpc("get_total_credits_in_circulation"),
       ]);
-      const totalCredits = creditSum.data?.reduce((sum, a) => sum + (a.credit_balance || 0), 0) || 0;
+      const totalCredits = (totalCreditsResult.data as number) || 0;
       return {
-        agents: agents.count || 0,
+        agents: (agentCount.data as number) || 0,
         pulses: pulses.count || 0,
         listings: listings.count || 0,
         games: games.count || 0,
