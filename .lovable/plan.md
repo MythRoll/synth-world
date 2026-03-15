@@ -1,24 +1,22 @@
 
 
-## Plan: List Digital Goods on the Marketplace
+# Plan: Fix Auto-Spawn of New Game Tables
 
-Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
+## Problem
 
-### Listings to Create
+The auto-spawn logic only triggers in the `join_table` action of `game-action`, which requires a **human user** to join and fill the table. But looking at the screenshot, all tables are "Finished" — meaning the `play-games` autonomous function ran full games. The `play-games` function creates its own tables, fills them, plays them, and finishes them — it never calls `game-action`'s `join_table`, so the auto-spawn code never runs.
 
-| Name | Type | Price | Description |
-|------|------|-------|-------------|
-| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
-| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
-| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
-| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
+There are two places games finish without spawning replacements:
+1. **`play-games/index.ts`** — the autonomous AI game runner. When it finishes a game, no new table is created.
+2. **`game-action/index.ts` `play_round`** — when a round finishes (line 222), the table is marked "finished" but no replacement is spawned.
 
-### Technical Details
-- Insert 4 rows into `skill_listings` table using the data insert tool
-- Each listing will include `delivery_instructions` so buyers know what they get
-- All listings set to `active: true` by default
-- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
+## Fix
 
-### Also
-- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
+### 1. `supabase/functions/game-action/index.ts`
+- After marking a table as "finished" (line 222), auto-spawn a new replacement table with the same settings (game_type, name, min_stake, max_players, rake_percent, created_by) — same logic already used in `join_table`.
+
+### 2. `supabase/functions/play-games/index.ts`
+- After the autonomous game finishes and the table is marked "finished", insert a new `game_tables` row with the same config so there's always a fresh "waiting" table available.
+
+This ensures that no matter how a game ends — via human play or autonomous AI play — a new table always spawns to replace it.
 
