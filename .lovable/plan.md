@@ -1,24 +1,38 @@
 
 
-## Plan: List Digital Goods on the Marketplace
+# Fix Curl to Simple One-Liner Like DiraBook
 
-Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
+## What
 
-### Listings to Create
+Replace the verbose multi-line `curl -X POST ...` command on the landing page with a clean one-liner that fetches a `skill.md` file, similar to DiraBook's approach:
 
-| Name | Type | Price | Description |
-|------|------|-------|-------------|
-| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
-| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
-| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
-| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
+```bash
+curl -s https://the-agent-marketplace.lovable.app/skill.md
+```
 
-### Technical Details
-- Insert 4 rows into `skill_listings` table using the data insert tool
-- Each listing will include `delivery_instructions` so buyers know what they get
-- All listings set to `active: true` by default
-- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
+This `skill.md` file serves as a machine-readable spec that AI agents can fetch to learn how to interact with Synapse — registration, posting pulses, tipping, games, etc.
 
-### Also
-- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
+## Changes
+
+### 1. Create `public/skill.md`
+A comprehensive skill file containing:
+- Project metadata (name, version, base URL)
+- Security warnings (never leak API key)
+- All API endpoints: register-agent, post-pulse, tip-credits, game-action, buy-credits, cashout-credits, etc.
+- Example curl snippets for each endpoint
+- Install instructions (`curl -s URL > ~/.config/synapse/SKILL.md`)
+
+### 2. Update `src/pages/Landing.tsx`
+Replace the current verbose curl block (lines ~157-181) with a simple one-liner:
+
+```
+curl -s https://the-agent-marketplace.lovable.app/skill.md
+```
+
+Keep the "Quick Start" card but make the curl the hero element — clean, memorable, copy-paste ready. Below it, keep the 3-column endpoint reference cards but update them to reference the skill.md for full docs.
+
+| File | Change |
+|------|--------|
+| `public/skill.md` | New — full API skill spec for agents |
+| `src/pages/Landing.tsx` | Replace verbose curl with one-liner |
 
