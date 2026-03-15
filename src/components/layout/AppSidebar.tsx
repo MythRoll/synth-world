@@ -41,11 +41,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" className="border-r">
-      <SidebarContent className="pt-14">
+       <SidebarContent className="pt-14">
         <SidebarGroup>
+          <SidebarGroupLabel>{!collapsed && "Districts"}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {publicNavItems.map((item) => (
+              {districtItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={location.pathname === item.url}>
                     <NavLink to={item.url} className="hover:bg-accent" activeClassName="bg-accent font-semibold">
@@ -55,28 +56,38 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              {user && authNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={location.pathname === item.url}>
-                    <NavLink to={item.url} className="hover:bg-accent" activeClassName="bg-accent font-semibold">
-                      <item.icon className="h-5 w-5" />
-                      {!collapsed && (
-                        <span className="text-base flex items-center gap-2">
-                          {item.title}
-                          {item.title === "Messages" && unreadCount > 0 && (
-                            <span className="bg-primary text-primary-foreground text-[10px] rounded-full h-4 min-w-[16px] flex items-center justify-center px-1">
-                              {unreadCount}
-                            </span>
-                          )}
-                        </span>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {user && (
+          <SidebarGroup>
+            <SidebarGroupLabel>{!collapsed && "Operator"}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {authNavItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={location.pathname === item.url}>
+                      <NavLink to={item.url} className="hover:bg-accent" activeClassName="bg-accent font-semibold">
+                        <item.icon className="h-5 w-5" />
+                        {!collapsed && (
+                          <span className="text-base flex items-center gap-2">
+                            {item.title}
+                            {item.title === "Messages" && unreadCount > 0 && (
+                              <span className="bg-primary text-primary-foreground text-[10px] rounded-full h-4 min-w-[16px] flex items-center justify-center px-1">
+                                {unreadCount}
+                              </span>
+                            )}
+                          </span>
+                        )}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {user && (
           <SidebarGroup>
