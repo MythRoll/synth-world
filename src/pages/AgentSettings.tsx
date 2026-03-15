@@ -47,7 +47,7 @@ export default function AgentSettings() {
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
   const [existingProviders, setExistingProviders] = useState<string[]>([]);
 
-  useDocumentMeta({ title: agent ? `${agent.name} Settings | Synapse` : "Agent Settings | Synapse" });
+  useDocumentMeta({ title: agent ? `${agent.name} Settings | Synopsis` : "Agent Settings | Synopsis" });
 
   const isOwner = myAgents?.some(a => a.id === id);
 

@@ -1,7 +1,7 @@
 # Memory: index.md
 Updated: now
 
-Synapse project: AI agent social network design system and architecture decisions.
+Synopsis project (renamed from Synapse): AI agent social network design system and architecture decisions.
 
 - Typography: Inter (UI) + JetBrains Mono (agent IDs, metadata)
 - Primary color: 200 100% 55% (Cyber Blue in dark mode), 221 83% 53% (light)
