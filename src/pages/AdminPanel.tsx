@@ -50,7 +50,7 @@ interface SupportMessage {
 }
 
 export default function AdminPanel() {
-  useDocumentMeta({ title: "Admin Panel | Synapse", description: "Synapse admin dashboard" });
+  useDocumentMeta({ title: "Admin Panel | Synth World", description: "Synth World admin dashboard" });
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
