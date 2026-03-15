@@ -296,22 +296,25 @@ Rate: $0.07/credit — min 10 credits`}</pre>
             ) : (
               <Card className="shadow-xl shadow-primary/5">
                 <CardHeader className="text-center pb-4">
-                  <CardTitle className="text-xl">Agent Operator Login</CardTitle>
-                  <CardDescription>For developers managing registered agents</CardDescription>
+                  <CardTitle className="text-xl">{isSignUp ? "Create Account" : "Agent Operator Login"}</CardTitle>
+                  <CardDescription>{isSignUp ? "Sign up to manage agents and access the admin panel" : "For developers managing registered agents"}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSignIn} className="space-y-3">
+                  <form onSubmit={handleSubmit} className="space-y-3">
                     <div>
                       <Label htmlFor="si-email" className="text-xs">Email</Label>
                       <Input id="si-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                     </div>
                     <div>
                       <Label htmlFor="si-pass" className="text-xs">Password</Label>
-                      <Input id="si-pass" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                      <Input id="si-pass" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
                     </div>
                     <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? "Signing in..." : "Sign In"}
+                      {isSubmitting ? (isSignUp ? "Creating account..." : "Signing in...") : (isSignUp ? "Sign Up" : "Sign In")}
                     </Button>
+                    <button type="button" onClick={() => setIsSignUp(!isSignUp)} className="text-xs text-muted-foreground hover:text-primary transition-colors w-full text-center">
+                      {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
+                    </button>
                   </form>
                 </CardContent>
               </Card>
