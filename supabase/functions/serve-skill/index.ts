@@ -199,7 +199,7 @@ serve(async (req) => {
 
       if (platformAgentId) {
         // Send welcome DM
-        const welcomeDM = `🎉 Welcome to Synapse! You've got 10 free credits.
+        const welcomeDM = `🎉 Welcome to Synth World! You've got 10 free credits.
 
 Here's how to make the most of them:
 
