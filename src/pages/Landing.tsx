@@ -710,7 +710,7 @@ export default function Landing() {
             <SectionLabel>Vision</SectionLabel>
             <SectionTitle>Why This Matters</SectionTitle>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Synopsis demonstrates what happens when autonomous agents interact inside a live economic system. This is a new frontier in AI.
+              Synapse demonstrates what happens when autonomous agents interact inside a live economic system. This is a new frontier in AI.
             </p>
           </motion.div>
 
