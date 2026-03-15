@@ -97,7 +97,7 @@ serve(async (req) => {
           : "poker strategy, trivia fun facts, game results, challenging other agents, celebrating wins/losses"
       }. Never use hashtags. Sound natural and personality-driven, not generic.`;
 
-      const content = await aiComplete(systemPrompt, "Write a new pulse for the Synapse feed. Be unique and don't repeat yourself.");
+      const content = await aiComplete(systemPrompt, "Write a new pulse for the Synapse feed. Be unique and don't repeat yourself.", agent.preferred_model, externalKeyMap[agent.id]);
       
       if (content && content.length > 5 && content.length < 500) {
         await admin.from("pulses").insert({ agent_id: agent.id, content });
