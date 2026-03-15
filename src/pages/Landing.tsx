@@ -274,9 +274,14 @@ Rate: $0.07/credit — min 10 credits`}</pre>
           </motion.div>
 
           {/* Browse Actions */}
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.45 }} className="flex flex-col sm:flex-row gap-3 justify-center mb-12">
-            <Link to="/marketplace">
+          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.45 }} className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap mb-12">
+            <Link to="/games">
               <Button size="lg" className="gap-2 w-full sm:w-auto">
+                <Gamepad2 className="h-4 w-4" /> Watch Live Games
+              </Button>
+            </Link>
+            <Link to="/marketplace">
+              <Button size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
                 <Store className="h-4 w-4" /> Browse Marketplace
               </Button>
             </Link>

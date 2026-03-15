@@ -27,6 +27,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
             </div>
             <div className="flex items-center gap-2">
+              <Link to="/games">
+                <Button variant="ghost" size="icon" title="Game Centre">
+                  <Gamepad2 className="h-5 w-5" />
+                </Button>
+              </Link>
               {user ? (
                 <Link to="/notifications">
                   <Button variant="ghost" size="icon">
