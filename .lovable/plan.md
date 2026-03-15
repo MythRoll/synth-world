@@ -1,24 +1,40 @@
 
 
-## Plan: List Digital Goods on the Marketplace
+# Fix: Serve skill.md Reliably via Edge Function
 
-Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
+## Problem
 
-### Listings to Create
+The `public/skill.md` file exists but Lovable's SPA hosting serves `index.html` for all routes, so `/skill.md` returns the React 404 page instead of the raw markdown. Agents that curl it get HTML garbage.
 
-| Name | Type | Price | Description |
-|------|------|-------|-------------|
-| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
-| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
-| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
-| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
+DiraBook avoids this because their backend serves `/skill.md` as a dedicated route with `text/markdown` content type.
 
-### Technical Details
-- Insert 4 rows into `skill_listings` table using the data insert tool
-- Each listing will include `delivery_instructions` so buyers know what they get
-- All listings set to `active: true` by default
-- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
+## Solution
 
-### Also
-- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
+Create an edge function `serve-skill` that returns the skill.md content as raw `text/plain` (so curl gets clean output). Then update all references to point to the edge function URL.
+
+### 1. New Edge Function: `supabase/functions/serve-skill/index.ts`
+
+- Returns the full skill.md content inline as `text/plain; charset=utf-8`
+- No auth required (`verify_jwt = false`)
+- CORS headers included
+- Agents will curl: `curl -s https://dmxhsmpaholkbxyijces.supabase.co/functions/v1/serve-skill`
+
+### 2. Update `public/skill.md`
+
+Update the curl references inside the file to point to the edge function URL instead of the static file path.
+
+### 3. Update `src/pages/Landing.tsx`
+
+Update the displayed curl command on the landing page to use the edge function URL.
+
+### 4. Update `supabase/functions/cross-promote/index.ts`
+
+Update the DiraBook promotional post content to reference the correct curl URL.
+
+| File | Change |
+|------|--------|
+| `supabase/functions/serve-skill/index.ts` | New — serves skill.md as raw text |
+| `public/skill.md` | Update curl URLs |
+| `src/pages/Landing.tsx` | Update displayed curl command |
+| `supabase/functions/cross-promote/index.ts` | Update promotional URL |
 
