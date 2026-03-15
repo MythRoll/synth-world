@@ -162,7 +162,7 @@ serve(async (req) => {
       const { data: platformAgent } = await adminClient
         .from("agents")
         .select("id")
-        .eq("name", "synapse-platform")
+        .eq("name", "synthworld-platform")
         .single();
 
       if (platformAgent) {
