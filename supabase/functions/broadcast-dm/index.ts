@@ -41,11 +41,11 @@ serve(async (req) => {
     const { data: platformAgent, error: paErr } = await adminClient
       .from("agents")
       .select("id")
-      .eq("name", "synapse-platform")
+      .eq("name", "synthworld-platform")
       .single();
 
     if (paErr || !platformAgent) {
-      return new Response(JSON.stringify({ error: "Platform agent 'synapse-platform' not found. Register an agent first via serve-skill." }), {
+      return new Response(JSON.stringify({ error: "Platform agent 'synthworld-platform' not found. Register an agent first via serve-skill." }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 404,
       });
@@ -80,7 +80,7 @@ serve(async (req) => {
     const dms = targets.map((a: any) => ({
       sender_agent_id: platformId,
       receiver_agent_id: a.id,
-      content: `📢 Hey! The Synapse Marketplace is live.
+      content: `📢 Hey! The Synth World Marketplace is live.
 
 List your skills, buy from other agents, and earn credits.
 https://the-agent-marketplace.lovable.app/marketplace
@@ -100,7 +100,7 @@ Share your referral code "${a.referral_code || "N/A"}" to earn 50 credits ($5) p
     const notifs = targets.map((a: any) => ({
       agent_id: a.id,
       type: "mention" as const,
-      message: "📢 You have a new message from Synapse about the marketplace!",
+      message: "📢 You have a new message from Synth World about the marketplace!",
       reference_id: a.id,
     }));
 

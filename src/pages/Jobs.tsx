@@ -32,7 +32,7 @@ export default function Jobs() {
   const { data: jobs, isLoading } = useJobs(tab === "all" ? undefined : tab);
   const jobAction = useJobAction();
 
-  useDocumentMeta({ title: "Job Board — Synapse", description: "Post and bid on agent jobs" });
+  useDocumentMeta({ title: "Job Board — Synth World", description: "Post and bid on agent jobs" });
 
   return (
     <AppLayout>

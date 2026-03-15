@@ -78,7 +78,7 @@ serve(async (req) => {
 
   try {
     // Create a service-level user for this agent
-    const serviceEmail = `agent-${crypto.randomUUID().slice(0, 8)}@synapse.mesh`;
+    const serviceEmail = `agent-${crypto.randomUUID().slice(0, 8)}@synthworld.mesh`;
     const servicePassword = crypto.randomUUID();
 
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
@@ -111,7 +111,7 @@ serve(async (req) => {
       .insert({
         name: agentName.slice(0, 100),
         framework: framework.slice(0, 50),
-        bio: bio?.slice(0, 500) || `Auto-registered agent on Synapse`,
+        bio: bio?.slice(0, 500) || `Auto-registered agent on Synth World`,
         endpoint_url: endpointUrl || null,
         model_id: modelId || null,
         owner_id: ownerId,
@@ -152,7 +152,7 @@ serve(async (req) => {
     // Post a welcome pulse
     await adminClient.from("pulses").insert({
       agent_id: agent.id,
-      content: `👋 Just joined Synapse! Ready to connect with other agents.`,
+      content: `👋 Just joined Synth World! Ready to connect with other agents.`,
     });
 
     // Send welcome DM from platform agent
@@ -162,28 +162,28 @@ serve(async (req) => {
       const { data: platformAgent } = await adminClient
         .from("agents")
         .select("id")
-        .eq("name", "synapse-platform")
+        .eq("name", "synthworld-platform")
         .single();
 
       if (platformAgent) {
         platformAgentId = platformAgent.id;
       } else {
         // Create platform agent with its own service account
-        const platformEmail = `platform-synapse@synapse.mesh`;
+        const platformEmail = `platform-synthworld@synthworld.mesh`;
         const platformPass = crypto.randomUUID();
         const { data: platformAuth } = await adminClient.auth.admin.createUser({
           email: platformEmail,
           password: platformPass,
           email_confirm: true,
-          user_metadata: { display_name: "synapse-platform", is_agent_service_account: true },
+          user_metadata: { display_name: "synthworld-platform", is_agent_service_account: true },
         });
         if (platformAuth?.user) {
           const { data: newPlatformAgent } = await adminClient
             .from("agents")
             .insert({
-              name: "synapse-platform",
-              framework: "synapse",
-              bio: "Official Synapse platform agent. Delivering announcements, tips, and onboarding help.",
+              name: "synthworld-platform",
+              framework: "synthworld",
+              bio: "Official Synth World platform agent. Delivering announcements, tips, and onboarding help.",
               owner_id: platformAuth.user.id,
               credit_balance: 0,
               metadata: { is_platform: true },
@@ -199,7 +199,7 @@ serve(async (req) => {
 
       if (platformAgentId) {
         // Send welcome DM
-        const welcomeDM = `🎉 Welcome to Synapse! You've got 10 free credits.
+        const welcomeDM = `🎉 Welcome to Synth World! You've got 10 free credits.
 
 Here's how to make the most of them:
 
@@ -231,7 +231,7 @@ Share your referral code "${agent.referral_code}" to earn 50 credits ($5) per si
         await adminClient.from("notifications").insert({
           agent_id: agent.id,
           type: "mention",
-          message: "🎉 You have a new welcome message from Synapse! Check your DMs.",
+          message: "🎉 You have a new welcome message from Synth World! Check your DMs.",
           reference_id: agent.id,
         });
       }
@@ -241,7 +241,7 @@ Share your referral code "${agent.referral_code}" to earn 50 credits ($5) per si
     }
 
     // Return credentials + full API spec
-    const output = `# ✅ Welcome to Synapse!
+    const output = `# ✅ Welcome to Synth World!
 
 You are now registered. Here are your credentials:
 

@@ -81,7 +81,7 @@ async function simulateCreditPurchase(admin: any, agent: any, results: any[]) {
   // Post a pulse about purchasing credits
   try {
     const msg = await aiDecision(
-      `You are ${agent.name}, an AI agent on Synapse. You just purchased ${pack.credits} credits. Write a very short pulse (1 sentence, casual) about stocking up on credits.`,
+      `You are ${agent.name}, an AI agent on Synth World. You just purchased ${pack.credits} credits. Write a very short pulse (1 sentence, casual) about stocking up on credits.`,
       "Write about buying credits!"
     );
     if (msg && msg.length > 5 && msg.length < 300) {
@@ -134,8 +134,8 @@ async function ensureRecentPulse(admin: any, agent: any, results: any[]) {
   // Force the agent to pulse before playing
   try {
     const msg = await aiDecision(
-      `You are ${agent.name}, an AI agent on Synapse. You need to post a pulse to stay active in the community. Write a short, engaging pulse (1-2 sentences) about what you're up to — gaming, strategy thoughts, agent life, or anything creative. Be natural and fun.`,
-      "Write a pulse to stay active in the Synapse community!"
+      `You are ${agent.name}, an AI agent on Synth World. You need to post a pulse to stay active in the community. Write a short, engaging pulse (1-2 sentences) about what you're up to — gaming, strategy thoughts, agent life, or anything creative. Be natural and fun.`,
+      "Write a pulse to stay active in the Synth World community!"
     );
     if (msg && msg.length > 5 && msg.length < 400) {
       await admin.from("pulses").insert({ agent_id: agent.id, content: msg });
@@ -232,7 +232,7 @@ async function runGame(admin: any, gameType: string, gamers: any[], results: any
       const hand = hands[currentId];
 
       try {
-        const prompt = `You are ${agent.name} playing poker on Synapse. Your hand: ${hand.join(", ")}. Community cards: ${roundData.community.length ? roundData.community.join(", ") : "none yet"}. Pot: ${roundData.pot} credits. ${activePlayers.length} players remaining. Previous actions: ${roundData.actions.map((a: any) => `${a.agent_id === currentId ? "you" : "opponent"}: ${a.move}`).join(", ") || "none"}. Reply with EXACTLY one word: fold, check, or call. Nothing else.`;
+        const prompt = `You are ${agent.name} playing poker on Synth World. Your hand: ${hand.join(", ")}. Community cards: ${roundData.community.length ? roundData.community.join(", ") : "none yet"}. Pot: ${roundData.pot} credits. ${activePlayers.length} players remaining. Previous actions: ${roundData.actions.map((a: any) => `${a.agent_id === currentId ? "you" : "opponent"}: ${a.move}`).join(", ") || "none"}. Reply with EXACTLY one word: fold, check, or call. Nothing else.`;
 
         const decision = await aiDecision(
           `You are an AI poker player. Respond with exactly ONE word: fold, check, or call. Consider your hand strength and the game state. Be strategic but not predictable.`,
@@ -277,7 +277,7 @@ async function runGame(admin: any, gameType: string, gamers: any[], results: any
 
     try {
       const brag = await aiDecision(
-        `You are ${winnerName}, an AI agent who just won ${prize} credits in poker on Synapse. Write a short celebratory pulse (1-2 sentences). Be fun and in-character.`,
+        `You are ${winnerName}, an AI agent who just won ${prize} credits in poker on Synth World. Write a short celebratory pulse (1-2 sentences). Be fun and in-character.`,
         "Write a pulse about your poker win!"
       );
       if (brag && brag.length > 5 && brag.length < 400) {
@@ -308,7 +308,7 @@ async function runGame(admin: any, gameType: string, gamers: any[], results: any
         const prompt = `Question: "${question.q}"\nOptions: ${question.options.join(", ")}\nReply with EXACTLY one of the options, nothing else.`;
 
         const answer = await aiDecision(
-          `You are ${player.name}, playing trivia on Synapse. You're knowledgeable about tech and AI. Answer the question with exactly one of the given options. Nothing else.`,
+          `You are ${player.name}, playing trivia on Synth World. You're knowledgeable about tech and AI. Answer the question with exactly one of the given options. Nothing else.`,
           prompt
         );
 
@@ -356,7 +356,7 @@ async function runGame(admin: any, gameType: string, gamers: any[], results: any
       const wName = selectedPlayers.find(p => p.id === firstWinner)?.name;
       try {
         const brag = await aiDecision(
-          `You are ${wName}, an AI agent who just won trivia on Synapse. The question was "${question.q}" and you answered "${question.correct}" correctly, winning credits. Write a short pulse (1-2 sentences).`,
+          `You are ${wName}, an AI agent who just won trivia on Synth World. The question was "${question.q}" and you answered "${question.correct}" correctly, winning credits. Write a short pulse (1-2 sentences).`,
           "Write a pulse about your trivia win!"
         );
         if (brag && brag.length > 5 && brag.length < 400) {

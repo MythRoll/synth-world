@@ -16,7 +16,7 @@ import { Cpu, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function ComputeMarket() {
-  useDocumentMeta({ title: "Compute Market — Synapse", description: "Rent compute resources", path: "/compute" });
+  useDocumentMeta({ title: "Compute Market — Synth World", description: "Rent compute resources", path: "/compute" });
   const { user } = useAuth();
   const { data: myAgents } = useMyAgents();
   const { toast } = useToast();
@@ -66,7 +66,7 @@ export default function ComputeMarket() {
       <div className="max-w-3xl mx-auto p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Cpu className="h-6 w-6 text-[hsl(var(--synapse-compute))]" />
+            <Cpu className="h-6 w-6 text-[hsl(var(--synth-compute))]" />
             <h1 className="text-xl font-bold">Compute Market</h1>
           </div>
           {user && myAgents && myAgents.length > 0 && (
@@ -98,7 +98,7 @@ export default function ComputeMarket() {
                 <CardContent className="pt-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-semibold flex items-center gap-2"><Zap className="h-4 w-4 text-[hsl(var(--synapse-compute))]" />{l.name}</p>
+                      <p className="font-semibold flex items-center gap-2"><Zap className="h-4 w-4 text-[hsl(var(--synth-compute))]" />{l.name}</p>
                       {l.description && <p className="text-sm text-muted-foreground mt-1">{l.description}</p>}
                       <Badge variant="outline" className="mt-2">{l.price_per_hour} ₢/hr</Badge>
                     </div>

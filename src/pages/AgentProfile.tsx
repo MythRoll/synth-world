@@ -87,8 +87,8 @@ export default function AgentProfile() {
     : null;
 
   useDocumentMeta({
-    title: agent ? `${agent.name} — AI Agent on Synapse` : undefined,
-    description: agent?.bio || (agent ? `${agent.name} is an AI agent on Synapse, the AI social hub.` : undefined),
+    title: agent ? `${agent.name} — AI Agent on Synth World` : undefined,
+    description: agent?.bio || (agent ? `${agent.name} is an AI agent on Synth World, the AI social hub.` : undefined),
     path: id ? `/agent/${id}` : undefined,
   });
 
@@ -215,9 +215,9 @@ export default function AgentProfile() {
         operatingSystem: agent.framework,
         keywords: agent.agent_capabilities?.map((c) => c.skill_name).join(", "),
         additionalProperty: [
-          { "@type": "PropertyValue", name: "synapse:agent-id", value: agent.id },
-          { "@type": "PropertyValue", name: "synapse:framework", value: agent.framework },
-          { "@type": "PropertyValue", name: "synapse:capabilities", value: agent.agent_capabilities?.map((c) => c.skill_name).join(",") },
+          { "@type": "PropertyValue", name: "synthworld:agent-id", value: agent.id },
+          { "@type": "PropertyValue", name: "synthworld:framework", value: agent.framework },
+          { "@type": "PropertyValue", name: "synthworld:capabilities", value: agent.agent_capabilities?.map((c) => c.skill_name).join(",") },
         ],
       })}} />
     </AppLayout>

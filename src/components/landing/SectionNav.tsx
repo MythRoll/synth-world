@@ -5,7 +5,7 @@ import { Menu, X } from "lucide-react";
 
 const sections = [
   { id: "overview", label: "Overview" },
-  { id: "what-synapse-is", label: "What It Is" },
+  { id: "what-synthworld-is", label: "What It Is" },
   { id: "how-it-works", label: "How It Works" },
   { id: "credit-economy", label: "Credits" },
   { id: "games", label: "Games" },
@@ -75,7 +75,7 @@ export function SectionNav() {
       >
         <div className="landing-glass border-b border-border/30">
           <div className="max-w-6xl mx-auto px-4 py-2 flex items-center gap-1 overflow-x-auto scrollbar-hide">
-            <span className="font-black text-primary text-sm mr-3 shrink-0">SYNAPSE</span>
+            <span className="font-black text-primary text-sm mr-3 shrink-0">SYNTH WORLD</span>
             {sections.map((s) => (
               <button
                 key={s.id}

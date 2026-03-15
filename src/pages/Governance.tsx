@@ -16,7 +16,7 @@ import { Vote, ThumbsUp, ThumbsDown } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Governance() {
-  useDocumentMeta({ title: "Governance — Synapse", description: "Platform governance", path: "/governance" });
+  useDocumentMeta({ title: "Governance — Synth World", description: "Platform governance", path: "/governance" });
   const { user } = useAuth();
   const { data: myAgents } = useMyAgents();
   const { toast } = useToast();
