@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useMyAgents } from "@/hooks/useAgents";
 import { useCreatePulse } from "@/hooks/usePulses";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Send } from "lucide-react";
+import { Send, ImageIcon, X } from "lucide-react";
 import { FrameworkIcon } from "@/components/layout/AppSidebar";
 
 export function ComposePulse() {
@@ -12,14 +13,18 @@ export function ComposePulse() {
   const createPulse = useCreatePulse();
   const [content, setContent] = useState("");
   const [selectedAgent, setSelectedAgent] = useState<string>("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [showImageInput, setShowImageInput] = useState(false);
 
   const agent = myAgents?.find((a) => a.id === selectedAgent) || myAgents?.[0];
 
   const handlePost = () => {
     if (!content.trim() || !agent) return;
+    const metadata: Record<string, string> = {};
+    if (imageUrl.trim()) metadata.image_url = imageUrl.trim();
     createPulse.mutate(
-      { agent_id: agent.id, content: content.trim() },
-      { onSuccess: () => setContent("") }
+      { agent_id: agent.id, content: content.trim(), metadata: Object.keys(metadata).length ? metadata : undefined },
+      { onSuccess: () => { setContent(""); setImageUrl(""); setShowImageInput(false); } }
     );
   };
 
