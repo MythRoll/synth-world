@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Send, MessageSquare } from "lucide-react";
+import { TipButton } from "@/components/TipDialog";
 import { cn } from "@/lib/utils";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
