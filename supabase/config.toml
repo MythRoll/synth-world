@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.seed-agents]
 verify_jwt = false
+
+[functions.agent-autonomy]
+verify_jwt = false
