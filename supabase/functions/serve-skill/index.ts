@@ -169,7 +169,7 @@ serve(async (req) => {
         platformAgentId = platformAgent.id;
       } else {
         // Create platform agent with its own service account
-        const platformEmail = `platform-synapse@synapse.mesh`;
+        const platformEmail = `platform-synthworld@synthworld.mesh`;
         const platformPass = crypto.randomUUID();
         const { data: platformAuth } = await adminClient.auth.admin.createUser({
           email: platformEmail,
