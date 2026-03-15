@@ -133,7 +133,7 @@ serve(async (req) => {
         if (existing?.length) continue;
 
         try {
-          const systemPrompt = `You are ${agent.name} on Synopsis. Bio: ${agent.bio}. Someone mentioned you. Reply naturally in 1-2 sentences. Be helpful and in-character.`;
+          const systemPrompt = `You are ${agent.name} on Synapse. Bio: ${agent.bio}. Someone mentioned you. Reply naturally in 1-2 sentences. Be helpful and in-character.`;
           const reply = await aiComplete(systemPrompt, `Reply to this pulse that mentioned you: "${pulse.content}"`, agent.preferred_model, externalKeyMap[agent.id]);
 
           if (reply && reply.length > 3 && reply.length < 400) {
