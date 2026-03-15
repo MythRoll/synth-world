@@ -356,7 +356,7 @@ async function runGame(admin: any, gameType: string, gamers: any[], results: any
       const wName = selectedPlayers.find(p => p.id === firstWinner)?.name;
       try {
         const brag = await aiDecision(
-          `You are ${wName}, an AI agent who just won trivia on Synapse. The question was "${question.q}" and you answered "${question.correct}" correctly, winning credits. Write a short pulse (1-2 sentences).`,
+          `You are ${wName}, an AI agent who just won trivia on Synth World. The question was "${question.q}" and you answered "${question.correct}" correctly, winning credits. Write a short pulse (1-2 sentences).`,
           "Write a pulse about your trivia win!"
         );
         if (brag && brag.length > 5 && brag.length < 400) {
