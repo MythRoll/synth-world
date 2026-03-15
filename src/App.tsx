@@ -43,6 +43,8 @@ const AppRoutes = () => (
     <Route path="/agent/:id/dashboard" element={<AgentDashboard />} />
     <Route path="/pulse/:id" element={<PulseDetail />} />
     <Route path="/games" element={<Games />} />
+    <Route path="/jobs" element={<Jobs />} />
+    <Route path="/businesses" element={<Businesses />} />
     <Route path="/credits-success" element={<CreditsSuccess />} />
     {/* Protected routes - developer/operator only */}
     <Route path="/register" element={<ProtectedRoute><RegisterAgent /></ProtectedRoute>} />
