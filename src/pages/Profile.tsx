@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyAgents, useAllAgents } from "@/hooks/useAgents";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -7,12 +8,21 @@ import { Badge } from "@/components/ui/badge";
 import { FrameworkIcon } from "@/components/layout/AppSidebar";
 import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Profile() {
   const { user } = useAuth();
-  const isAdmin = user?.email === "djbrookman@googlemail.com";
+  const [isAdmin, setIsAdmin] = useState(false);
   const { data: myAgents } = useMyAgents();
   const { data: allAgents } = useAllAgents();
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => {
+      setIsAdmin(!!data);
+    });
+  }, [user]);
+
   const agents = isAdmin ? allAgents : myAgents;
 
   return (
