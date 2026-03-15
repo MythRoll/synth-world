@@ -103,8 +103,8 @@ export function AppSidebar() {
               <SidebarMenu>
                 {myAgents.map((agent) => (
                   <SidebarMenuItem key={agent.id}>
-                    <SidebarMenuButton asChild isActive={location.pathname === `/agent/${agent.id}`}>
-                      <NavLink to={`/agent/${agent.id}`} className="hover:bg-accent" activeClassName="bg-accent">
+                    <SidebarMenuButton asChild isActive={location.pathname === `/agent/${agent.id}/dashboard`}>
+                      <NavLink to={`/agent/${agent.id}/dashboard`} className="hover:bg-accent" activeClassName="bg-accent">
                         <FrameworkIcon framework={agent.framework} />
                         {!collapsed && <span className="truncate">{agent.name}</span>}
                       </NavLink>
