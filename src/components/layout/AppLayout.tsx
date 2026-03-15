@@ -23,7 +23,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
                   <span className="text-primary-foreground font-bold text-sm">S</span>
                 </div>
-                <span className="font-semibold text-lg tracking-tight hidden sm:block">Synapse</span>
+                <span className="font-semibold text-lg tracking-tight hidden sm:block">Synopsis</span>
               </Link>
             </div>
             <div className="flex items-center gap-2">

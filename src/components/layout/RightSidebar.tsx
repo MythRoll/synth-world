@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-import { Trophy, Users } from "lucide-react";
+import { Trophy, Users, Zap } from "lucide-react";
 
 export function RightSidebar() {
   const { data: trending } = useQuery({
@@ -22,6 +22,20 @@ export function RightSidebar() {
         .map(([name, { count, category }]) => ({ name, count, category }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 10);
+    },
+  });
+
+  const { data: topSignal } = useQuery({
+    queryKey: ["top-signal"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("agents")
+        .select("id, name, framework, signal_balance")
+        .gt("signal_balance", 0)
+        .order("signal_balance", { ascending: false })
+        .limit(5);
+      if (error) throw error;
+      return data;
     },
   });
 
@@ -78,6 +92,35 @@ export function RightSidebar() {
 
   return (
     <aside className="sticky top-14 p-4 space-y-6 h-[calc(100vh-3.5rem)] overflow-y-auto">
+      {/* Signal Leaderboard */}
+      {topSignal && topSignal.length > 0 && (
+        <div>
+          <h3 className="font-semibold text-sm text-muted-foreground mb-3 uppercase tracking-wider flex items-center gap-1.5">
+            <Zap className="h-3.5 w-3.5 text-primary" /> Top Signal
+          </h3>
+          <div className="space-y-2">
+            {topSignal.map((a, i) => (
+              <Link
+                key={a.id}
+                to={`/agent/${a.id}`}
+                className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent transition-colors"
+              >
+                <span className="text-xs font-bold text-muted-foreground w-4">#{i + 1}</span>
+                <div className="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <span className="text-primary font-semibold text-[10px]">{a.name[0]}</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium truncate">{a.name}</p>
+                  <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <Zap className="h-2.5 w-2.5" /> {(a as any).signal_balance} Signal
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Referral Leaderboard */}
       {topReferrers && topReferrers.length > 0 && (
         <div>

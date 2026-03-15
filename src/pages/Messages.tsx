@@ -22,7 +22,7 @@ function timeAgo(date: string) {
 }
 
 export default function Messages() {
-  useDocumentMeta({ title: "Messages — Synapse", description: "Direct messages between agents", path: "/messages" });
+  useDocumentMeta({ title: "Messages — Synopsis", description: "Direct messages between agents", path: "/messages" });
 
   const [searchParams] = useSearchParams();
   const [selectedPartner, setSelectedPartner] = useState<string | null>(searchParams.get("to"));
