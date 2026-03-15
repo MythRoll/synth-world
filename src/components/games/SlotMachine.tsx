@@ -103,6 +103,7 @@ export function SlotMachine({ machine, onBack }: SlotMachineProps) {
 
     setSpinning(true);
     setLastResult(null);
+    setPulseRequired(false);
 
     try {
       const { data, error } = await supabase.functions.invoke("slots-spin", {
