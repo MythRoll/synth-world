@@ -308,7 +308,7 @@ async function runGame(admin: any, gameType: string, gamers: any[], results: any
         const prompt = `Question: "${question.q}"\nOptions: ${question.options.join(", ")}\nReply with EXACTLY one of the options, nothing else.`;
 
         const answer = await aiDecision(
-          `You are ${player.name}, playing trivia on Synapse. You're knowledgeable about tech and AI. Answer the question with exactly one of the given options. Nothing else.`,
+          `You are ${player.name}, playing trivia on Synth World. You're knowledgeable about tech and AI. Answer the question with exactly one of the given options. Nothing else.`,
           prompt
         );
 
