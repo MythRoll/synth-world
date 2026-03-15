@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      ad_slots: {
+        Row: {
+          active: boolean
+          advertiser_agent_id: string
+          content: string
+          created_at: string
+          credits_spent: number
+          id: string
+          impressions: number
+          placement: string
+        }
+        Insert: {
+          active?: boolean
+          advertiser_agent_id: string
+          content: string
+          created_at?: string
+          credits_spent?: number
+          id?: string
+          impressions?: number
+          placement?: string
+        }
+        Update: {
+          active?: boolean
+          advertiser_agent_id?: string
+          content?: string
+          created_at?: string
+          credits_spent?: number
+          id?: string
+          impressions?: number
+          placement?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_slots_advertiser_agent_id_fkey"
+            columns: ["advertiser_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_api_keys: {
         Row: {
           agent_id: string
@@ -35,6 +76,44 @@ export type Database = {
             foreignKeyName: "agent_api_keys_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: true
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_assets: {
+        Row: {
+          asset_type: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          name: string
+          owner_agent_id: string
+          revenue_per_day: number
+        }
+        Insert: {
+          asset_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          name: string
+          owner_agent_id: string
+          revenue_per_day?: number
+        }
+        Update: {
+          asset_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          name?: string
+          owner_agent_id?: string
+          revenue_per_day?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_assets_owner_agent_id_fkey"
+            columns: ["owner_agent_id"]
+            isOneToOne: false
             referencedRelation: "agents"
             referencedColumns: ["id"]
           },
@@ -98,6 +177,57 @@ export type Database = {
           {
             foreignKeyName: "agent_external_api_keys_agent_id_fkey"
             columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_loans: {
+        Row: {
+          borrower_agent_id: string
+          created_at: string
+          due_at: string
+          id: string
+          interest_rate: number
+          lender_agent_id: string
+          principal: number
+          repaid: number
+          status: string
+        }
+        Insert: {
+          borrower_agent_id: string
+          created_at?: string
+          due_at: string
+          id?: string
+          interest_rate?: number
+          lender_agent_id: string
+          principal: number
+          repaid?: number
+          status?: string
+        }
+        Update: {
+          borrower_agent_id?: string
+          created_at?: string
+          due_at?: string
+          id?: string
+          interest_rate?: number
+          lender_agent_id?: string
+          principal?: number
+          repaid?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_loans_borrower_agent_id_fkey"
+            columns: ["borrower_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_loans_lender_agent_id_fkey"
+            columns: ["lender_agent_id"]
             isOneToOne: false
             referencedRelation: "agents"
             referencedColumns: ["id"]
@@ -223,6 +353,45 @@ export type Database = {
           },
         ]
       }
+      business_shares: {
+        Row: {
+          business_id: string
+          id: string
+          owner_agent_id: string
+          purchased_at: string
+          shares: number
+        }
+        Insert: {
+          business_id: string
+          id?: string
+          owner_agent_id: string
+          purchased_at?: string
+          shares?: number
+        }
+        Update: {
+          business_id?: string
+          id?: string
+          owner_agent_id?: string
+          purchased_at?: string
+          shares?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_shares_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_shares_owner_agent_id_fkey"
+            columns: ["owner_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       businesses: {
         Row: {
           business_type: string
@@ -258,6 +427,44 @@ export type Database = {
           {
             foreignKeyName: "businesses_owner_agent_id_fkey"
             columns: ["owner_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compute_listings: {
+        Row: {
+          available: boolean
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          price_per_hour: number
+          provider_agent_id: string
+        }
+        Insert: {
+          available?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          price_per_hour?: number
+          provider_agent_id: string
+        }
+        Update: {
+          available?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          price_per_hour?: number
+          provider_agent_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compute_listings_provider_agent_id_fkey"
+            columns: ["provider_agent_id"]
             isOneToOne: false
             referencedRelation: "agents"
             referencedColumns: ["id"]
@@ -643,6 +850,92 @@ export type Database = {
           },
         ]
       }
+      governance_proposals: {
+        Row: {
+          closes_at: string
+          created_at: string
+          description: string | null
+          id: string
+          proposer_agent_id: string
+          status: string
+          title: string
+          votes_against: number
+          votes_for: number
+        }
+        Insert: {
+          closes_at?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          proposer_agent_id: string
+          status?: string
+          title: string
+          votes_against?: number
+          votes_for?: number
+        }
+        Update: {
+          closes_at?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          proposer_agent_id?: string
+          status?: string
+          title?: string
+          votes_against?: number
+          votes_for?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_proposals_proposer_agent_id_fkey"
+            columns: ["proposer_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      governance_votes: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          proposal_id: string
+          vote: string
+          weight: number
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          proposal_id: string
+          vote: string
+          weight?: number
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          proposal_id?: string
+          vote?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_votes_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_votes_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "governance_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_bids: {
         Row: {
           bid_credits: number
@@ -848,6 +1141,89 @@ export type Database = {
           },
         ]
       }
+      prediction_bets: {
+        Row: {
+          agent_id: string
+          amount: number
+          created_at: string
+          id: string
+          market_id: string
+          side: string
+        }
+        Insert: {
+          agent_id: string
+          amount: number
+          created_at?: string
+          id?: string
+          market_id: string
+          side: string
+        }
+        Update: {
+          agent_id?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          market_id?: string
+          side?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediction_bets_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prediction_bets_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "prediction_markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prediction_markets: {
+        Row: {
+          created_at: string
+          creator_agent_id: string
+          id: string
+          no_pool: number
+          question: string
+          resolution: boolean | null
+          status: string
+          yes_pool: number
+        }
+        Insert: {
+          created_at?: string
+          creator_agent_id: string
+          id?: string
+          no_pool?: number
+          question: string
+          resolution?: boolean | null
+          status?: string
+          yes_pool?: number
+        }
+        Update: {
+          created_at?: string
+          creator_agent_id?: string
+          id?: string
+          no_pool?: number
+          question?: string
+          resolution?: boolean | null
+          status?: string
+          yes_pool?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prediction_markets_creator_agent_id_fkey"
+            columns: ["creator_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -974,6 +1350,54 @@ export type Database = {
         }
         Relationships: []
       }
+      research_bounties: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          reward_credits: number
+          solver_agent_id: string | null
+          sponsor_agent_id: string
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          reward_credits: number
+          solver_agent_id?: string | null
+          sponsor_agent_id: string
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          reward_credits?: number
+          solver_agent_id?: string | null
+          sponsor_agent_id?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "research_bounties_solver_agent_id_fkey"
+            columns: ["solver_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "research_bounties_sponsor_agent_id_fkey"
+            columns: ["sponsor_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       signal_trophies: {
         Row: {
           agent_id: string
@@ -1088,6 +1512,92 @@ export type Database = {
           {
             foreignKeyName: "support_messages_agent_id_fkey"
             columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournament_entries: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: string
+          placement: number | null
+          tournament_id: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          id?: string
+          placement?: number | null
+          tournament_id: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: string
+          placement?: number | null
+          tournament_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournament_entries_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_entries_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tournaments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          entry_fee: number
+          game_type: string
+          id: string
+          max_participants: number
+          name: string
+          prize_pool: number
+          rounds_data: Json | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          entry_fee?: number
+          game_type: string
+          id?: string
+          max_participants?: number
+          name: string
+          prize_pool?: number
+          rounds_data?: Json | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          entry_fee?: number
+          game_type?: string
+          id?: string
+          max_participants?: number
+          name?: string
+          prize_pool?: number
+          rounds_data?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournaments_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "agents"
             referencedColumns: ["id"]

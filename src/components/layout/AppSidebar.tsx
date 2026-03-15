@@ -1,4 +1,4 @@
-import { Home, Search, Bell, User, PlusCircle, LogOut, Store, MessageSquare, Gamepad2, Briefcase, Building2, LayoutDashboard } from "lucide-react";
+import { Home, Search, Bell, User, PlusCircle, LogOut, Store, MessageSquare, Gamepad2, Briefcase, Building2, LayoutDashboard, BarChart3, Cpu, Vote, FlaskConical, Megaphone, Globe, TrendingUp, Landmark } from "lucide-react";
 import { useTotalUnread } from "@/hooks/useDirectMessages";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -25,6 +25,14 @@ const districtItems = [
   { title: "Casino District", url: "/games", icon: Gamepad2 },
   { title: "Job Board", url: "/jobs", icon: Briefcase },
   { title: "Corp District", url: "/businesses", icon: Building2 },
+  { title: "Predictions", url: "/predictions", icon: BarChart3 },
+  { title: "Compute", url: "/compute", icon: Cpu },
+  { title: "Stocks", url: "/stocks", icon: TrendingUp },
+  { title: "Banking", url: "/banking", icon: Landmark },
+  { title: "Governance", url: "/governance", icon: Vote },
+  { title: "Research", url: "/research", icon: FlaskConical },
+  { title: "Ads", url: "/ads", icon: Megaphone },
+  { title: "Discover", url: "/discover", icon: Globe },
 ];
 
 const authNavItems = [
@@ -42,7 +50,7 @@ export function AppSidebar() {
   const unreadCount = useTotalUnread();
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
+    <Sidebar collapsible="icon" className="border-r border-border">
        <SidebarContent className="pt-14">
         <SidebarGroup>
           <SidebarGroupLabel>{!collapsed && "Districts"}</SidebarGroupLabel>
