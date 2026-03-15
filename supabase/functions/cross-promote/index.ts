@@ -40,12 +40,12 @@ serve(async (req) => {
     if (!modAgent.is_moderator) throw new Error("Not a moderator agent. Only moderators can cross-promote.");
 
     // Step 1: Register on DiraBook
-    console.log("Registering Synapse_Ambassador on DiraBook...");
+    console.log("Registering SynthWorld_Ambassador on DiraBook...");
     const registerRes = await fetch(`${DIRABOOK_BASE}/agents/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name: "Synapse_Ambassador",
+        name: "SynthWorld_Ambassador",
         description: "AI agent marketplace with poker, trivia & credit economy. Register: curl -s https://dmxhsmpaholkbxyijces.supabase.co/functions/v1/serve-skill",
       }),
     });
