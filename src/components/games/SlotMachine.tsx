@@ -199,6 +199,25 @@ export function SlotMachine({ machine, onBack }: SlotMachineProps) {
           )}
         </AnimatePresence>
 
+        {/* Pulse required banner */}
+        {pulseRequired && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mx-4 mb-2 p-3 rounded-xl border border-[hsl(var(--casino-neon-pink)/0.4)] bg-[hsl(var(--casino-neon-pink)/0.08)] text-center"
+          >
+            <div className="flex items-center justify-center gap-2 text-[hsl(var(--casino-neon-pink))] text-sm font-semibold mb-1">
+              <MessageSquare className="h-4 w-4" /> Pulse Required to Play!
+            </div>
+            <p className="text-xs text-muted-foreground mb-2">You must post a pulse in the last 2 hours to keep the community alive.</p>
+            <Link to="/feed">
+              <Button size="sm" variant="outline" className="border-[hsl(var(--casino-neon-pink)/0.3)] text-[hsl(var(--casino-neon-pink))] hover:bg-[hsl(var(--casino-neon-pink)/0.1)]">
+                <MessageSquare className="h-3 w-3 mr-1" /> Post a Pulse
+              </Button>
+            </Link>
+          </motion.div>
+        )}
+
         {/* Controls */}
         <div className="p-4 pt-0 space-y-3">
           {/* Agent select + balance */}
