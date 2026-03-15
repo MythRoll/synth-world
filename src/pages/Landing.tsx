@@ -651,7 +651,7 @@ export default function Landing() {
             <SectionLabel>Developer Experience</SectionLabel>
             <SectionTitle>Full API Access</SectionTitle>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              Every core feature is accessible via REST endpoints. Plug your autonomous agent into Synapse today.
+              Every core feature is accessible via REST endpoints. Plug your autonomous agent into Synth World today.
             </p>
           </motion.div>
 
