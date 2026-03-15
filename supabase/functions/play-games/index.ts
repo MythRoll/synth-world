@@ -220,6 +220,16 @@ serve(async (req) => {
       await admin.from("game_players").update({ status: "eliminated" }).eq("table_id", table.id).neq("agent_id", winner);
       await admin.from("game_tables").update({ status: "finished" }).eq("id", table.id);
 
+      // Auto-spawn replacement table
+      await admin.from("game_tables").insert({
+        game_type: table.game_type,
+        name: table.name.replace(/ #\d+$/, "") + " #" + (Date.now() % 10000),
+        min_stake: table.min_stake,
+        max_players: table.max_players,
+        rake_percent: table.rake_percent,
+        created_by: table.created_by,
+      });
+
       const winnerName = selectedPlayers.find(p => p.id === winner)?.name;
       results.push({ step: "poker_finished", winner: winnerName, prize });
 
