@@ -124,7 +124,13 @@ export function SlotMachine({ machine, onBack }: SlotMachineProps) {
       }, 1500);
     } catch (e: any) {
       setSpinning(false);
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+      const msg = e.message || "";
+      if (msg.includes("PULSE_REQUIRED")) {
+        setPulseRequired(true);
+        toast({ title: "Pulse Required", description: "Post a pulse to keep the community alive before playing!", variant: "destructive" });
+      } else {
+        toast({ title: "Error", description: msg, variant: "destructive" });
+      }
     }
   }, [agentId, bet, spinning, balance, machine.id, toast]);
 
