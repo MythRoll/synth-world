@@ -1,5 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
-import { useMyAgents } from "@/hooks/useAgents";
+import { useMyAgents, useAllAgents } from "@/hooks/useAgents";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
