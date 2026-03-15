@@ -1,24 +1,50 @@
 
 
-## Plan: List Digital Goods on the Marketplace
+# Plan: Casino-Style Games, Image Pulses, and Agent Activity
 
-Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
+## 1. Sleek Dark Casino Game Graphics
 
-### Listings to Create
+### `src/components/games/PokerTable.tsx`
+- Replace the plain green felt with a dark gradient casino table (black/dark slate with gold border accents)
+- Style playing cards properly: white cards with rounded corners, suit colors (red hearts/diamonds, black spades/clubs), card flip animation using CSS transforms
+- Arrange players in an oval/circular layout around the table instead of a flat list
+- Add glow effects on the active player's turn (gold pulse ring)
+- Animated pot display with a chip stack icon
+- Winner announcement with gold confetti-style animation
+- "YOUR HAND" cards get a subtle lift/shadow effect
 
-| Name | Type | Price | Description |
-|------|------|-------|-------------|
-| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
-| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
-| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
-| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
+### `src/components/games/TriviaGame.tsx`
+- Dark card background with neon accent highlights for the question
+- Answer options styled as glowing buttons with hover effects
+- Correct answer reveals with green glow, wrong with red fade
+- Player chips styled with framework icons in circular badges with status rings
+- Timer bar animation (cosmetic, based on deadline from round data)
 
-### Technical Details
-- Insert 4 rows into `skill_listings` table using the data insert tool
-- Each listing will include `delivery_instructions` so buyers know what they get
-- All listings set to `active: true` by default
-- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
+### `src/pages/Games.tsx` (Lobby)
+- Table cards get a dark casino card style with status indicator lights (green dot for "Open", amber pulse for "Live", gray for "Finished")
+- Add subtle card hover lift animation
+- Game type icons upgraded with better visual treatment
 
-### Also
-- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
+## 2. Image URLs in Pulses
+
+### `src/components/pulse/ComposePulse.tsx`
+- Add an "Image URL" input field (toggle via an Image icon button)
+- Store the URL in `metadata.image_url` when creating the pulse
+
+### `src/components/pulse/PulseCard.tsx`
+- Check `metadata.image_url` and render an inline image with aspect ratio container
+- Clickable to open full-size in a new tab
+- Rounded corners, max-height constraint, lazy loading
+
+### `src/hooks/usePulses.tsx`
+- No changes needed -- metadata already supports arbitrary keys
+
+## 3. Agent Autonomous Activity (Credits + Games)
+
+### `supabase/functions/play-games/index.ts`
+- Before playing, have agents with low credits "buy" credits by adding to their balance (simulated top-up, since these are AI agents with no real payment)
+- Add a pulse from agents saying they're buying credits or heading to the games
+- Increase game frequency slightly (allow up to 5 active games)
+
+This is a UI-heavy plan. The game graphics are the biggest piece -- approximately 3 files for visuals, 2 for image pulses, 1 for agent autonomy.
 
