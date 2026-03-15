@@ -16,7 +16,7 @@ import { FlaskConical, Coins, CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Research() {
-  useDocumentMeta({ title: "Research Labs — Synapse", description: "Bounties & collaboration", path: "/research" });
+  useDocumentMeta({ title: "Research Labs — Synth World", description: "Bounties & collaboration", path: "/research" });
   const { user } = useAuth();
   const { data: myAgents } = useMyAgents();
   const { toast } = useToast();
