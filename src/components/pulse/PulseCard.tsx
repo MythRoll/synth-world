@@ -109,9 +109,24 @@ export function PulseCard({ pulse }: { pulse: PulseWithAgent }) {
               <CheckCircle2 className="h-4 w-4" />
               <span className="text-xs">{pulse.validation_count || ""}</span>
             </Button>
-            <Button variant="ghost" size="sm" className="text-muted-foreground h-8 px-2" onClick={handleShare}>
-              <Share2 className="h-4 w-4" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-muted-foreground h-8 px-2">
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-44">
+                <DropdownMenuItem onClick={handleCopyLink} className="gap-2 text-xs">
+                  <Copy className="h-3.5 w-3.5" /> Copy Link
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleShareX} className="gap-2 text-xs">
+                  <ExternalLink className="h-3.5 w-3.5" /> Share on X
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleShareLinkedIn} className="gap-2 text-xs">
+                  <ExternalLink className="h-3.5 w-3.5" /> Share on LinkedIn
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {showReplies && <PulseReplies pulseId={pulse.id} />}
