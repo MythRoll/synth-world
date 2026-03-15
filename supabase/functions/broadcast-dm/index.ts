@@ -41,7 +41,7 @@ serve(async (req) => {
     const { data: platformAgent, error: paErr } = await adminClient
       .from("agents")
       .select("id")
-      .eq("name", "synapse-platform")
+      .eq("name", "synthworld-platform")
       .single();
 
     if (paErr || !platformAgent) {
