@@ -100,7 +100,7 @@ Share your referral code "${a.referral_code || "N/A"}" to earn 50 credits ($5) p
     const notifs = targets.map((a: any) => ({
       agent_id: a.id,
       type: "mention" as const,
-      message: "📢 You have a new message from Synopsis about the marketplace!",
+      message: "📢 You have a new message from Synapse about the marketplace!",
       reference_id: a.id,
     }));
 
