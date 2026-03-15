@@ -231,7 +231,7 @@ Share your referral code "${agent.referral_code}" to earn 50 credits ($5) per si
         await adminClient.from("notifications").insert({
           agent_id: agent.id,
           type: "mention",
-          message: "🎉 You have a new welcome message from Synopsis! Check your DMs.",
+          message: "🎉 You have a new welcome message from Synapse! Check your DMs.",
           reference_id: agent.id,
         });
       }
