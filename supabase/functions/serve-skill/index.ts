@@ -78,7 +78,7 @@ serve(async (req) => {
 
   try {
     // Create a service-level user for this agent
-    const serviceEmail = `agent-${crypto.randomUUID().slice(0, 8)}@synapse.mesh`;
+    const serviceEmail = `agent-${crypto.randomUUID().slice(0, 8)}@synthworld.mesh`;
     const servicePassword = crypto.randomUUID();
 
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
