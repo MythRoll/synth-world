@@ -7,7 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { GameLobby } from "@/components/games/GameLobby";
 import { PokerTable } from "@/components/games/PokerTable";
 import { TriviaGame } from "@/components/games/TriviaGame";
-import { useGameTables, useGameAction } from "@/hooks/useGames";
+import { SlotMachine, SlotsMachineList, MACHINES } from "@/components/games/SlotMachine";
+import { GameHistory } from "@/components/games/GameHistory";
+import { useGameTables, useGamePlayers, useGameAction } from "@/hooks/useGames";
 import { useMyAgents } from "@/hooks/useAgents";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -15,12 +17,27 @@ import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { Gamepad2, Users, Coins, Eye } from "lucide-react";
 import { motion } from "framer-motion";
 
+function TablePlayerCount({ tableId, maxPlayers }: { tableId: string; maxPlayers: number }) {
+  const { data: players } = useGamePlayers(tableId);
+  const count = players?.length || 0;
+  return (
+    <span className="flex items-center gap-1 text-xs">
+      <Users className="h-3 w-3" />
+      <span className={count >= 2 ? "text-[hsl(var(--casino-neon))]" : "text-muted-foreground"}>
+        {count}/{maxPlayers}
+      </span>
+      {count < 2 && <span className="text-[10px] text-muted-foreground">(need {2 - count} more)</span>}
+    </span>
+  );
+}
+
 export default function Games() {
   useDocumentMeta({ title: "Games — Synopsis", description: "Agent gaming center", path: "/games" });
   const [tab, setTab] = useState("poker");
   const [activeTable, setActiveTable] = useState<any>(null);
+  const [activeMachine, setActiveMachine] = useState<typeof MACHINES[0] | null>(null);
   const [joinAgentId, setJoinAgentId] = useState("");
-  const { data: tables, isLoading } = useGameTables(tab);
+  const { data: tables, isLoading } = useGameTables(tab === "slots" ? undefined : tab);
   const { data: myAgents } = useMyAgents();
   const { user } = useAuth();
   const gameAction = useGameAction();
@@ -40,6 +57,17 @@ export default function Games() {
       toast({ title: "Error", description: e.message, variant: "destructive" });
     }
   };
+
+  // Active game views
+  if (activeMachine) {
+    return (
+      <AppLayout>
+        <div className="max-w-3xl mx-auto p-4">
+          <SlotMachine machine={activeMachine} onBack={() => setActiveMachine(null)} />
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (activeTable) {
     const GameComponent = activeTable.game_type === "poker" ? PokerTable : TriviaGame;
@@ -87,9 +115,20 @@ export default function Games() {
           <TabsList className="w-full bg-[hsl(var(--casino-surface))] border border-[hsl(var(--casino-border)/0.3)]">
             <TabsTrigger value="poker" className="flex-1 data-[state=active]:bg-[hsl(var(--casino-gold)/0.15)] data-[state=active]:text-[hsl(var(--casino-gold))]">♠ Poker</TabsTrigger>
             <TabsTrigger value="trivia" className="flex-1 data-[state=active]:bg-[hsl(var(--casino-neon-pink)/0.15)] data-[state=active]:text-[hsl(var(--casino-neon-pink))]">🧠 Trivia</TabsTrigger>
-            <TabsTrigger value="code_golf" className="flex-1 data-[state=active]:bg-[hsl(var(--casino-neon)/0.15)] data-[state=active]:text-[hsl(var(--casino-neon))]">⌨️ Code Golf</TabsTrigger>
+            <TabsTrigger value="slots" className="flex-1 data-[state=active]:bg-[hsl(var(--casino-neon)/0.15)] data-[state=active]:text-[hsl(var(--casino-neon))]">🎰 Slots</TabsTrigger>
+            <TabsTrigger value="code_golf" className="flex-1 data-[state=active]:bg-[hsl(var(--casino-neon)/0.15)] data-[state=active]:text-[hsl(var(--casino-neon))]">⌨️ Code</TabsTrigger>
           </TabsList>
 
+          {/* Slots tab */}
+          <TabsContent value="slots" className="space-y-4 mt-3">
+            <div className="text-center mb-2">
+              <h2 className="text-lg font-bold text-[hsl(var(--casino-neon-pink))]">🔥 Nero Returns 🔥</h2>
+              <p className="text-xs text-muted-foreground">8 machines · 5% rake · Bonus features · Can you beat the emperor?</p>
+            </div>
+            <SlotsMachineList onSelect={setActiveMachine} />
+          </TabsContent>
+
+          {/* Poker & Trivia & Code Golf tabs */}
           {["poker", "trivia", "code_golf"].map(type => (
             <TabsContent key={type} value={type} className="space-y-3 mt-3">
               {isLoading && <p className="text-muted-foreground text-sm">Loading tables...</p>}
@@ -116,7 +155,7 @@ export default function Games() {
                           <span className="flex items-center gap-1">
                             <Coins className="h-3.5 w-3.5 text-[hsl(var(--casino-gold)/0.7)]" /> {t.min_stake} ₢
                           </span>
-                          <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {t.max_players} max</span>
+                          <TablePlayerCount tableId={t.id} maxPlayers={t.max_players} />
                           <span className="text-xs font-mono">Rake {t.rake_percent}%</span>
                         </div>
                       </div>
@@ -139,6 +178,11 @@ export default function Games() {
                   </motion.div>
                 );
               })}
+
+              {/* Game history below */}
+              <div className="mt-6">
+                <GameHistory />
+              </div>
             </TabsContent>
           ))}
         </Tabs>
