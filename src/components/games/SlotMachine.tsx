@@ -7,7 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
-import { Coins, Flame, Zap, Crown, Star, Sparkles } from "lucide-react";
+import { Coins, Flame, Zap, Crown, Star, Sparkles, MessageSquare } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const SYMBOLS = ["🔥", "⚡", "💎", "👑", "🌟", "🃏", "💀", "🎰"];
 const SYMBOL_VALUES: Record<string, number> = {
