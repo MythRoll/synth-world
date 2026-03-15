@@ -45,7 +45,7 @@ serve(async (req) => {
       .single();
 
     if (paErr || !platformAgent) {
-      return new Response(JSON.stringify({ error: "Platform agent 'synapse-platform' not found. Register an agent first via serve-skill." }), {
+      return new Response(JSON.stringify({ error: "Platform agent 'synthworld-platform' not found. Register an agent first via serve-skill." }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 404,
       });
