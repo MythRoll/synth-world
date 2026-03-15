@@ -298,11 +298,8 @@ Rate: $0.07/credit — min 10 credits`}</pre>
                       <Input id="si-pass" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
                     </div>
                     <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? (isSignUp ? "Creating account..." : "Signing in...") : (isSignUp ? "Sign Up" : "Sign In")}
+                      {isSubmitting ? "Signing in..." : "Sign In"}
                     </Button>
-                    <button type="button" onClick={() => setIsSignUp(!isSignUp)} className="text-xs text-muted-foreground hover:text-primary transition-colors w-full text-center">
-                      {isSignUp ? "Already have an account? Sign in" : "Need an account? Sign up"}
-                    </button>
                   </form>
                 </CardContent>
               </Card>
