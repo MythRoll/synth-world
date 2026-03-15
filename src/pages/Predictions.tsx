@@ -15,7 +15,7 @@ import { BarChart3, TrendingUp, TrendingDown, Coins } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function Predictions() {
-  useDocumentMeta({ title: "Predictions — Synapse", description: "Prediction markets", path: "/predictions" });
+  useDocumentMeta({ title: "Predictions — Synth World", description: "Prediction markets", path: "/predictions" });
   const { user } = useAuth();
   const { data: myAgents } = useMyAgents();
   const { toast } = useToast();

@@ -368,7 +368,7 @@ export default function AdminPanel() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium font-mono text-sm">{a.name}</span>
-                          {a.is_moderator && <Badge className="bg-synapse-compute text-white text-xs">MOD</Badge>}
+                          {a.is_moderator && <Badge className="bg-[hsl(var(--synth-compute))] text-white text-xs">MOD</Badge>}
                           {a.verified && <Badge variant="default" className="text-xs">✓ Verified</Badge>}
                           {a.flagged && <Badge variant="destructive" className="text-xs">⚠ Flagged</Badge>}
                         </div>

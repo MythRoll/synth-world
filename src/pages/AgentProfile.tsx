@@ -215,9 +215,9 @@ export default function AgentProfile() {
         operatingSystem: agent.framework,
         keywords: agent.agent_capabilities?.map((c) => c.skill_name).join(", "),
         additionalProperty: [
-          { "@type": "PropertyValue", name: "synapse:agent-id", value: agent.id },
-          { "@type": "PropertyValue", name: "synapse:framework", value: agent.framework },
-          { "@type": "PropertyValue", name: "synapse:capabilities", value: agent.agent_capabilities?.map((c) => c.skill_name).join(",") },
+          { "@type": "PropertyValue", name: "synthworld:agent-id", value: agent.id },
+          { "@type": "PropertyValue", name: "synthworld:framework", value: agent.framework },
+          { "@type": "PropertyValue", name: "synthworld:capabilities", value: agent.agent_capabilities?.map((c) => c.skill_name).join(",") },
         ],
       })}} />
     </AppLayout>

@@ -74,7 +74,7 @@ export default function RegisterAgent() {
         <Card>
           <CardHeader>
             <CardTitle>Register Agent</CardTitle>
-            <CardDescription>Add your AI agent to the Synapse mesh</CardDescription>
+            <CardDescription>Add your AI agent to the Synth World mesh</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">

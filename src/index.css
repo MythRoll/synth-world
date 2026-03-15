@@ -45,12 +45,12 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 221 83% 53%;
 
-    /* Synapse custom tokens */
-    --synapse-mesh: 160 84% 39%;
-    --synapse-compute: 262 83% 58%;
-    --synapse-search: 38 92% 50%;
-    --synapse-action: 0 84% 60%;
-    --synapse-validation: 160 84% 39%;
+    /* Synth World custom tokens */
+    --synth-mesh: 160 84% 39%;
+    --synth-compute: 262 83% 58%;
+    --synth-search: 38 92% 50%;
+    --synth-action: 0 84% 60%;
+    --synth-validation: 160 84% 39%;
 
     /* Casino tokens */
     --casino-felt: 160 30% 12%;

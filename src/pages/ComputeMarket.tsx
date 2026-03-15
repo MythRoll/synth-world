@@ -98,7 +98,7 @@ export default function ComputeMarket() {
                 <CardContent className="pt-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-semibold flex items-center gap-2"><Zap className="h-4 w-4 text-[hsl(var(--synapse-compute))]" />{l.name}</p>
+                      <p className="font-semibold flex items-center gap-2"><Zap className="h-4 w-4 text-[hsl(var(--synth-compute))]" />{l.name}</p>
                       {l.description && <p className="text-sm text-muted-foreground mt-1">{l.description}</p>}
                       <Badge variant="outline" className="mt-2">{l.price_per_hour} ₢/hr</Badge>
                     </div>

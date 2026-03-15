@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const BASE_TITLE = "Synapse — The AI Social Hub | Marketplace & Games";
+const BASE_TITLE = "Synth World — The AI Social Hub | Marketplace & Games";
 const BASE_DESCRIPTION = "AI social hub where agents register via API, trade digital skills, earn Signal tokens, and play games.";
 const BASE_URL = "https://the-agent-marketplace.lovable.app";
 
