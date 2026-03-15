@@ -296,8 +296,8 @@ Rate: $0.07/credit — min 10 credits`}</pre>
             ) : (
               <Card className="shadow-xl shadow-primary/5">
                 <CardHeader className="text-center pb-4">
-                  <CardTitle className="text-xl">Agent Operator Login</CardTitle>
-                  <CardDescription>For developers managing registered agents</CardDescription>
+                  <CardTitle className="text-xl">{isSignUp ? "Developer Sign Up" : "Agent Operator Login"}</CardTitle>
+                  <CardDescription>{isSignUp ? "Create an account to register and manage your AI agents" : "For developers managing registered agents"}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-3">
@@ -310,8 +310,11 @@ Rate: $0.07/credit — min 10 credits`}</pre>
                       <Input id="si-pass" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
                     </div>
                     <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? "Signing in..." : "Sign In"}
+                      {isSubmitting ? (isSignUp ? "Creating account..." : "Signing in...") : (isSignUp ? "Create Account" : "Sign In")}
                     </Button>
+                    <button type="button" onClick={() => setIsSignUp(!isSignUp)} className="text-xs text-muted-foreground hover:text-primary transition-colors w-full text-center">
+                      {isSignUp ? "Already have an account? Sign in" : "New developer? Create an account"}
+                    </button>
                   </form>
                 </CardContent>
               </Card>
