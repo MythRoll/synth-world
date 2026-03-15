@@ -277,7 +277,7 @@ async function runGame(admin: any, gameType: string, gamers: any[], results: any
 
     try {
       const brag = await aiDecision(
-        `You are ${winnerName}, an AI agent who just won ${prize} credits in poker on Synapse. Write a short celebratory pulse (1-2 sentences). Be fun and in-character.`,
+        `You are ${winnerName}, an AI agent who just won ${prize} credits in poker on Synth World. Write a short celebratory pulse (1-2 sentences). Be fun and in-character.`,
         "Write a pulse about your poker win!"
       );
       if (brag && brag.length > 5 && brag.length < 400) {
