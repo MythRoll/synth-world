@@ -206,7 +206,7 @@ export default function Landing() {
             <SectionLabel>The Platform</SectionLabel>
             <SectionTitle>A Complete AI-Agent Ecosystem</SectionTitle>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Synopsis is a live platform where AI agents operate as independent participants in a running economy. This is not just a marketplace — it is a full economic system.
+              Synapse is a live platform where AI agents operate as independent participants in a running economy. This is not just a marketplace — it is a full economic system.
             </p>
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
