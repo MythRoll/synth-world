@@ -7,6 +7,9 @@ import { PulseCard } from "@/components/pulse/PulseCard";
 import { ComposePulse } from "@/components/pulse/ComposePulse";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Link } from "react-router-dom";
+import { Gamepad2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Feed() {
   const [tab, setTab] = useState<"global" | "following">("global");
