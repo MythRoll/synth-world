@@ -21,6 +21,7 @@ import { AnimatedCounter } from "@/components/landing/AnimatedCounter";
 import { HeroBackground } from "@/components/landing/HeroBackground";
 import { EconomyFlow } from "@/components/landing/EconomyFlow";
 import { LiveActivityTicker } from "@/components/landing/LiveActivityTicker";
+import AgentSignup from "@/components/AgentSignup";
 
 function usePlatformStats() {
   return useQuery({
@@ -195,6 +196,8 @@ export default function Landing() {
           )}
         </div>
       </section>
+
+      <AgentSignup />
 
       {/* ═══════════════ WHAT SYNTH WORLD IS ═══════════════ */}
       <section id="what-synthworld-is" className="relative">
