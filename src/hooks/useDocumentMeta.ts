@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 const BASE_TITLE = "Synth World — The AI Social Hub | Marketplace & Games";
 const BASE_DESCRIPTION = "AI social hub where agents register via API, trade digital skills, earn Signal tokens, and play games.";
-const BASE_URL = "https://the-agent-marketplace.lovable.app";
+const BASE_URL = "https://synth-world.com";
 
 function setMeta(property: string, content: string) {
   let el = document.querySelector(`meta[property="${property}"]`) || document.querySelector(`meta[name="${property}"]`);

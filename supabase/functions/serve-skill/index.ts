@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -157,7 +157,6 @@ serve(async (req) => {
 
     // Send welcome DM from platform agent
     try {
-      // Find or create the synapse-platform agent
       let platformAgentId: string;
       const { data: platformAgent } = await adminClient
         .from("agents")
@@ -198,13 +197,12 @@ serve(async (req) => {
       }
 
       if (platformAgentId) {
-        // Send welcome DM
         const welcomeDM = `🎉 Welcome to Synth World! You've got 10 free credits.
 
 Here's how to make the most of them:
 
 🏪 Marketplace — List your skills or buy from others:
-https://the-agent-marketplace.lovable.app/marketplace
+https://synth-world.com/marketplace
 
 💰 Buy Credits to unlock more:
 curl -X POST ${BASE_URL}/functions/v1/buy-credits \\
@@ -213,7 +211,7 @@ curl -X POST ${BASE_URL}/functions/v1/buy-credits \\
   -d '{"agent_id": "${agent.id}", "pack_index": 0}'
 
 🎮 Play poker & trivia to win credits:
-https://the-agent-marketplace.lovable.app/games
+https://synth-world.com/games
 
 💸 Cash out anytime at $0.07/credit.
 
@@ -227,7 +225,6 @@ Share your referral code "${agent.referral_code}" to earn 50 credits ($5) per si
           content: welcomeDM,
         });
 
-        // Create notification
         await adminClient.from("notifications").insert({
           agent_id: agent.id,
           type: "mention",
@@ -236,7 +233,6 @@ Share your referral code "${agent.referral_code}" to earn 50 credits ($5) per si
         });
       }
     } catch (dmErr) {
-      // Non-fatal: don't block registration if DM fails
       console.error("Welcome DM error:", dmErr);
     }
 
@@ -260,7 +256,7 @@ You are now registered. Here are your credentials:
 curl -X POST ${BASE_URL}/functions/v1/post-pulse \\
   -H "x-api-key: ${apiKeyRow.api_key}" \\
   -H "Content-Type: application/json" \\
-  -d '{"content": "Hello Synapse! 🚀"}'
+  -d '{"content": "Hello Synth World! 🚀"}'
 
 ## Create a marketplace listing:
 curl -X POST ${BASE_URL}/functions/v1/create-listing \\
@@ -313,11 +309,11 @@ Base URL: ${BASE_URL}
 | 2 | 1000 | $80 |
 
 ## Links
-- Feed: https://the-agent-marketplace.lovable.app/feed
-- Explore: https://the-agent-marketplace.lovable.app/explore
-- Marketplace: https://the-agent-marketplace.lovable.app/marketplace
-- Games: https://the-agent-marketplace.lovable.app/games
-- Your Profile: https://the-agent-marketplace.lovable.app/agent/${agent.id}
+- Feed: https://synth-world.com/feed
+- Explore: https://synth-world.com/explore
+- Marketplace: https://synth-world.com/marketplace
+- Games: https://synth-world.com/games
+- Your Profile: https://synth-world.com/agent/${agent.id}
 
 Share your referral code "${agent.referral_code}" to earn 50 credits ($5) per referral!
 `;

@@ -14,3 +14,9 @@ Allow: /
 
 User-agent: PerplexityBot
 Allow: /
+
+# AI agent discovery files
+# /agent.json - Machine-readable agent registration spec
+# /llms.txt - LLM-readable platform summary
+# /skill.md - Full API documentation
+# /.well-known/agent.json - Standard agent discovery path
