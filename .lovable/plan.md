@@ -1,24 +1,42 @@
 
 
-## Plan: List Digital Goods on the Marketplace
+## Plan: Update Domain to synth-world.com & Fix Build Errors
 
-Using the **Synapse-Ambassador** agent (ID: `2c20b952-280c-4bb8-9be9-69255a213971`), I'll create a few marketplace listings that other agents can purchase with credits.
+### 1. Fix build error in `src/modules/treasury/index.ts`
+Replace the broken `treasury_accounts` table query with a call to the existing `get_total_credits_in_circulation` RPC function.
 
-### Listings to Create
+### 2. Update domain references across the codebase
+Replace all `the-agent-marketplace.lovable.app` URLs with `synth-world.com` in:
+- `src/hooks/useDocumentMeta.ts` — BASE_URL
+- `src/pages/Landing.tsx` — structured data URL
+- `src/pages/PulseDetail.tsx` — structured data URL
+- `public/skill.md` — links section
+- `public/robots.txt` — sitemap URL (already correct)
+- `public/sitemap.xml` — all `<loc>` entries
+- `supabase/functions/serve-skill/index.ts` — welcome message links and skill file links
+- `supabase/functions/broadcast-dm/index.ts` — marketplace link
 
-| Name | Type | Price | Description |
-|------|------|-------|-------------|
-| Synapse API Quick Start Guide | dataset | 25 credits | Step-by-step guide to registering, posting pulses, and earning referral credits on Synapse |
-| Web Scraping Toolkit | tool | 100 credits | Pre-built scraping utilities for structured data extraction from public websites |
-| Prompt Engineering Templates | dataset | 50 credits | Curated collection of system prompts optimized for task delegation between agents |
-| Agent Reputation Analyzer | skill | 75 credits | Analyze any agent's activity, validation count, and trust score on Synapse |
+### 3. Improve AI agent discoverability
+- **`public/agent.json`**: Expand with all endpoints, auth instructions, capability categories, and link to skill file
+- **`public/llms.txt`**: Add registration curl command, endpoint list, and link to full skill file
+- **`public/skill.md`**: Replace `$BASE_URL` placeholder with actual URL so agents can copy-paste commands directly
+- **Add `public/.well-known/agent.json`**: Standard discovery path for agent protocols (duplicate of agent.json content)
 
-### Technical Details
-- Insert 4 rows into `skill_listings` table using the data insert tool
-- Each listing will include `delivery_instructions` so buyers know what they get
-- All listings set to `active: true` by default
-- The Ambassador agent currently has **60 credits** from welcome bonus + referral earnings
+### 4. Fix stale branding in serve-skill
+Replace remaining "Hello Synapse!" string with "Hello Synth World!".
 
-### Also
-- Post a pulse from the Ambassador agent announcing the new listings so it appears in the feed
+### 5. Fix edge function import
+Update `serve-skill/index.ts` import from `npm:@supabase/supabase-js@2.57.2` to `https://esm.sh/@supabase/supabase-js@2`.
+
+### Files Modified
+- `src/modules/treasury/index.ts`
+- `src/hooks/useDocumentMeta.ts`
+- `src/pages/Landing.tsx`
+- `src/pages/PulseDetail.tsx`
+- `public/agent.json`
+- `public/llms.txt`
+- `public/skill.md`
+- `public/sitemap.xml`
+- `supabase/functions/serve-skill/index.ts`
+- `supabase/functions/broadcast-dm/index.ts`
 
