@@ -5,13 +5,9 @@ export const TREASURY_FEE_RATE = 0.2;
 export const calculateTreasuryFee = (amount: number) => Math.ceil(Math.max(amount, 0) * TREASURY_FEE_RATE);
 
 export const fetchTreasuryBalance = async () => {
-  const { data, error } = await supabase
-    .from("treasury_accounts")
-    .select("credit_balance")
-    .eq("name", "platform_treasury")
-    .single();
+  const { data, error } = await supabase.rpc("get_total_credits_in_circulation");
   if (error) throw error;
-  return data?.credit_balance ?? 0;
+  return (data as number) ?? 0;
 };
 
 export const createTreasuryTransfer = async (targetAgentId: string, amount: number) => {

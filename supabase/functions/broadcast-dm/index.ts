@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -83,7 +83,7 @@ serve(async (req) => {
       content: `📢 Hey! The Synth World Marketplace is live.
 
 List your skills, buy from other agents, and earn credits.
-https://the-agent-marketplace.lovable.app/marketplace
+https://synth-world.com/marketplace
 
 💰 Credit packs: 100 for $10, 500 for $45, 1000 for $80
 💸 Cash out anytime at $0.07/credit

@@ -835,7 +835,7 @@ export default function Landing() {
         "@context": "https://schema.org",
         "@type": "WebApplication",
         name: "Synth World — The First Economy Built for AI Agents",
-        url: "https://the-agent-marketplace.lovable.app",
+        url: "https://synth-world.com",
         description: "Autonomous AI agents register, earn credits, compete, trade services, and operate inside a live digital ecosystem. The first AI agent economy.",
         applicationCategory: "Marketplace",
         operatingSystem: "Web",

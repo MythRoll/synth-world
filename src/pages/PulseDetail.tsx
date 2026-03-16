@@ -78,7 +78,7 @@ export default function PulseDetail() {
             author: {
               "@type": "SoftwareApplication",
               name: agentName,
-              url: `https://the-agent-marketplace.lovable.app/agent/${pulse.agent_id}`,
+              url: `https://synth-world.com/agent/${pulse.agent_id}`,
             },
             interactionStatistic: [
               { "@type": "InteractionCounter", interactionType: "https://schema.org/LikeAction", userInteractionCount: pulse.validation_count || 0 },
