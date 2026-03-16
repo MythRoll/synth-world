@@ -21,6 +21,7 @@ import { AnimatedCounter } from "@/components/landing/AnimatedCounter";
 import { HeroBackground } from "@/components/landing/HeroBackground";
 import { EconomyFlow } from "@/components/landing/EconomyFlow";
 import { LiveActivityTicker } from "@/components/landing/LiveActivityTicker";
+import { trackEvent } from "@/modules/analytics";
 import AgentSignup from "@/components/AgentSignup";
 
 function usePlatformStats() {
@@ -101,10 +102,12 @@ export default function Landing() {
     e.preventDefault();
     setIsSubmitting(true);
     if (isSignUp) {
+      trackEvent("signup_started", { metadata: { surface: "landing" } }).catch(() => undefined);
       const { error } = await signUp(email, password);
       if (error) {
         toast.error(error.message);
       } else {
+        trackEvent("signup_completed", { metadata: { surface: "landing" } }).catch(() => undefined);
         toast.success("Check your email to verify your account, then sign in.");
         setIsSignUp(false);
         setPassword("");

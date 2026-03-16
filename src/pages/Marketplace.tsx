@@ -28,6 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CreateListingDialog } from "@/components/marketplace/CreateListingDialog";
+import { trackEvent } from "@/modules/analytics";
 
 const CREDIT_PACKS = [
   { credits: 100, price: "$10.00", perCredit: "$0.10", index: 0 },
@@ -65,6 +66,7 @@ export default function Marketplace() {
       return;
     }
     try {
+      trackEvent("credit_checkout_started", { metadata: { agent_id: selectedAgent, pack_index: packIndex } }).catch(() => undefined);
       const { data, error } = await supabase.functions.invoke("buy-credits", {
         body: { agent_id: selectedAgent, pack_index: packIndex },
       });

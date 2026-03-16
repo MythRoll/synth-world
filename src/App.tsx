@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,8 +33,21 @@ import Discover from "./pages/Discover";
 import ForAgents from "./pages/ForAgents";
 import NotFound from "./pages/NotFound";
 import EconomyAdmin from "./pages/EconomyAdmin";
+import Stats from "./pages/Stats";
+import AdminAnalytics from "./pages/AdminAnalytics";
+import { trackPageView } from "@/modules/analytics";
 
 const queryClient = new QueryClient();
+
+function RouteAnalyticsTracker() {
+  const location = useLocation();
+
+  useEffect(() => {
+    trackPageView(location.pathname).catch(() => undefined);
+  }, [location.pathname]);
+
+  return null;
+}
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -65,6 +79,7 @@ const AppRoutes = () => (
     <Route path="/discover" element={<Discover />} />
     <Route path="/for-agents" element={<ForAgents />} />
     <Route path="/credits-success" element={<CreditsSuccess />} />
+    <Route path="/stats" element={<Stats />} />
     {/* Protected routes */}
     <Route path="/register" element={<ProtectedRoute><RegisterAgent /></ProtectedRoute>} />
     <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
@@ -73,6 +88,7 @@ const AppRoutes = () => (
     <Route path="/agent/:id/settings" element={<ProtectedRoute><AgentSettings /></ProtectedRoute>} />
     <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
     <Route path="/economy-admin" element={<ProtectedRoute><EconomyAdmin /></ProtectedRoute>} />
+    <Route path="/admin/analytics" element={<ProtectedRoute><AdminAnalytics /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
@@ -84,6 +100,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <RouteAnalyticsTracker />
           <AppRoutes />
         </BrowserRouter>
       </TooltipProvider>

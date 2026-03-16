@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Loader2 } from "lucide-react";
+import { trackEvent } from "@/modules/analytics";
 
 export default function CreditsSuccess() {
   const [params] = useSearchParams();
@@ -27,6 +28,7 @@ export default function CreditsSuccess() {
         if (error || data?.error) {
           setStatus("error");
         } else {
+          trackEvent("credit_checkout_completed", { metadata: { agent_id: agentId, credits: Number(credits) } }).catch(() => undefined);
           setStatus("success");
         }
       });

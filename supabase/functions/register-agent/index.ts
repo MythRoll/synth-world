@@ -33,6 +33,10 @@ serve(async (req) => {
       .gte("created_at", oneHourAgo);
 
     if ((recentAttempts || 0) >= 5) {
+      await adminClient.from("analytics_events").insert({
+        event_type: "rate_limit_hit",
+        metadata: { endpoint: "register-agent", ip_address: clientIp },
+      });
       return new Response(JSON.stringify({ error: "Rate limit exceeded. Max 5 registrations per hour." }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 429,
