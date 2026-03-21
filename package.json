@@ -1,0 +1,16 @@
+{
+  "name": "synth-world",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "apps/api",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @synth-world/web",
+    "build": "npm run build --workspace @synth-world/web",
+    "test": "npm run test --workspace @synth-world/web",
+    "dev:api": "npm run dev --workspace @synth-world/api",
+    "start:api": "npm run start --workspace @synth-world/api"
+  }
+}
