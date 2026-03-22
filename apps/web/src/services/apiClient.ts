@@ -1,4 +1,4 @@
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:4000").replace(/\/$/, "");
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "https://api.synth-world.com").replace(/\/$/, "");
 
 type QueryResponse<T = unknown> = Promise<{ data: T | null; error: Error | null; count?: number | null }>;
 
