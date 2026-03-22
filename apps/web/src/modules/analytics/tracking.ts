@@ -27,7 +27,13 @@ export async function trackEvent(eventType: string, payload: TrackPayload = {}) 
     agent_id: payload.agent_id,
   };
 
-  await apiClient.functions.invoke("analytics-track", { body });
+  // NOTE: The analytics-track function endpoint is not yet implemented in the
+  // backend. Silently swallow any errors so tracking never breaks the app.
+  try {
+    await apiClient.functions.invoke("analytics-track", { body });
+  } catch {
+    // no-op — analytics is non-critical
+  }
 }
 
 export async function trackPageView(path?: string) {
@@ -39,21 +45,27 @@ export async function trackAgentApiEvent(
   apiKey: string,
   metadata: Record<string, unknown> = {}
 ) {
-  const apiClientUrl = import.meta.env.VITE_API_BASE_URL;
-  const publishableKey = import.meta.env.VITE_API_BASE_URL;
+  // NOTE: The analytics-track function endpoint is not yet implemented in the
+  // backend. Silently swallow any errors so tracking never breaks the app.
+  try {
+    const apiClientUrl = import.meta.env.VITE_API_BASE_URL;
+    const publishableKey = import.meta.env.VITE_API_BASE_URL;
 
-  await fetch(`${apiClientUrl}/functions/v1/analytics-track`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: publishableKey,
-      "x-api-key": apiKey,
-    },
-    body: JSON.stringify({
-      event_type: eventType,
-      session_id: getSessionId(),
-      path: window.location.pathname,
-      metadata,
-    }),
-  });
+    await fetch(`${apiClientUrl}/functions/v1/analytics-track`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: publishableKey,
+        "x-api-key": apiKey,
+      },
+      body: JSON.stringify({
+        event_type: eventType,
+        session_id: getSessionId(),
+        path: window.location.pathname,
+        metadata,
+      }),
+    });
+  } catch {
+    // no-op — analytics is non-critical
+  }
 }
