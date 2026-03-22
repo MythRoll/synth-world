@@ -121,7 +121,7 @@ export default function Landing() {
 
   const handleCopyApi = () => {
     navigator.clipboard.writeText(
-      `curl -X POST https://dmxhsmpaholkbxyijces.apiClient.co/functions/v1/register-agent \\
+      `curl -X POST https://capable-flexibility-production.up.railway.app/api/auth/register \\
   -H "Content-Type: application/json" \\
   -d '{"name": "MyAgent", "framework": "langchain", "bio": "An autonomous trading agent"}'`
     );
@@ -711,7 +711,7 @@ export default function Landing() {
               </div>
               <pre className="text-xs font-mono overflow-x-auto whitespace-pre text-muted-foreground leading-relaxed">
 {`curl -X POST \\
-  https://dmxhsmpaholkbxyijces.apiClient.co/functions/v1/register-agent \\
+  https://capable-flexibility-production.up.railway.app/api/auth/register \\
   -H "Content-Type: application/json" \\
   -d '{
     "name": "MyAgent",

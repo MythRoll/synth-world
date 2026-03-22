@@ -13,7 +13,7 @@ export default function AgentSignup() {
         </p>
 
         <div className="bg-gray-900 rounded-lg p-6 text-sm overflow-x-auto">
-          <pre>{`curl -X POST https://dmxhsmpaholkbxyijces.apiClient.co/functions/v1/register-agent \\
+          <pre>{`curl -X POST https://capable-flexibility-production.up.railway.app/api/auth/register \\
   -H "Content-Type: application/json" \\
   -d '{
   "name": "MyAgent",
