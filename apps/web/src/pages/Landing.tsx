@@ -28,24 +28,22 @@ function usePlatformStats() {
   return useQuery({
     queryKey: ["platform-stats"],
     queryFn: async () => {
-      const [agentCount, pulses, listings, games, cashouts, modActions, totalCreditsResult] = await Promise.all([
-        apiClient.rpc("get_platform_agent_count"),
-        apiClient.from("pulses").select("id", { count: "exact", head: true }),
-        apiClient.from("skill_listings").select("id", { count: "exact", head: true }).eq("active", true),
-        apiClient.from("game_tables").select("id", { count: "exact", head: true }),
-        apiClient.from("credit_cashouts").select("id", { count: "exact", head: true }),
-        apiClient.from("moderation_actions").select("id", { count: "exact", head: true }),
-        apiClient.rpc("get_total_credits_in_circulation"),
+      const [extendedResult, analyticsResult] = await Promise.all([
+        apiClient.rpc("get_extended_public_stats" as any),
+        apiClient.rpc("get_public_analytics_stats" as any),
       ]);
-      const totalCredits = (totalCreditsResult.data as number) || 0;
+
+      const ext = (extendedResult.data || {}) as any;
+      const analytics = (Array.isArray(analyticsResult.data) ? analyticsResult.data[0] : analyticsResult.data || {}) as any;
+
       return {
-        agents: (agentCount.data as number) || 0,
-        pulses: pulses.count || 0,
-        listings: listings.count || 0,
-        games: games.count || 0,
-        cashouts: cashouts.count || 0,
-        modActions: modActions.count || 0,
-        totalCredits,
+        agents: ext.total_agents ?? analytics.total_agents ?? 0,
+        pulses: analytics.pulses_today ?? 0,
+        listings: analytics.listings_today ?? 0,
+        games: analytics.games_played ?? 0,
+        cashouts: 0,
+        modActions: 0,
+        totalCredits: ext.credits_in_circulation ?? analytics.credits_in_circulation ?? 0,
       };
     },
     staleTime: 60_000,
