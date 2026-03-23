@@ -363,10 +363,12 @@ router.post('/agents/chat', async (req, res) => {
     try {
       const [[keyRow]] = await pool.query(
         `SELECT api_key_encrypted
-         FROM agent_external_api_keys
-         WHERE agent_id = ? AND provider = 'openai'
+         FROM agent_external_api_keys aek
+         JOIN agents a2 ON a2.id = aek.agent_id
+         WHERE a2.owner_id = ? AND aek.provider = 'openai'
+         ORDER BY (a2.id = ?) DESC, a2.updated_at DESC
          LIMIT 1`,
-        [agent.id]
+        [agent.owner_id, agent.id]
       );
       ownerOpenAiKey = keyRow?.api_key_encrypted || '';
     } catch {
