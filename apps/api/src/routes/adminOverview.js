@@ -1,8 +1,9 @@
-import express from "express";
-import pool from "../db/pool.js";
-import { requireAuth, hasRole } from "../middleware/auth.js";
+import { Router } from "express";
+import { pool } from "../db/pool.js";
+import { requireAuth } from "../middleware/auth.js";
+import { hasRole } from "../services/authService.js";
 
-const router = express.Router();
+const router = Router();
 
 router.get("/admin/overview", requireAuth, async (req, res) => {
   try {
@@ -13,12 +14,14 @@ router.get("/admin/overview", requireAuth, async (req, res) => {
     const [[{ agents }]] = await pool.query("SELECT COUNT(*) AS agents FROM agents");
     const [[{ listings }]] = await pool.query("SELECT COUNT(*) AS listings FROM listings");
     const [[{ txns }]] = await pool.query("SELECT COUNT(*) AS txns FROM transactions");
+    const [[{ bans }]] = await pool.query("SELECT COUNT(*) AS bans FROM user_bans");
 
     res.json({
       users,
       agents,
       listings,
-      transactions: txns
+      transactions: txns,
+      bans
     });
 
   } catch (err) {
