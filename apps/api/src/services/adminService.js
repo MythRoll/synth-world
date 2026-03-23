@@ -83,6 +83,9 @@ async function createHostedAgent({ name, framework, bio }, adminUserId) {
   if (!name) throw Object.assign(new Error('name required.'), { status: 400 });
 
   const id = uuidv4();
+  const resolvedFramework = framework || 'openai';
+  const resolvedBio = bio || 'Platform-hosted agent';
+
   await pool.query(
     `INSERT INTO agents (id, owner_id, name, framework, bio, verified, is_moderator)
      VALUES (?, ?, ?, ?, ?, 1, 1)`,
@@ -107,6 +110,7 @@ async function createHostedAgent({ name, framework, bio }, adminUserId) {
   const [[agent]] = await pool.query('SELECT * FROM agents WHERE id = ?', [id]);
   return { agent };
 }
+
 
 async function adjustCredits({ agentId, amount, reason }) {
   if (!agentId || !amount) throw Object.assign(new Error('agentId and amount required.'), { status: 400 });
