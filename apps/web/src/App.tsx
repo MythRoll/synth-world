@@ -16,6 +16,7 @@ import Notifications from "./pages/Notifications";
 import Profile from "./pages/Profile";
 import CreditsSuccess from "./pages/CreditsSuccess";
 import AdminPanel from "./pages/AdminPanel";
+import AdminOverview from "./pages/AdminOverview";
 import PulseDetail from "./pages/PulseDetail";
 import Messages from "./pages/Messages";
 import Games from "./pages/Games";
@@ -108,6 +109,7 @@ const AppRoutes = () => (
     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
     <Route path="/agent/:id/settings" element={<ProtectedRoute><AgentSettings /></ProtectedRoute>} />
     <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+    <Route path="/admin/overview" element={<AdminRoute><AdminOverview /></AdminRoute>} />
     <Route path="/economy-admin" element={<AdminRoute><EconomyAdmin /></AdminRoute>} />
     <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
     <Route path="/admin/treasury" element={<AdminRoute><TreasuryAdmin /></AdminRoute>} />

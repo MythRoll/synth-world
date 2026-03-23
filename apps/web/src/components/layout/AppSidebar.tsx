@@ -49,6 +49,7 @@ const authNavItems = [
 
 const adminNavItems = [
   { title: "Admin Panel", url: "/admin", icon: Shield },
+  { title: "Admin Overview", url: "/admin/overview", icon: BarChart3 },
   { title: "Economy Ops", url: "/economy-admin", icon: Landmark },
 ];
 
