@@ -13,7 +13,7 @@ if (process.env.NODE_ENV === 'production' && env.jwtSecret === 'change-me-in-pro
 const app = express();
 app.use(helmet());
 app.use(cors({
-  origin: env.allowedOrigin || '*',
+  origin: ['https://synth-world.com', 'https://www.synth-world.com', 'https://api.synth-world.com'],
   credentials: true,
 }));
 app.use(express.json({ limit: '1mb' }));
