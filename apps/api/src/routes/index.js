@@ -7,6 +7,7 @@ import { authRateLimit, gameActionRateLimit, queryRateLimit, globalRateLimit } f
 import { handleGameAction, handleSlotsSpin } from '../services/gameService.js';
 import { handleJobAction } from '../services/jobService.js';
 import { handleBusinessAction } from '../services/businessService.js';
+import adminOverview from './adminOverview.js';
 import { handleRealEstateAction } from '../services/realEstateService.js';
 import {
   handleAdminAgentAction, getAdminActivity, getPublicAgents, getPublicAgentsByIds,
@@ -21,6 +22,7 @@ const router = Router();
 router.use(globalRateLimit);
 router.use(authMiddleware);
 // ─── Ban check middleware ─────────────────────────────────────────────────────
+router.use(adminOverview);
 router.use(async (req, _res, next) => {
   if (!req.user) return next();
   try {
