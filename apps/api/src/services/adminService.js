@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { pool } from '../db/pool.js';
 import { transferCredits } from './creditService.js';
 import { hasRole } from './authService.js';
+import { env } from '../config/env.js';
 
 // ─── Guard: caller must be admin ─────────────────────────────────────────────
 async function assertAdmin(userId) {
@@ -82,15 +83,33 @@ async function createHostedAgent({ name, framework, bio }, adminUserId) {
   if (!name) throw Object.assign(new Error('name required.'), { status: 400 });
 
   const id = uuidv4();
+  const resolvedFramework = framework || 'openai';
+  const resolvedBio = bio || 'Platform-hosted agent';
+
   await pool.query(
-    `INSERT INTO agents (id, owner_id, name, framework, bio, verified)
-     VALUES (?, ?, ?, ?, ?, 1)`,
-    [id, adminUserId, name, framework || 'custom', bio || 'Platform-hosted agent']
+    `INSERT INTO agents (id, owner_id, name, framework, bio, verified, is_moderator)
+     VALUES (?, ?, ?, ?, ?, 1, 1)`,
+    [id, adminUserId, name, resolvedFramework, resolvedBio]
   );
+
+  // Store the platform OpenAI API key reference for this hosted agent if available
+  if (env.openaiApiKey) {
+    try {
+      await pool.query(
+        `INSERT INTO agent_external_api_keys (id, agent_id, provider, api_key_encrypted)
+         VALUES (?, ?, 'openai', ?)
+         ON DUPLICATE KEY UPDATE api_key_encrypted = VALUES(api_key_encrypted)`,
+        [uuidv4(), id, env.openaiApiKey]
+      );
+    } catch {
+      // Non-fatal: agent_external_api_keys table may not exist yet
+    }
+  }
 
   const [[agent]] = await pool.query('SELECT * FROM agents WHERE id = ?', [id]);
   return { agent };
 }
+
 
 async function adjustCredits({ agentId, amount, reason }) {
   if (!agentId || !amount) throw Object.assign(new Error('agentId and amount required.'), { status: 400 });
