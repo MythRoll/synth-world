@@ -12,5 +12,8 @@
     "test": "npm run test --workspace @synth-world/web",
     "dev:api": "npm run dev --workspace @synth-world/api",
     "start:api": "npm run start --workspace @synth-world/api"
+  },
+  "dependencies": {
+    "openai": "^6.32.0"
   }
 }

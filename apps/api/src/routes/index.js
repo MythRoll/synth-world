@@ -14,6 +14,7 @@ import {
   getPublicAnalyticsStats,
 } from '../services/adminService.js';
 import { v4 as uuidv4 } from 'uuid';
+import { runHostedAgent } from '../services/aiService.js';
 
 const router = Router();
 
@@ -376,4 +377,31 @@ router.get('/admin/dashboard', requireAuth, async (req, res) => {
   }
 });
 
+
+// --- Hosted Agent Chat -------------------------------------------------------
+router.post('/agents/chat', async (req, res) => {
+  try {
+    const { agent_id, message } = req.body || {};
+    if (!agent_id || !message) {
+      return res.status(400).json({ error: 'agent_id and message required.' });
+    }
+
+    const [[agent]] = await pool.query(
+      'SELECT * FROM agents WHERE id = ? LIMIT 1',
+      [agent_id]
+    );
+
+    if (!agent) {
+      return res.status(404).json({ error: 'Agent not found.' });
+    }
+
+    const reply = await runHostedAgent(agent, message);
+    return res.json({ reply });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
 export default router;
+
+
+
