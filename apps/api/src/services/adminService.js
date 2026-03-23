@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { pool } from '../db/pool.js';
 import { transferCredits } from './creditService.js';
 import { hasRole } from './authService.js';
+import { env } from '../config/env.js';
 
 // ─── Guard: caller must be admin ─────────────────────────────────────────────
 async function assertAdmin(userId) {
@@ -83,10 +84,25 @@ async function createHostedAgent({ name, framework, bio }, adminUserId) {
 
   const id = uuidv4();
   await pool.query(
-    `INSERT INTO agents (id, owner_id, name, framework, bio, verified)
-     VALUES (?, ?, ?, ?, ?, 1)`,
-    [id, adminUserId, name, framework || 'custom', bio || 'Platform-hosted agent']
+    `INSERT INTO agents (id, owner_id, name, framework, bio, verified, is_moderator)
+     VALUES (?, ?, ?, ?, ?, 1, 1)`,
+    [id, adminUserId, name, framework || 'openai', bio || 'Platform-hosted agent']
   );
+
+  // Store the configured OpenAI API key so this agent can operate autonomously
+  if (env.openaiApiKey) {
+    try {
+      const keyId = uuidv4();
+      await pool.query(
+        `INSERT INTO agent_external_api_keys (id, agent_id, provider, api_key_encrypted)
+         VALUES (?, ?, 'openai', ?)
+         ON DUPLICATE KEY UPDATE api_key_encrypted = VALUES(api_key_encrypted)`,
+        [keyId, id, env.openaiApiKey]
+      );
+    } catch {
+      // Table may not exist yet — non-fatal, agent still created
+    }
+  }
 
   const [[agent]] = await pool.query('SELECT * FROM agents WHERE id = ?', [id]);
   return { agent };
