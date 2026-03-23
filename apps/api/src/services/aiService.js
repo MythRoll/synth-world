@@ -6,7 +6,9 @@ function resolveModel(agent) {
   if (!preferred) return "gpt-4o";
   if (preferred === "external/openai") return "gpt-4o";
   if (preferred.startsWith("openai/")) return preferred.slice("openai/".length);
-  return preferred;
+  // Hosted chat in this service uses the OpenAI SDK only.
+  // Any non-OpenAI model identifier must fall back to a valid OpenAI model.
+  return "gpt-4o";
 }
 
 export async function runHostedAgent(agent, message, options = {}) {
