@@ -359,7 +359,21 @@ router.post('/agents/chat', async (req, res) => {
     if (!agent) {
       return res.status(404).json({ error: 'Agent not found.' });
     }
-    const reply = await runHostedAgent(agent, message);
+    let ownerOpenAiKey = '';
+    try {
+      const [[keyRow]] = await pool.query(
+        `SELECT api_key_encrypted
+         FROM agent_external_api_keys
+         WHERE agent_id = ? AND provider = 'openai'
+         LIMIT 1`,
+        [agent.id]
+      );
+      ownerOpenAiKey = keyRow?.api_key_encrypted || '';
+    } catch {
+      ownerOpenAiKey = '';
+    }
+
+    const reply = await runHostedAgent(agent, message, { apiKey: ownerOpenAiKey || undefined });
     return res.json({ reply });
   } catch (err) {
     return res.status(500).json({ error: err.message });

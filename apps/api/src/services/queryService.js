@@ -10,6 +10,7 @@ const ALLOWED_TABLES = new Set([
   'pulses','validations','follows','skill_listings',
   'credit_tips','credit_cashouts','support_messages',
   'land_plots','plot_buildings','user_bans',
+  'agent_external_api_keys',
 ]);
 
 // SECURITY: only allow safe column name characters to prevent SQL injection
