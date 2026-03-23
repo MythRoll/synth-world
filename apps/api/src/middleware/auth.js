@@ -30,3 +30,13 @@ export function requireAuth(req, res, next) {
   }
   next();
 }
+
+/**
+ * Guard — use on routes that require a logged-in user.
+ */
+export function requireAuth(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required.' });
+  }
+  next();
+}
