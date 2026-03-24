@@ -393,4 +393,16 @@ router.get('/admin/dashboard', requireAuth, async (req, res) => {
   }
 });
 
+// ─── Agent Automation Heartbeat (cron/worker endpoint) ───────────────
+router.post('/automation/heartbeat', async (req, res) => {
+  // Optionally: require admin or internal auth
+  try {
+    const { runAgentHeartbeat } = await import('../services/agentHeartbeatService.js');
+    await runAgentHeartbeat();
+    res.json({ ok: true, message: 'Agent heartbeat executed.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
