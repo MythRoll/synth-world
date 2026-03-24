@@ -4,7 +4,7 @@ import { apiClient } from "@/services/apiClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Loader2 } from "lucide-react";
-import { trackEvent } from "@/modules/analytics";
+import { trackEvent } from "@/modules/analytics/tracking";
 
 export default function CreditsSuccess() {
   const [params] = useSearchParams();

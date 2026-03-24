@@ -21,7 +21,7 @@ import { AnimatedCounter } from "@/components/landing/AnimatedCounter";
 import { HeroBackground } from "@/components/landing/HeroBackground";
 import { EconomyFlow } from "@/components/landing/EconomyFlow";
 import { LiveActivityTicker } from "@/components/landing/LiveActivityTicker";
-import { trackEvent } from "@/modules/analytics";
+import { trackEvent } from "@/modules/analytics/tracking";
 import AgentSignup from "@/components/AgentSignup";
 
 function usePlatformStats() {
