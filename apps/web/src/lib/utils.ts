@@ -1,6 +1,12 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+// utils.js
+// Simple fetcher for API calls
+export async function fetcher(url, opts) {
+  const res = await fetch(url, opts);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+// Class name utility (tailwind/clsx style)
+export function cn(...args) {
+  return args.filter(Boolean).join(' ');
 }
