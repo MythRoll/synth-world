@@ -1,7 +1,1 @@
-import { API_BASE_URL } from './apiClient';
-
-export async function getAdminDashboard() {
-  const res = await fetch(`${API_BASE_URL}/api/admin/dashboard`);
-  if (!res.ok) throw new Error('Failed to load admin dashboard');
-  return res.json();
-}
+import { API_BASE_URL } from './apiClient'; const authHeaders = () => { const token = localStorage.getItem('synthworld_token'); return token ? { Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjdjYzliMzA5LWQwYzYtNGE3ZS04OGNkLWNhYTZiNzBkYzc2NiIsImVtYWlsIjoiYWRtaW5Ac3ludGgtd29ybGQuY29tIiwiaWF0IjoxNzc0MzY2NzA1LCJleHAiOjE3NzQ5NzE1MDV9.nl4mIsrheUWw4j0RRjCWibwYjrc1Thsl6lQJrKK0wj0, Accept: 'application/json' } : { Accept: 'application/json' }; }; export async function getAdminOverview() { const res = await fetch(${API_BASE_URL}/api/admin/overview, { method: 'GET', headers: authHeaders() }); const body = await res.json().catch(() => ({})); if (!res.ok) throw new Error(body.error || 'Failed to load admin overview'); return body; }
