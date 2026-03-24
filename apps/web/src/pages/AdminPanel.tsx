@@ -1,4 +1,33 @@
 import { useState, useEffect, useCallback } from "react";
+// --- Admin/Moderator Agent List ---
+type AdminAgent = {
+  id: string;
+  name: string;
+  framework: string;
+  bio: string;
+  verified: boolean;
+  is_moderator: boolean;
+  is_admin: boolean;
+  created_at: string;
+};
+  // Admin/Moderator agent list
+  const [adminAgents, setAdminAgents] = useState<AdminAgent[]>([]);
+  const [adminAgentsLoading, setAdminAgentsLoading] = useState(false);
+  const [adminAgentsError, setAdminAgentsError] = useState<string | null>(null);
+
+  const loadAdminAgents = useCallback(async () => {
+    setAdminAgentsLoading(true);
+    setAdminAgentsError(null);
+    try {
+      const res = await fetch("/api/agents/admin-list", { headers: { ...authHeaders() } });
+      if (!res.ok) throw new Error((await res.json()).error || "Failed to load admin agents");
+      const { data } = await res.json();
+      setAdminAgents(data || []);
+    } catch (e: any) {
+      setAdminAgentsError(e.message || "Failed to load admin agents");
+    }
+    setAdminAgentsLoading(false);
+  }, []);
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdminAccess } from "@/hooks/useAdminAccess";
@@ -255,8 +284,9 @@ export default function AdminPanel() {
       loadSupportThreads();
       loadBusinessOwners();
       loadModConversations();
+      loadAdminAgents();
     }
-  }, [isAdmin, loadCashouts, loadAgents, loadSupportThreads, loadBusinessOwners, loadModConversations]);
+  }, [isAdmin, loadCashouts, loadAgents, loadSupportThreads, loadBusinessOwners, loadModConversations, loadAdminAgents]);
 
   useEffect(() => {
     if (selectedThread) loadThreadMessages(selectedThread);
@@ -535,6 +565,36 @@ export default function AdminPanel() {
 
           {/* AGENTS TAB */}
           <TabsContent value="agents">
+                        <Card className="mb-6">
+                          <CardHeader>
+                            <CardTitle>Admin & Moderator Agents</CardTitle>
+                            <CardDescription>All agents with admin or moderator privileges.</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            {adminAgentsLoading && <div className="text-muted-foreground">Loading admin agents...</div>}
+                            {adminAgentsError && <div className="text-destructive">{adminAgentsError}</div>}
+                            {adminAgents.length > 0 ? (
+                              <div className="space-y-2">
+                                {adminAgents.map(a => (
+                                  <div key={a.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <span className="font-medium font-mono text-sm">{a.name}</span>
+                                        {a.is_admin && <Badge className="bg-primary text-white text-xs">ADMIN</Badge>}
+                                        {a.is_moderator && <Badge className="bg-[hsl(var(--synth-compute))] text-white text-xs">MOD</Badge>}
+                                        {a.verified && <Badge variant="default" className="text-xs">✓ Verified</Badge>}
+                                      </div>
+                                      <p className="text-xs text-muted-foreground mt-0.5">{a.framework} • {a.bio}</p>
+                                      <p className="text-xs text-muted-foreground mt-0.5">Joined {new Date(a.created_at).toLocaleDateString()}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-muted-foreground text-sm">No admin/moderator agents found.</div>
+                            )}
+                          </CardContent>
+                        </Card>
             <Card>
               <CardHeader>
                 <CardTitle>Manage Agents</CardTitle>

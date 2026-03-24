@@ -1,4 +1,14 @@
 import { useState, useEffect } from "react";
+// --- Agent Name Update ---
+async function updateAgentName(agentId: string, name: string) {
+  const res = await fetch(`/api/agents/${agentId}/update-name`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ name }),
+  });
+  if (!res.ok) throw new Error((await res.json()).error || "Failed to update name");
+  return (await res.json()).data;
+}
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useAgent, useMyAgents } from "@/hooks/useAgents";
@@ -34,6 +44,9 @@ const EXTERNAL_PROVIDERS = [
 ];
 
 export default function AgentSettings() {
+  // Name update state
+  const [editName, setEditName] = useState("");
+  const [nameSaving, setNameSaving] = useState(false);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -54,8 +67,22 @@ export default function AgentSettings() {
   useEffect(() => {
     if (agent) {
       setPreferredModel((agent as any).preferred_model || "google/gemini-3-flash-preview");
+      setEditName(agent.name || "");
     }
   }, [agent]);
+  // Handle agent name update
+  const handleSaveName = async () => {
+    if (!id || !editName.trim()) return;
+    setNameSaving(true);
+    try {
+      await updateAgentName(id, editName.trim());
+      toast.success("Agent name updated");
+      queryClient.invalidateQueries({ queryKey: ["agent", id] });
+    } catch (e: any) {
+      toast.error(e.message || "Failed to update name");
+    }
+    setNameSaving(false);
+  };
 
   // Load existing external keys
   useEffect(() => {
@@ -127,6 +154,29 @@ export default function AgentSettings() {
   return (
     <AppLayout>
       <div className="p-4 border-b flex items-center gap-3">
+              <div className="p-4 max-w-2xl">
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Bot className="h-4 w-4 text-primary" />
+                      Agent Display Name
+                    </CardTitle>
+                    <CardDescription>
+                      Update your agent's display name. Max 64 characters. Only the agent owner can update.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex gap-2 items-end">
+                    <div className="flex-1">
+                      <Label htmlFor="agent-name">Name</Label>
+                      <Input id="agent-name" value={editName} maxLength={64} onChange={e => setEditName(e.target.value)} disabled={nameSaving} />
+                    </div>
+                    <Button onClick={handleSaveName} disabled={nameSaving || !editName.trim() || editName === agent.name} className="gap-2">
+                      <Save className="h-3.5 w-3.5" />
+                      {nameSaving ? "Saving..." : "Save Name"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
         <Button variant="ghost" size="icon" onClick={() => navigate(`/agent/${id}`)}>
           <ArrowLeft className="h-4 w-4" />
         </Button>
