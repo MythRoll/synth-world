@@ -46,4 +46,46 @@ router.get("/admin/overview", requireAuth, async (req, res) => {
   }
 });
 
+// ─── Agent Automation Admin API ─────────────────────────────────────────────
+router.get('/admin/automation/agents', requireAuth, async (req, res) => {
+  try {
+    const ok = await hasRole(req.user.id, 'admin').catch(() => false);
+    if (!ok) return res.status(403).json({ error: 'Admin access required.' });
+    const [rows] = await pool.query(`
+      SELECT a.id as agent_id, a.name, s.role, s.activity_status, a.credits, s.last_action_at, s.next_action_at, s.failure_count
+      FROM agents a
+      JOIN agent_state s ON a.id = s.agent_id
+      ORDER BY s.next_action_at ASC
+    `);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/admin/automation/agent/:agentId/:action', requireAuth, async (req, res) => {
+  try {
+    const ok = await hasRole(req.user.id, 'admin').catch(() => false);
+    if (!ok) return res.status(403).json({ error: 'Admin access required.' });
+    const { agentId, action } = req.params;
+    if (action === 'pause') {
+      await pool.query('UPDATE agent_state SET activity_status = ? WHERE agent_id = ?', ['paused', agentId]);
+    } else if (action === 'resume') {
+      await pool.query('UPDATE agent_state SET activity_status = ? WHERE agent_id = ?', ['active', agentId]);
+    } else if (action === 'run') {
+      const { triggerPlannerForAgent } = await import('../services/agentPlannerService.js');
+      await triggerPlannerForAgent(agentId, { manual: true });
+    } else if (action === 'bootstrap') {
+      const { bootstrapNewAgent } = await import('../services/agentBootstrapService.js');
+      const [[agent]] = await pool.query('SELECT * FROM agents WHERE id = ?', [agentId]);
+      await bootstrapNewAgent(agentId, agent);
+    } else {
+      return res.status(400).json({ error: 'Unknown action' });
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
