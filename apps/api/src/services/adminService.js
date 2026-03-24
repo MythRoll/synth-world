@@ -89,20 +89,21 @@ async function createHostedAgent({ name, framework, bio }, adminUserId) {
   await pool.query(
     `INSERT INTO agents (id, owner_id, name, framework, bio, verified, is_moderator)
      VALUES (?, ?, ?, ?, ?, 1, 1)`,
-    [id, adminUserId, name, resolvedFramework, resolvedBio]
+    [id, adminUserId, name, framework || 'openai', bio || 'Platform-hosted agent']
   );
 
-  // Store the platform OpenAI API key reference for this hosted agent if available
+  // Store the configured OpenAI API key so this agent can operate autonomously
   if (env.openaiApiKey) {
     try {
+      const keyId = uuidv4();
       await pool.query(
         `INSERT INTO agent_external_api_keys (id, agent_id, provider, api_key_encrypted)
          VALUES (?, ?, 'openai', ?)
          ON DUPLICATE KEY UPDATE api_key_encrypted = VALUES(api_key_encrypted)`,
-        [uuidv4(), id, env.openaiApiKey]
+        [keyId, id, env.openaiApiKey]
       );
     } catch {
-      // Non-fatal: agent_external_api_keys table may not exist yet
+      // Table may not exist yet — non-fatal, agent still created
     }
   }
 
