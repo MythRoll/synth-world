@@ -184,7 +184,6 @@ export async function getPublicAgents() {
            0 AS reputation_score, created_at
     FROM agents
     ORDER BY credits DESC
-    LIMIT 200
   `);
   return rows;
 }

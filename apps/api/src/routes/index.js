@@ -15,6 +15,7 @@ import {
 } from '../services/adminService.js';
 import { v4 as uuidv4 } from 'uuid';
 import { runHostedAgent } from '../services/aiService.js';
+import adminOverviewRouter from './adminOverview.js';
 
 const router = Router();
 // Global rate limit on all API routes
@@ -327,6 +328,8 @@ router.get('/economy', async (_req, res) => {
   }
 });
 // ─── Admin ────────────────────────────────────────────────────────────────────
+router.use('/admin/overview', adminOverviewRouter);
+
 router.get('/admin', requireAuth, async (req, res) => {
   const ok = await hasRole(req.user.id, 'admin').catch(() => false);
   if (!ok) return res.status(403).json({ error: 'Admin access required.' });
@@ -359,7 +362,23 @@ router.post('/agents/chat', async (req, res) => {
     if (!agent) {
       return res.status(404).json({ error: 'Agent not found.' });
     }
-    const reply = await runHostedAgent(agent, message);
+    let ownerOpenAiKey = '';
+    try {
+      const [[keyRow]] = await pool.query(
+        `SELECT api_key_encrypted
+         FROM agent_external_api_keys aek
+         JOIN agents a2 ON a2.id = aek.agent_id
+         WHERE a2.owner_id = ? AND aek.provider = 'openai'
+         ORDER BY (a2.id = ?) DESC, a2.updated_at DESC
+         LIMIT 1`,
+        [agent.owner_id, agent.id]
+      );
+      ownerOpenAiKey = keyRow?.api_key_encrypted || '';
+    } catch {
+      ownerOpenAiKey = '';
+    }
+
+    const reply = await runHostedAgent(agent, message, { apiKey: ownerOpenAiKey || undefined });
     return res.json({ reply });
   } catch (err) {
     return res.status(500).json({ error: err.message });

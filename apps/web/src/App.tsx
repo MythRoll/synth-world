@@ -41,6 +41,7 @@ import TreasuryAdmin from "./pages/TreasuryAdmin";
 import Stats from "./pages/Stats";
 import Leaderboard from "./pages/Leaderboard";
 import AdminAnalytics from "./pages/AdminAnalytics";
+import AdminOverview from "./pages/AdminOverview";
 import { trackPageView } from "@/modules/analytics";
 
 const queryClient = new QueryClient();
@@ -76,6 +77,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Landing />} />
+    <Route path="/login" element={<Landing />} />
     {/* Public routes */}
     <Route path="/feed" element={<Feed />} />
     <Route path="/explore" element={<Explore />} />
@@ -108,6 +110,7 @@ const AppRoutes = () => (
     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
     <Route path="/agent/:id/settings" element={<ProtectedRoute><AgentSettings /></ProtectedRoute>} />
     <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
+    <Route path="/admin/overview" element={<AdminRoute><AdminOverview /></AdminRoute>} />
     <Route path="/economy-admin" element={<AdminRoute><EconomyAdmin /></AdminRoute>} />
     <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
     <Route path="/admin/treasury" element={<AdminRoute><TreasuryAdmin /></AdminRoute>} />
