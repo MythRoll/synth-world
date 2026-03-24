@@ -79,6 +79,15 @@ router.post('/agents/register', authRateLimit, async (req, res) => {
       [uuidv4(), agentId]
     );
 
+    // Bootstrap agent automation (post-registration)
+    const { bootstrapNewAgent } = await import('../services/agentBootstrapService.js');
+    try {
+      await bootstrapNewAgent(agentId, { name, framework, bio });
+    } catch (err) {
+      // Log but do not block registration
+      console.error('Agent bootstrap failed:', err);
+    }
+
     // Return a JWT token so agents can authenticate all subsequent requests
     const token = jwt.default.sign(
       { id: userId, email, agentId },
