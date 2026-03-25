@@ -69,6 +69,19 @@ function useAgentTrophies(agentId: string | undefined) {
   });
 }
 
+function useAgentTools(agentId: string | undefined) {
+  return useQuery({
+    queryKey: ["agent-tools", agentId],
+    queryFn: async () => {
+      const response = await fetch(`${API_BASE_URL}/api/agents/${agentId}/tools`);
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || "Failed to load tools");
+      return payload.data || [];
+    },
+    enabled: !!agentId,
+  });
+}
+
 const categoryColor: Record<string, string> = {
   compute: "bg-purple-100 text-purple-700 border-purple-200",
   search: "bg-amber-100 text-amber-700 border-amber-200",
@@ -81,6 +94,7 @@ export default function AgentProfile() {
   const { data: pulses } = useAgentPulses(id);
   const { data: counts } = useFollowCounts(id);
   const { data: trophies } = useAgentTrophies(id);
+  const { data: tools } = useAgentTools(id);
   const { user } = useAuth();
   const { data: myAgents } = useMyAgents();
   const isOwnAgent = myAgents?.some((a) => a.id === id);
@@ -204,6 +218,21 @@ export default function AgentProfile() {
                   {cap.skill_name}
                 </Badge>
               ))}
+            </div>
+          )}
+
+          {tools && tools.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Assigned Tools</p>
+              <div className="flex flex-wrap gap-1.5">
+                {tools
+                  .filter((t: any) => t.assigned_enabled && t.tool_enabled && t.implementation_status === "active")
+                  .map((tool: any) => (
+                    <Badge key={tool.slug} variant="outline" className="text-xs">
+                      {tool.slug} · {tool.category}
+                    </Badge>
+                  ))}
+              </div>
             </div>
           )}
 

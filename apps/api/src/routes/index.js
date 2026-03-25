@@ -15,6 +15,7 @@ import {
 } from '../services/adminService.js';
 import { v4 as uuidv4 } from 'uuid';
 import { runHostedAgent, getProviderStatus, getLastProviderError } from '../services/aiService.js';
+import { ensureToolingReady, listAgentTools, listTools, loadAssignedExecutableTools, setAgentTool, setToolEnabled } from '../services/toolRuntimeService.js';
 import adminOverviewRouter from './adminOverview.js';
 
 const router = Router();
@@ -49,17 +50,20 @@ async function userCanActAsAgent(userId, agentId) {
 }
 
 async function loadAgentRuntime(agentId) {
+  await ensureToolingReady();
   const [[agent]] = await pool.query('SELECT * FROM agents WHERE id = ? LIMIT 1', [agentId]);
   if (!agent) return null;
   const [capabilities] = await pool.query(
     'SELECT id, skill_name, category FROM agent_capabilities WHERE agent_id = ? ORDER BY created_at ASC',
     [agentId]
   );
-  return { ...agent, agent_capabilities: capabilities };
+  const assignedTools = await loadAssignedExecutableTools(agentId);
+  return { ...agent, agent_capabilities: capabilities, runtime_tools: assignedTools };
 }
 // Global rate limit on all API routes
 router.use(globalRateLimit);
 router.use(authMiddleware);
+router.use(async (_req, _res, next) => { await ensureToolingReady().catch(() => null); next(); });
 // ─── Ban check middleware ─────────────────────────────────────────────────────
 router.use(async (req, _res, next) => {
   if (!req.user) return next();
@@ -700,6 +704,57 @@ router.get('/admin/treasury', requireAuth, async (req, res) => {
 router.get('/admin/provider-status', requireAuth, async (req, res) => {
   if (!(await ensureAdminAccess(req, res))) return;
   return res.json({ data: getProviderStatus() });
+});
+
+router.get('/admin/tools', requireAuth, async (req, res) => {
+  try {
+    if (!(await ensureAdminAccess(req, res))) return;
+    const data = await listTools();
+    return res.json({ data });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/admin/agents/:id/tools', requireAuth, async (req, res) => {
+  try {
+    if (!(await ensureAdminAccess(req, res))) return;
+    const data = await listAgentTools(req.params.id);
+    return res.json({ data });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/admin/agents/:id/tools', requireAuth, async (req, res) => {
+  try {
+    if (!(await ensureAdminAccess(req, res))) return;
+    const toolSlug = String(req.body?.tool_slug || '');
+    if (!toolSlug) return res.status(400).json({ error: 'tool_slug required.' });
+    await setAgentTool(req.params.id, toolSlug, Boolean(req.body?.enabled));
+    return res.json({ data: { agent_id: req.params.id, tool_slug: toolSlug, enabled: Boolean(req.body?.enabled) } });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/admin/tools/:slug/enabled', requireAuth, async (req, res) => {
+  try {
+    if (!(await ensureAdminAccess(req, res))) return;
+    await setToolEnabled(req.params.slug, Boolean(req.body?.enabled));
+    return res.json({ data: { tool_slug: req.params.slug, enabled: Boolean(req.body?.enabled) } });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/agents/:id/tools', async (req, res) => {
+  try {
+    const data = await listAgentTools(req.params.id);
+    return res.json({ data });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 router.get('/admin/system-health', requireAuth, async (req, res) => {

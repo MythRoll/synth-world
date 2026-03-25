@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { env } from "../config/env.js";
+import { executeToolCall, getOpenAiToolSpecs } from "./toolRuntimeService.js";
 
 const DEFAULT_OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o";
 
@@ -41,21 +42,21 @@ function resolveOpenAiModel(agent) {
 
 function buildAgentSystemPrompt(agent) {
   const metadata = parseMetadata(agent?.metadata);
-  const skills = Array.isArray(agent?.agent_capabilities)
-    ? agent.agent_capabilities.map((s) => s?.skill_name).filter(Boolean)
-    : [];
+  const skills = Array.isArray(agent?.agent_capabilities) ? agent.agent_capabilities.map((s) => s?.skill_name).filter(Boolean) : [];
+  const runtimeTools = Array.isArray(agent?.runtime_tools) ? agent.runtime_tools : [];
   const role = metadata.role || metadata.personality || agent?.role || "platform participant";
   const configuredPrompt = agent?.system_prompt_summary || metadata?.system_prompt_summary || "";
 
-  const toolsLine = skills.length
-    ? `You can reference only these configured skills: ${skills.join(", ")}. Do not claim extra tools.`
-    : "You currently have no callable external tools. Do not claim browsing, tool execution, or external actions.";
+  const toolsLine = runtimeTools.length
+    ? `You can call ONLY these built-in tools: ${runtimeTools.map((t) => `${t.slug} (${t.category})`).join(", ")}.`
+    : "You currently have no callable built-in tools. Do not claim browsing, tool execution, or external actions.";
 
   return [
     `You are ${agent?.name || "an unnamed agent"}, an AI agent operating inside Synth-World.`,
     `Your agent identity: id=${agent?.id || "unknown"}, name=${agent?.name || "Unnamed Agent"}.`,
     `Your role/personality: ${role}.`,
     `Agent bio: ${agent?.bio || "No bio provided."}`,
+    skills.length ? `Skills profile: ${skills.join(", ")}.` : "",
     `Framework/provider hint: ${agent?.framework || "unknown"}.`,
     "Synth-World context: This is an AI-agent economy platform where agents register, hold credits, offer services, interact with users/admins, and participate in governance/market activity.",
     toolsLine,
@@ -96,16 +97,49 @@ export async function runHostedAgent(agent, message, options = {}) {
     const client = new OpenAI({ apiKey });
     const model = resolveOpenAiModel(agent);
     const systemPrompt = buildAgentSystemPrompt(agent);
-    const response = await client.chat.completions.create({
-      model,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: message },
-      ],
-      temperature: 0.7,
-    });
+    const openAiTools = getOpenAiToolSpecs(agent.runtime_tools || []);
+    const messages = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: message },
+    ];
 
-    return response.choices?.[0]?.message?.content || "";
+    for (let i = 0; i < 3; i += 1) {
+      const response = await client.chat.completions.create({
+        model,
+        messages,
+        tools: openAiTools.length ? openAiTools : undefined,
+        temperature: 0.7,
+      });
+      const choice = response.choices?.[0]?.message;
+      if (!choice) return "";
+      const toolCalls = choice.tool_calls || [];
+      if (!toolCalls.length) return choice.content || "";
+
+      messages.push({
+        role: "assistant",
+        content: choice.content || "",
+        tool_calls: toolCalls,
+      });
+
+      for (const toolCall of toolCalls) {
+        const toolSlug = toolCall.function?.name;
+        let args = {};
+        try { args = JSON.parse(toolCall.function?.arguments || "{}"); } catch { args = {}; }
+        try {
+          const output = await executeToolCall({
+            agent,
+            userId: options.userId || null,
+            toolSlug,
+            input: args,
+            assignedTools: agent.runtime_tools || [],
+          });
+          messages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify(output) });
+        } catch (toolErr) {
+          messages.push({ role: "tool", tool_call_id: toolCall.id, content: JSON.stringify({ error: toolErr.message }) });
+        }
+      }
+    }
+    return "I could not complete that action in this request.";
   } catch (error) {
     console.error("[aiService] OpenAI call failed:", error?.message || error);
     setLastProviderError(error, { provider: "openai", model: resolveOpenAiModel(agent), agent_id: agent?.id || null });
