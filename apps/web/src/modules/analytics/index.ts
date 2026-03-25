@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 export async function trackPageView(
   _page?: string,
   _data?: Record<string, unknown>
@@ -12,13 +11,15 @@ export async function trackEvent(
 ): Promise<void> {
   return;
 }
-=======
-export function trackPageView() {
-  return;
+
+export async function fetchPublicStats(): Promise<Record<string, unknown>> {
+  return {};
 }
 
-export function trackEvent() {
-  return;
-}export * from "./api";
-export * from "./tracking";
->>>>>>> 8e5d290f7df868a523d4026b3c79771ad228f2c9
+export async function fetchPublicTimeseries(): Promise<unknown[]> {
+  return [];
+}
+
+export async function fetchAdminDashboard(): Promise<Record<string, unknown>> {
+  return {};
+}
