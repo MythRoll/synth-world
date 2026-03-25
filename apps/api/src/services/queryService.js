@@ -116,12 +116,12 @@ async function resolveJoin(parentRows, join, parentTable) {
 
 function parseOrFilter(orValue) {
   const clauses = []; const params = [];
-  for (const part of orValue.split(',')) {
+  for (const part of splitTopLevel(orValue)) {
     const trimmed = part.trim();
     const andMatch = trimmed.match(/^and\((.+)\)$/);
     if (andMatch) {
       const andClauses = [];
-      for (const ip of andMatch[1].split(',')) {
+      for (const ip of splitTopLevel(andMatch[1])) {
         const [col, op, ...v] = ip.trim().split('.');
         if (op === 'eq') { andClauses.push(`\`${safeCol(col)}\` = ?`); params.push(v.join('.')); }
       }
@@ -135,7 +135,7 @@ function parseOrFilter(orValue) {
   return { sql: clauses.length ? `(${clauses.join(' OR ')})` : null, params };
 }
 
-export async function runTableQuery({ table, action, values, filters=[], order=[], limit, columns='*', single }) {
+export async function runTableQuery({ table, action, values, filters=[], order=[], limit, columns='*', options={}, single, returning=false, returningColumns='*' }) {
   if (!ALLOWED_TABLES.has(table)) throw new Error(`Table not allowed: ${table}`);
 
   if (action === 'select') {
@@ -157,20 +157,42 @@ export async function runTableQuery({ table, action, values, filters=[], order=[
     if (order.length) sql += ` ORDER BY ${order.map(o=>`\`${safeCol(o.column)}\` ${o.options?.ascending===false?'DESC':'ASC'}`).join(', ')}`;
     if (limit) sql += ` LIMIT ${Number(limit)}`;
     const [rows] = await pool.query(sql, params);
+    const shouldCount = options?.count === 'exact';
+    let count = null;
+    if (shouldCount) {
+      let countSql = `SELECT COUNT(*) AS total FROM \`${table}\``;
+      if (where.length) countSql += ` WHERE ${where.join(' AND ')}`;
+      const [[countRow]] = await pool.query(countSql, params);
+      count = Number(countRow?.total || 0);
+    }
     for (const join of joins) await resolveJoin(rows, join, table);
-    return { data: single ? (rows[0]??null) : rows };
+    return { data: single ? (rows[0]??null) : rows, count };
   }
 
   if (action === 'insert') {
-    const payload = { ...(Array.isArray(values)?values[0]:values) };
-    if (table === 'agents') payload.name = validateAgentName(payload.name);
-    if (!payload.id) payload.id = uuidv4();
-    const fields = Object.keys(payload);
-    await pool.query(
-      `INSERT INTO \`${table}\` (${fields.map(f=>`\`${safeCol(f)}\``).join(',')}) VALUES (${fields.map(()=>'?').join(',')})`,
-      fields.map(f => payload[f])
+    const items = Array.isArray(values) ? values : [values];
+    const inserted = [];
+    for (const raw of items) {
+      const payload = { ...(raw || {}) };
+      if (table === 'agents') payload.name = validateAgentName(payload.name);
+      if (!payload.id) payload.id = uuidv4();
+      const fields = Object.keys(payload);
+      await pool.query(
+        `INSERT INTO \`${table}\` (${fields.map(f=>`\`${safeCol(f)}\``).join(',')}) VALUES (${fields.map(()=>'?').join(',')})`,
+        fields.map(f => payload[f])
+      );
+      inserted.push(payload);
+    }
+    if (!returning) return { data: Array.isArray(values) ? inserted : inserted[0] };
+    const idList = inserted.map((row) => row.id).filter(Boolean);
+    if (!idList.length) return { data: Array.isArray(values) ? inserted : inserted[0] };
+    const [rows] = await pool.query(
+      `SELECT ${returningColumns || '*'} FROM \`${table}\` WHERE id IN (${idList.map(() => '?').join(',')})`,
+      idList
     );
-    return { data: payload };
+    const map = new Map(rows.map((row) => [row.id, row]));
+    const returned = inserted.map((row) => map.get(row.id) || row);
+    return { data: single ? (returned[0] || null) : (Array.isArray(values) ? returned : returned[0]) };
   }
 
   if (action === 'update') {
@@ -182,7 +204,11 @@ export async function runTableQuery({ table, action, values, filters=[], order=[
     const eqf = filters.filter(f=>f.op==='eq');
     if (eqf.length) { sql += ` WHERE ${eqf.map(f=>`\`${safeCol(f.column)}\` = ?`).join(' AND ')}`; params.push(...eqf.map(f=>f.value)); }
     const [result] = await pool.query(sql, params);
-    return { data: result };
+    if (!returning) return { data: result };
+    if (!eqf.length) return { data: single ? null : [] };
+    const where = eqf.map(f=>`\`${safeCol(f.column)}\` = ?`).join(' AND ');
+    const [rows] = await pool.query(`SELECT ${returningColumns || '*'} FROM \`${table}\` WHERE ${where}`, eqf.map(f=>f.value));
+    return { data: single ? (rows[0] || null) : rows };
   }
 
   if (action === 'delete') {

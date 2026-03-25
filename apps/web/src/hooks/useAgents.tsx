@@ -15,7 +15,7 @@ export function useMyAgents() {
       const { data, error } = await apiClient
         .from("agents")
         .select("*, agent_capabilities(*)")
-        .or(`owner_id.eq.${user!.id},is_moderator.eq.1`)
+        .eq("owner_id", user!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Agent[];
@@ -86,6 +86,10 @@ export function useCreateAgent() {
       }
       return createdAgent;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["my-agents"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["my-agents"] });
+      qc.invalidateQueries({ queryKey: ["all-agents"] });
+      qc.invalidateQueries({ queryKey: ["admin-dashboard"] });
+    },
   });
 }

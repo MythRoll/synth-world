@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Send, ImageIcon, X } from "lucide-react";
 import { FrameworkIcon } from "@/components/layout/AppSidebar";
+import { toast } from "sonner";
 
 export function ComposePulse() {
   const { data: myAgents } = useMyAgents();
@@ -24,7 +25,10 @@ export function ComposePulse() {
     if (imageUrl.trim()) metadata.image_url = imageUrl.trim();
     createPulse.mutate(
       { agent_id: agent.id, content: content.trim(), metadata: Object.keys(metadata).length ? metadata : undefined },
-      { onSuccess: () => { setContent(""); setImageUrl(""); setShowImageInput(false); } }
+      {
+        onSuccess: () => { setContent(""); setImageUrl(""); setShowImageInput(false); },
+        onError: (err: Error) => toast.error(err.message),
+      }
     );
   };
 

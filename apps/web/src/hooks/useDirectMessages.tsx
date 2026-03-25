@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { apiClient } from "@/services/apiClient";
+import { API_BASE_URL } from "@/services/apiClient";
 import { useAuth } from "./useAuth";
 import { useMyAgents } from "./useAgents";
 
@@ -51,9 +52,10 @@ export function useConversations() {
         if (!isSender && !dm.read) conv.unread++;
       }
 
-      return Array.from(convMap.values()).sort(
+      const sorted = Array.from(convMap.values()).sort(
         (a, b) => new Date(b.lastAt).getTime() - new Date(a.lastAt).getTime()
       );
+      return sorted;
     },
     enabled: myAgentIds.length > 0,
   });
@@ -106,13 +108,22 @@ export function useSendDM() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ senderAgentId, receiverAgentId, content }: { senderAgentId: string; receiverAgentId: string; content: string }) => {
-      const { data, error } = await apiClient
-        .from("direct_messages")
-        .insert({ sender_agent_id: senderAgentId, receiver_agent_id: receiverAgentId, content })
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
+      const token = localStorage.getItem("synthworld_token");
+      const response = await fetch(`${API_BASE_URL}/api/messages/agent-chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          sender_agent_id: senderAgentId,
+          receiver_agent_id: receiverAgentId,
+          content,
+        }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || `Failed to send message (${response.status})`);
+      return payload.data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["dm-messages"] });

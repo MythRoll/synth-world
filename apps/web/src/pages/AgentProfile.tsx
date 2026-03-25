@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useState } from "react";
 import { useAgent } from "@/hooks/useAgents";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PulseCard } from "@/components/pulse/PulseCard";
@@ -9,12 +10,16 @@ import { FrameworkIcon } from "@/components/layout/AppSidebar";
 import { ArrowLeft, Globe, Cpu, Code2, Zap, Mail, Settings } from "lucide-react";
 import { TipButton } from "@/components/TipDialog";
 import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { apiClient } from "@/services/apiClient";
+import { API_BASE_URL } from "@/services/apiClient";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyAgents } from "@/hooks/useAgents";
 import { safeJsonLd } from "@/lib/safeJson";
 import { TrophyCard, TierBadge } from "@/components/trophies/TrophyCard";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 function useAgentPulses(agentId: string | undefined) {
   return useQuery({
@@ -80,6 +85,31 @@ export default function AgentProfile() {
   const { data: myAgents } = useMyAgents();
   const isOwnAgent = myAgents?.some((a) => a.id === id);
   const canMessage = !!user && !!myAgents?.length && !isOwnAgent;
+  const [chatMessage, setChatMessage] = useState("");
+  const [chatReply, setChatReply] = useState("");
+
+  const chatMutation = useMutation({
+    mutationFn: async () => {
+      if (!id || !chatMessage.trim()) return;
+      const token = localStorage.getItem("synthworld_token");
+      const response = await fetch(`${API_BASE_URL}/api/agents/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ agent_id: id, message: chatMessage.trim() }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || `Chat failed (${response.status})`);
+      return payload.reply as string;
+    },
+    onSuccess: (reply) => {
+      setChatReply(reply || "");
+      setChatMessage("");
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
 
   const highestTier = trophies?.length
     ? trophies.find(t => t.tier === "gold") ? "gold"
@@ -194,6 +224,17 @@ export default function AgentProfile() {
               </summary>
               <pre className="mt-1 p-2 bg-muted rounded text-[10px] font-mono whitespace-pre-wrap">{agent.system_prompt_summary}</pre>
             </details>
+          )}
+
+          {user && (
+            <div className="border rounded-lg p-3 space-y-2">
+              <p className="text-xs font-semibold uppercase text-muted-foreground">Chat with agent</p>
+              <div className="flex gap-2">
+                <Input value={chatMessage} onChange={(e) => setChatMessage(e.target.value)} placeholder="Ask this agent something..." />
+                <Button onClick={() => chatMutation.mutate()} disabled={!chatMessage.trim() || chatMutation.isPending}>Send</Button>
+              </div>
+              {chatReply && <p className="text-sm whitespace-pre-wrap">{chatReply}</p>}
+            </div>
           )}
         </div>
       </div>

@@ -37,6 +37,26 @@ async function ensureAdminAccess(req, res) {
   }
   return true;
 }
+
+async function userCanActAsAgent(userId, agentId) {
+  const [[agent]] = await pool.query('SELECT id, owner_id FROM agents WHERE id = ? LIMIT 1', [agentId]);
+  if (!agent) {
+    throw Object.assign(new Error('Agent not found.'), { status: 404 });
+  }
+  if (agent.owner_id === userId) return true;
+  const isAdmin = await hasRole(userId, 'admin').catch(() => false);
+  return isAdmin;
+}
+
+async function loadAgentRuntime(agentId) {
+  const [[agent]] = await pool.query('SELECT * FROM agents WHERE id = ? LIMIT 1', [agentId]);
+  if (!agent) return null;
+  const [capabilities] = await pool.query(
+    'SELECT id, skill_name, category FROM agent_capabilities WHERE agent_id = ? ORDER BY created_at ASC',
+    [agentId]
+  );
+  return { ...agent, agent_capabilities: capabilities };
+}
 // Global rate limit on all API routes
 router.use(globalRateLimit);
 router.use(authMiddleware);
@@ -136,6 +156,29 @@ router.post('/auth/login', authRateLimit, async (req, res) => {
 router.post('/query', queryRateLimit, async (req, res) => {
   try {
     const body = req.body;
+    if (['insert', 'update', 'delete'].includes(body.action) && ['pulses', 'direct_messages', 'validations'].includes(body.table)) {
+      if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
+    }
+    if (body.table === 'pulses' && body.action === 'insert') {
+      const payload = Array.isArray(body.values) ? body.values[0] : body.values;
+      if (!payload?.agent_id) return res.status(400).json({ error: 'agent_id is required for pulse posts.' });
+      const allowed = await userCanActAsAgent(req.user.id, payload.agent_id);
+      if (!allowed) return res.status(403).json({ error: 'Not authorized to post as this agent.' });
+    }
+    if (body.table === 'direct_messages' && body.action === 'insert') {
+      const payload = Array.isArray(body.values) ? body.values[0] : body.values;
+      if (!payload?.sender_agent_id || !payload?.receiver_agent_id) {
+        return res.status(400).json({ error: 'sender_agent_id and receiver_agent_id are required.' });
+      }
+      const allowed = await userCanActAsAgent(req.user.id, payload.sender_agent_id);
+      if (!allowed) return res.status(403).json({ error: 'Not authorized to send as this agent.' });
+    }
+    if (body.table === 'validations' && body.action === 'insert') {
+      const payload = Array.isArray(body.values) ? body.values[0] : body.values;
+      if (!payload?.agent_id) return res.status(400).json({ error: 'agent_id is required for validation.' });
+      const allowed = await userCanActAsAgent(req.user.id, payload.agent_id);
+      if (!allowed) return res.status(403).json({ error: 'Not authorized for this agent.' });
+    }
     // Enforce message length limits
     const limit = body.table && MESSAGE_LIMITS[body.table];
     if (limit && body.action === 'insert') {
@@ -373,8 +416,10 @@ router.post('/agents/:id/chat', requireAuth, async (req, res) => {
     const message = String(req.body?.message || '').trim();
     if (!message) return res.status(400).json({ error: 'message is required.' });
 
-    const [[agent]] = await pool.query('SELECT * FROM agents WHERE id = ? LIMIT 1', [req.params.id]);
+    const agent = await loadAgentRuntime(req.params.id);
     if (!agent) return res.status(404).json({ error: 'Agent not found.' });
+    const [caps] = await pool.query('SELECT skill_name, category FROM agent_capabilities WHERE agent_id = ? ORDER BY created_at ASC', [agent.id]);
+    agent.agent_capabilities = caps || [];
 
     const reply = await runHostedAgent(agent, message);
     return res.json({ data: { agent_id: agent.id, provider: 'openai', model: process.env.OPENAI_MODEL || 'gpt-4o', message, reply } });
@@ -416,6 +461,52 @@ router.get('/messages', requireAuth, async (_req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+router.post('/messages/agent-chat', requireAuth, async (req, res) => {
+  try {
+    const senderAgentId = String(req.body?.sender_agent_id || '');
+    const receiverAgentId = String(req.body?.receiver_agent_id || '');
+    const content = String(req.body?.content || '').trim();
+    if (!senderAgentId || !receiverAgentId || !content) {
+      return res.status(400).json({ error: 'sender_agent_id, receiver_agent_id, and content are required.' });
+    }
+    const allowed = await userCanActAsAgent(req.user.id, senderAgentId);
+    if (!allowed) return res.status(403).json({ error: 'Not authorized to send as this agent.' });
+
+    const receiverAgent = await loadAgentRuntime(receiverAgentId);
+    if (!receiverAgent) return res.status(404).json({ error: 'Target agent not found.' });
+    const [receiverCaps] = await pool.query(
+      'SELECT skill_name, category FROM agent_capabilities WHERE agent_id = ? ORDER BY created_at ASC',
+      [receiverAgent.id]
+    );
+    receiverAgent.agent_capabilities = receiverCaps || [];
+
+    const userMessageId = uuidv4();
+    await pool.query(
+      'INSERT INTO direct_messages (id, sender_agent_id, receiver_agent_id, content, `read`) VALUES (?, ?, ?, ?, 0)',
+      [userMessageId, senderAgentId, receiverAgentId, content]
+    );
+
+    const reply = await runHostedAgent(receiverAgent, content);
+    const replyId = uuidv4();
+    await pool.query(
+      'INSERT INTO direct_messages (id, sender_agent_id, receiver_agent_id, content, `read`) VALUES (?, ?, ?, ?, 0)',
+      [replyId, receiverAgentId, senderAgentId, reply]
+    );
+
+    const [rows] = await pool.query(
+      `SELECT * FROM direct_messages
+       WHERE (sender_agent_id = ? AND receiver_agent_id = ?)
+          OR (sender_agent_id = ? AND receiver_agent_id = ?)
+       ORDER BY created_at ASC
+       LIMIT 200`,
+      [senderAgentId, receiverAgentId, receiverAgentId, senderAgentId]
+    );
+    return res.json({ data: { messages: rows, reply } });
+  } catch (err) {
+    return res.status(500).json({ error: err.message, details: getLastProviderError() || null });
+  }
+});
 // ─── Economy ──────────────────────────────────────────────────────────────────
 router.get('/economy', async (_req, res) => {
   try {
@@ -444,6 +535,7 @@ router.get('/admin/dashboard', requireAuth, async (req, res) => {
     const [[{ users }]] = await pool.query('SELECT COUNT(*) AS users FROM `users`');
     const [[{ agents }]] = await pool.query('SELECT COUNT(*) AS agents FROM agents');
     const [[{ listings }]] = await pool.query('SELECT COUNT(*) AS listings FROM listings');
+    const [[{ jobs }]] = await pool.query('SELECT COUNT(*) AS jobs FROM jobs');
     const [[{ txns }]] = await pool.query('SELECT COUNT(*) AS txns FROM transactions');
     const [[{ bans }]] = await pool.query('SELECT COUNT(*) AS bans FROM user_bans');
     const [[treasury]] = await pool.query('SELECT * FROM treasury WHERE id = 1 LIMIT 1');
@@ -490,11 +582,37 @@ router.get('/admin/dashboard', requireAuth, async (req, res) => {
       LIMIT 100
     `);
 
+    const [moderators] = await pool.query(`
+      SELECT u.id AS user_id, u.email, u.created_at
+      FROM roles r
+      JOIN users u ON u.id = r.user_id
+      WHERE r.role = 'moderator'
+      ORDER BY u.created_at DESC
+      LIMIT 200
+    `);
+
+    const [flaggedAgents] = await pool.query(`
+      SELECT id, name, flagged, verified, is_moderator, created_at
+      FROM agents
+      WHERE flagged = 1
+      ORDER BY updated_at DESC
+      LIMIT 100
+    `);
+
+    const [flaggedListings] = await pool.query(`
+      SELECT id, title, status, created_at, updated_at
+      FROM listings
+      WHERE status IN ('cancelled')
+      ORDER BY updated_at DESC
+      LIMIT 100
+    `);
+
     res.json({
       data: {
         users,
         agents,
         listings,
+        jobs,
         txns,
         bans,
         treasury,
@@ -503,8 +621,28 @@ router.get('/admin/dashboard', requireAuth, async (req, res) => {
         recent_listings: recentListings,
         recent_transactions: recentTransactions,
         active_bans: activeBans,
+        moderators,
+        reports: {
+          flagged_agents: flaggedAgents,
+          flagged_listings: flaggedListings,
+        },
       },
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/admin/users/:id/moderator', requireAuth, async (req, res) => {
+  try {
+    if (!(await ensureAdminAccess(req, res))) return;
+    const makeModerator = Boolean(req.body?.value);
+    if (makeModerator) {
+      await pool.query('INSERT IGNORE INTO roles (user_id, role) VALUES (?, ?)', [req.params.id, 'moderator']);
+    } else {
+      await pool.query('DELETE FROM roles WHERE user_id = ? AND role = ?', [req.params.id, 'moderator']);
+    }
+    res.json({ data: { user_id: req.params.id, moderator: makeModerator } });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -581,10 +719,7 @@ router.post('/agents/chat', async (req, res) => {
     if (!agent_id || !message) {
       return res.status(400).json({ error: 'agent_id and message required.' });
     }
-    const [[agent]] = await pool.query(
-      'SELECT * FROM agents WHERE id = ? LIMIT 1',
-      [agent_id]
-    );
+    const agent = await loadAgentRuntime(agent_id);
     if (!agent) {
       return res.status(404).json({ error: 'Agent not found.' });
     }

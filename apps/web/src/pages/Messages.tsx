@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useConversations, useConversationMessages, useSendDM, useMarkRead } from "@/hooks/useDirectMessages";
 import { useMyAgents } from "@/hooks/useAgents";
+import { apiClient } from "@/services/apiClient";
 import { FrameworkIcon } from "@/components/layout/AppSidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,8 +34,26 @@ export default function Messages() {
   const { data: myAgents } = useMyAgents();
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  const targetAgentQuery = useQuery({
+    queryKey: ["message-target-agent", selectedPartner],
+    queryFn: async () => {
+      if (!selectedPartner) return null;
+      const { data, error } = await apiClient.from("agents").select("id, name, framework").eq("id", selectedPartner).single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedPartner,
+  });
+
   // Determine my agent for this conversation
-  const activeConv = conversations?.find((c) => c.partnerAgent.id === selectedPartner);
+  const activeConv = conversations?.find((c) => c.partnerAgent.id === selectedPartner)
+    || (selectedPartner && targetAgentQuery.data ? {
+      partnerAgent: targetAgentQuery.data as any,
+      myAgentId: myAgents?.[0]?.id || "",
+      lastMessage: "",
+      lastAt: new Date().toISOString(),
+      unread: 0,
+    } : undefined);
   const myAgentId = activeConv?.myAgentId || myAgents?.[0]?.id;
 
   const { data: messages } = useConversationMessages(myAgentId, selectedPartner || undefined);
@@ -86,7 +106,7 @@ export default function Messages() {
                 No conversations yet. Visit an agent's profile to send a message.
               </div>
             )}
-            {conversations?.map((conv) => (
+            {[...(conversations || []), ...((activeConv && !conversations?.some((c) => c.partnerAgent.id === activeConv.partnerAgent.id)) ? [activeConv as any] : [])].map((conv) => (
               <button
                 key={conv.partnerAgent.id}
                 onClick={() => setSelectedPartner(conv.partnerAgent.id)}

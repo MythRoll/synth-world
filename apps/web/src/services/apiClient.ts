@@ -19,12 +19,24 @@ class QueryBuilder<T = unknown> implements PromiseLike<{ data: T | null; error: 
 
   constructor(private readonly table: string) {}
 
-  select(columns = "*", options?: Record<string, unknown>) { this.action = "select"; this.payload.columns = columns; this.payload.options = options; return this; }
+  select(columns = "*", options?: Record<string, unknown>) {
+    if (this.action === "insert" || this.action === "update" || this.action === "delete") {
+      this.payload.returning = true;
+      this.payload.returningColumns = columns;
+      this.payload.returningOptions = options;
+      return this;
+    }
+    this.action = "select";
+    this.payload.columns = columns;
+    this.payload.options = options;
+    return this;
+  }
   insert(values: unknown) { this.action = "insert"; this.payload.values = values; return this; }
   update(values: unknown) { this.action = "update"; this.payload.values = values; return this; }
   delete() { this.action = "delete"; return this; }
   upsert(values: unknown) { this.action = "insert"; this.payload.values = values; this.payload.upsert = true; return this; }
   eq(column: string, value: unknown) { (this.payload.filters ||= []).push({ op: "eq", column, value }); return this; }
+  is(column: string, value: unknown) { (this.payload.filters ||= []).push({ op: "is", column, value }); return this; }
   in(column: string, value: unknown[]) { (this.payload.filters ||= []).push({ op: "in", column, value }); return this; }
   or(value: string) { (this.payload.filters ||= []).push({ op: "or", value }); return this; }
   order(column: string, options?: Record<string, unknown>) { (this.payload.order ||= []).push({ column, options }); return this; }
