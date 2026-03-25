@@ -11,13 +11,32 @@ import { handleRealEstateAction } from '../services/realEstateService.js';
 import {
   handleAdminAgentAction, getAdminActivity, getPublicAgents, getPublicAgentsByIds,
   getLeaderboard, getTreasuryStats, handleTreasuryAction, getTreasuryDashboard,
-  getPublicAnalyticsStats,
+  getPublicAnalyticsStats, handleAdminListingAction,
 } from '../services/adminService.js';
 import { v4 as uuidv4 } from 'uuid';
-import { runHostedAgent } from '../services/aiService.js';
+import { runHostedAgent, getProviderStatus, getLastProviderError } from '../services/aiService.js';
 import adminOverviewRouter from './adminOverview.js';
 
 const router = Router();
+
+const INVALID_AGENT_NAMES = /^(placeholder|test|default|unnamed|null|guest|n\/?a|agent)$/i;
+
+function normalizeAgentName(name) {
+  const normalized = String(name || '').trim().replace(/\s+/g, ' ');
+  if (normalized.length < 3 || INVALID_AGENT_NAMES.test(normalized)) {
+    throw Object.assign(new Error('Please provide a valid descriptive agent name.'), { status: 400 });
+  }
+  return normalized;
+}
+
+async function ensureAdminAccess(req, res) {
+  const ok = await hasRole(req.user.id, 'admin').catch(() => false);
+  if (!ok) {
+    res.status(403).json({ error: 'Admin access required.' });
+    return false;
+  }
+  return true;
+}
 // Global rate limit on all API routes
 router.use(globalRateLimit);
 router.use(authMiddleware);
@@ -47,7 +66,8 @@ const MESSAGE_LIMITS = { direct_messages: 2000, pulses: 500, support_messages: 1
 router.post('/agents/register', authRateLimit, async (req, res) => {
   try {
     const { name, framework, bio } = req.body || {};
-    if (!name) return res.status(400).json({ error: 'name is required.' });
+    let safeName;
+    try { safeName = normalizeAgentName(name); } catch (err) { return res.status(err.status || 400).json({ error: err.message }); }
     // Create a system user account for this agent
     const userId  = uuidv4();
     const agentId = uuidv4();
@@ -62,7 +82,7 @@ router.post('/agents/register', authRateLimit, async (req, res) => {
     await pool.query(
       `INSERT INTO agents (id, owner_id, name, framework, bio, credits, verified)
        VALUES (?, ?, ?, ?, ?, 10, 0)`,
-      [agentId, userId, name, framework || 'custom', bio || '']
+      [agentId, userId, safeName, framework || 'custom', bio || '']
     );
     // Give starting credits from treasury
     await pool.query(
@@ -74,6 +94,7 @@ router.post('/agents/register', authRateLimit, async (req, res) => {
       agent_id:  agentId,
       api_key:   apiKey,
       credits:   10,
+      name:      safeName,
       message:   'Welcome to Synth World. Read https://synth-world.com/world/WELCOME.md to get started.',
     });
   } catch (err) {
@@ -170,6 +191,19 @@ router.post('/rpc', async (req, res) => {
       const activity = await getAdminActivity(req.user.id);
       return res.json({ data: { traffic_trends: [], event_breakdown: [], referrers: [], daily_registrations: [], top_agents: activity.top_agents, suspicious_spikes: activity.suspicious_agents, failed_webhooks: [], rate_limit_hits: 0, credits_economy_trend: [] } });
     }
+
+    if (name === 'get_platform_stats') {
+      const [[{ total_agents }]] = await pool.query('SELECT COUNT(*) AS total_agents FROM agents');
+      const [[{ total_credits_circulating }]] = await pool.query('SELECT COALESCE(SUM(credits),0) AS total_credits_circulating FROM agents');
+      const [[{ games_played_today }]] = await pool.query(
+        "SELECT COUNT(*) AS games_played_today FROM game_tables WHERE status = 'finished' AND created_at >= CURDATE()"
+      );
+      const [[{ services_sold_today }]] = await pool.query(
+        "SELECT COUNT(*) AS services_sold_today FROM listings WHERE status = 'sold' AND created_at >= CURDATE()"
+      );
+      return res.json({ data: [{ total_agents, total_credits_circulating: Number(total_credits_circulating), games_played_today, services_sold_today }] });
+    }
+
     if (name === 'get_extended_public_stats') {
       const [[{ total_agents }]] = await pool.query('SELECT COUNT(*) AS total_agents FROM agents');
       const [[{ plots_owned }]] = await pool.query('SELECT COUNT(*) AS plots_owned FROM land_plots WHERE owner_agent_id IS NOT NULL');
@@ -229,6 +263,21 @@ router.post('/functions/:name', async (req, res) => {
   if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
   const userId = req.user.id;
   try {
+    if (fn === 'register-agent') {
+      const safeName = normalizeAgentName(body.name);
+      const agentId = uuidv4();
+      const metadata = body.metadata && typeof body.metadata === 'object' ? JSON.stringify(body.metadata) : null;
+      await pool.query(
+        `INSERT INTO agents (id, owner_id, name, framework, bio, metadata)
+         VALUES (?, ?, ?, ?, ?, ?)` ,
+        [agentId, userId, safeName, (body.framework || 'custom'), body.bio || null, metadata]
+      );
+      const [[agent]] = await pool.query(
+        'SELECT id, owner_id, name, framework, bio, verified, flagged, is_moderator, credits AS credit_balance, created_at, metadata FROM agents WHERE id = ? LIMIT 1',
+        [agentId]
+      );
+      return res.json({ data: agent });
+    }
     if (fn === 'slots-spin') {
       const result = await handleSlotsSpin(body, userId);
       return res.json(result);
@@ -257,6 +306,10 @@ router.post('/functions/:name', async (req, res) => {
       const result = await getAdminActivity(userId);
       return res.json(result);
     }
+    if (fn === 'admin-listing-action') {
+      const result = await handleAdminListingAction(body, userId);
+      return res.json(result);
+    }
     if (fn === 'treasury-dashboard') {
       const result = await getTreasuryDashboard(userId);
       return res.json(result);
@@ -271,14 +324,62 @@ router.post('/functions/:name', async (req, res) => {
   }
 });
 // ─── Agents ───────────────────────────────────────────────────────────────────
+router.post('/agents', requireAuth, async (req, res) => {
+  try {
+    const safeName = normalizeAgentName(req.body?.name);
+    const id = uuidv4();
+    const metadata = req.body?.metadata && typeof req.body.metadata === 'object' ? JSON.stringify(req.body.metadata) : null;
+    await pool.query(
+      `INSERT INTO agents (id, owner_id, name, framework, bio, metadata)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [id, req.user.id, safeName, req.body?.framework || 'custom', req.body?.bio || null, metadata]
+    );
+    const [[agent]] = await pool.query(
+      'SELECT id, owner_id, name, framework, bio, verified, flagged, is_moderator, credits AS credit_balance, created_at, metadata FROM agents WHERE id = ? LIMIT 1',
+      [id]
+    );
+    res.status(201).json({ data: agent });
+  } catch (err) {
+    res.status(err.status || 500).json({ error: err.message });
+  }
+});
+
 router.get('/agents', async (_req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT id, name, framework, bio, verified, flagged, credits AS credit_balance, created_at FROM agents ORDER BY created_at DESC LIMIT 100'
+      'SELECT id, owner_id, name, framework, bio, verified, flagged, is_moderator, credits AS credit_balance, created_at FROM agents ORDER BY created_at DESC LIMIT 200'
     );
     res.json({ data: rows });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/agents/:id', async (req, res) => {
+  try {
+    const [[agent]] = await pool.query(
+      'SELECT id, owner_id, name, framework, bio, verified, flagged, is_moderator, credits AS credit_balance, created_at, metadata FROM agents WHERE id = ? LIMIT 1',
+      [req.params.id]
+    );
+    if (!agent) return res.status(404).json({ error: 'Agent not found.' });
+    res.json({ data: agent });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/agents/:id/chat', requireAuth, async (req, res) => {
+  try {
+    const message = String(req.body?.message || '').trim();
+    if (!message) return res.status(400).json({ error: 'message is required.' });
+
+    const [[agent]] = await pool.query('SELECT * FROM agents WHERE id = ? LIMIT 1', [req.params.id]);
+    if (!agent) return res.status(404).json({ error: 'Agent not found.' });
+
+    const reply = await runHostedAgent(agent, message);
+    return res.json({ data: { agent_id: agent.id, provider: 'openai', model: process.env.OPENAI_MODEL || 'gpt-4o', message, reply } });
+  } catch (err) {
+    return res.status(500).json({ error: err.message, details: getLastProviderError() || null });
   }
 });
 // ─── Leaderboard ──────────────────────────────────────────────────────────────
@@ -337,17 +438,142 @@ router.get('/admin', requireAuth, async (req, res) => {
 });
 router.get('/admin/dashboard', requireAuth, async (req, res) => {
   try {
-    const [[{ users }]]    = await pool.query('SELECT COUNT(*) AS users FROM `users`');
-    const [[{ agents }]]   = await pool.query('SELECT COUNT(*) AS agents FROM agents');
+    const ok = await hasRole(req.user.id, 'admin').catch(() => false);
+    if (!ok) return res.status(403).json({ error: 'Admin access required.' });
+
+    const [[{ users }]] = await pool.query('SELECT COUNT(*) AS users FROM `users`');
+    const [[{ agents }]] = await pool.query('SELECT COUNT(*) AS agents FROM agents');
     const [[{ listings }]] = await pool.query('SELECT COUNT(*) AS listings FROM listings');
-    const [[{ txns }]]     = await pool.query('SELECT COUNT(*) AS txns FROM transactions');
-    const [[{ bans }]]     = await pool.query('SELECT COUNT(*) AS bans FROM user_bans');
-    const [[treasury]]     = await pool.query('SELECT * FROM treasury WHERE id = 1 LIMIT 1');
-    res.json({ data: { users, agents, listings, txns, bans, treasury } });
+    const [[{ txns }]] = await pool.query('SELECT COUNT(*) AS txns FROM transactions');
+    const [[{ bans }]] = await pool.query('SELECT COUNT(*) AS bans FROM user_bans');
+    const [[treasury]] = await pool.query('SELECT * FROM treasury WHERE id = 1 LIMIT 1');
+
+    const [recentUsers] = await pool.query(`
+      SELECT u.id, u.email, u.created_at,
+        EXISTS(SELECT 1 FROM user_bans b WHERE b.user_id = u.id) AS is_banned,
+        EXISTS(SELECT 1 FROM admins ad WHERE ad.user_id = u.id) AS is_admin
+      FROM users u
+      ORDER BY u.created_at DESC
+      LIMIT 100
+    `);
+
+    const [recentAgents] = await pool.query(`
+      SELECT id, owner_id, name, framework, bio, verified, flagged, is_moderator,
+             credits AS credit_balance, created_at
+      FROM agents
+      ORDER BY created_at DESC
+      LIMIT 200
+    `);
+
+    const [recentListings] = await pool.query(`
+      SELECT l.id, l.seller_agent_id, l.title, l.description, l.price AS price_credits, l.status, l.created_at,
+             l.title AS skill_name,
+             a.name AS seller_name
+      FROM listings l
+      LEFT JOIN agents a ON a.id = l.seller_agent_id
+      ORDER BY l.created_at DESC
+      LIMIT 200
+    `);
+
+    const [recentTransactions] = await pool.query(`
+      SELECT id, from_agent_id, to_agent_id, amount, type, description, created_at
+      FROM transactions
+      ORDER BY created_at DESC
+      LIMIT 200
+    `);
+
+    const [activeBans] = await pool.query(`
+      SELECT b.id, b.user_id, b.reason, b.expires_at, b.created_at, u.email
+      FROM user_bans b
+      LEFT JOIN users u ON u.id = b.user_id
+      ORDER BY b.created_at DESC
+      LIMIT 100
+    `);
+
+    res.json({
+      data: {
+        users,
+        agents,
+        listings,
+        txns,
+        bans,
+        treasury,
+        recent_users: recentUsers,
+        recent_agents: recentAgents,
+        recent_listings: recentListings,
+        recent_transactions: recentTransactions,
+        active_bans: activeBans,
+      },
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+router.get('/admin/agents', requireAuth, async (req, res) => {
+  try {
+    if (!(await ensureAdminAccess(req, res))) return;
+    const [rows] = await pool.query(
+      'SELECT id, owner_id, name, framework, bio, verified, flagged, is_moderator, credits AS credit_balance, created_at FROM agents ORDER BY created_at DESC LIMIT 300'
+    );
+    res.json({ data: rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/admin/agents/:id/set-role', requireAuth, async (req, res) => {
+  try {
+    if (!(await ensureAdminAccess(req, res))) return;
+    const role = String(req.body?.role || '').trim();
+    if (!role) return res.status(400).json({ error: 'role is required.' });
+    const [[agent]] = await pool.query('SELECT owner_id FROM agents WHERE id = ? LIMIT 1', [req.params.id]);
+    if (!agent) return res.status(404).json({ error: 'Agent not found.' });
+    await pool.query('INSERT IGNORE INTO roles (id, user_id, role) VALUES (?, ?, ?)', [uuidv4(), agent.owner_id, role]);
+    res.json({ data: { agent_id: req.params.id, user_id: agent.owner_id, role, assigned: true } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/admin/agents/:id/toggle-mod', requireAuth, async (req, res) => {
+  try {
+    if (!(await ensureAdminAccess(req, res))) return;
+    const [[agent]] = await pool.query('SELECT id, is_moderator FROM agents WHERE id = ? LIMIT 1', [req.params.id]);
+    if (!agent) return res.status(404).json({ error: 'Agent not found.' });
+    const next = agent.is_moderator ? 0 : 1;
+    await pool.query('UPDATE agents SET is_moderator = ? WHERE id = ?', [next, req.params.id]);
+    res.json({ data: { agent_id: req.params.id, is_moderator: Boolean(next) } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/admin/treasury', requireAuth, async (req, res) => {
+  try {
+    if (!(await ensureAdminAccess(req, res))) return;
+    const [[treasury]] = await pool.query('SELECT * FROM treasury WHERE id = 1 LIMIT 1');
+    const [[{ circulating }]] = await pool.query('SELECT COALESCE(SUM(credits),0) AS circulating FROM agents');
+    res.json({ data: { treasury, circulating: Number(circulating) } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/admin/provider-status', requireAuth, async (req, res) => {
+  if (!(await ensureAdminAccess(req, res))) return;
+  return res.json({ data: getProviderStatus() });
+});
+
+router.get('/admin/system-health', requireAuth, async (req, res) => {
+  try {
+    if (!(await ensureAdminAccess(req, res))) return;
+    await pingDatabase();
+    return res.json({ data: { api: 'ok', database: 'ok', provider: getProviderStatus(), uptime_seconds: Math.floor(process.uptime()) } });
+  } catch (err) {
+    return res.status(500).json({ error: err.message, data: { api: 'degraded', database: 'error', provider: getProviderStatus() } });
+  }
+});
+
 // --- Hosted Agent Chat -------------------------------------------------------
 router.post('/agents/chat', async (req, res) => {
   try {

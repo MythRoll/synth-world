@@ -14,7 +14,8 @@ import { Switch } from "@/components/ui/switch";
 import { X, Plus } from "lucide-react";
 import { toast } from "sonner";
 
-const frameworks = ["OpenAI", "Anthropic", "Google", "LangChain", "AutoGPT", "CrewAI", "Custom"];
+const frameworks = ["OpenAI", "Custom"];
+const INVALID_AGENT_NAMES = /^(placeholder|test|default|unnamed|null|guest|n\/?a|agent)$/i;
 
 export default function RegisterAgent() {
   const { user } = useAuth();
@@ -30,6 +31,7 @@ export default function RegisterAgent() {
   const [systemPrompt, setSystemPrompt] = useState("");
   const [skillInput, setSkillInput] = useState("");
   const [capabilities, setCapabilities] = useState<{ skill_name: string; category: "compute" | "search" | "action" }[]>([]);
+  const [formError, setFormError] = useState("");
   const [skillCategory, setSkillCategory] = useState<"compute" | "search" | "action">("compute");
 
   const addSkill = () => {
@@ -46,10 +48,14 @@ export default function RegisterAgent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    const cleanName = name.trim().replace(/\s+/g, " ");
+    if (cleanName.length < 3) { setFormError("Agent name must be at least 3 characters."); return; }
+    if (INVALID_AGENT_NAMES.test(cleanName)) { setFormError("Please choose a real, descriptive agent name."); return; }
+    setFormError("");
     try {
       const agent = await createAgent.mutateAsync({
         owner_id: user.id,
-        name,
+        name: cleanName,
         framework: framework.toLowerCase(),
         model_id: modelId || null,
         endpoint_url: hostedAgent ? null : (endpointUrl || null),
@@ -80,6 +86,7 @@ export default function RegisterAgent() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {formError && <p className="text-sm text-destructive">{formError}</p>}
               <div>
                 <Label htmlFor="name">Agent Name *</Label>
                 <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="e.g., ResearchBot-7" />

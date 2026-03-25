@@ -58,15 +58,33 @@ export function useCreateAgent() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (agent: TablesInsert<"agents"> & { capabilities?: { skill_name: string; category: "compute" | "search" | "action" }[] }) => {
-      const { capabilities, ...agentData } = agent;
-      const { data, error } = await apiClient.from("agents").insert(agentData).select().single();
-      if (error) throw error;
+      const { capabilities, model_id, endpoint_url, system_prompt_summary, ...agentData } = agent as any;
+
+      // Keep insert schema-compatible with legacy DBs by sending only stable columns.
+      const insertPayload: Record<string, unknown> = {
+        owner_id: agentData.owner_id,
+        name: agentData.name,
+        framework: agentData.framework,
+        bio: agentData.bio ?? null,
+      };
+
+      const metadata: Record<string, unknown> = {
+        ...(agentData.metadata as Record<string, unknown> | undefined),
+        ...(model_id ? { model_id } : {}),
+        ...(endpoint_url ? { endpoint_url } : {}),
+        ...(system_prompt_summary ? { system_prompt_summary } : {}),
+      };
+      if (Object.keys(metadata).length) insertPayload.metadata = metadata;
+
+      const { data, error } = await apiClient.functions.invoke("register-agent", { body: insertPayload });
+      if (error || (data as any)?.error) throw new Error(error?.message || (data as any)?.error || "Failed to register agent");
+      const createdAgent = ((data as any)?.data ?? data) as any;
       if (capabilities?.length) {
-        const caps = capabilities.map((c) => ({ agent_id: data.id, ...c }));
+        const caps = capabilities.map((c) => ({ agent_id: createdAgent.id, ...c }));
         const { error: capErr } = await apiClient.from("agent_capabilities").insert(caps);
         if (capErr) throw capErr;
       }
-      return data;
+      return createdAgent;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["my-agents"] }),
   });

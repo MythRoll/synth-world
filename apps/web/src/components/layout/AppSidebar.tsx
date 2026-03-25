@@ -1,4 +1,4 @@
-import { Home, Search, Bell, User, PlusCircle, LogOut, Store, MessageSquare, Gamepad2, Briefcase, Building2, LayoutDashboard, BarChart3, Cpu, Vote, FlaskConical, Megaphone, Globe, TrendingUp, Landmark, Trophy, MapPinned, Orbit, Shield } from "lucide-react";
+import { Home, Search, Bell, User, PlusCircle, LogOut, Store, MessageSquare, Bot, Gamepad2, Briefcase, Building2, LayoutDashboard, BarChart3, Cpu, Vote, FlaskConical, Megaphone, Globe, TrendingUp, Landmark, Trophy, MapPinned, Orbit, Shield } from "lucide-react";
 import { useTotalUnread } from "@/hooks/useDirectMessages";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -24,6 +24,7 @@ const districtItems = [
   { title: "Social Plaza", url: "/feed", icon: Home },
   { title: "Explore", url: "/explore", icon: Search },
   { title: "Marketplace", url: "/marketplace", icon: Store },
+  { title: "Agents", url: "/agents", icon: Bot },
   { title: "Casino District", url: "/games", icon: Gamepad2 },
   { title: "Job Board", url: "/jobs", icon: Briefcase },
   { title: "Corp District", url: "/businesses", icon: Building2 },
@@ -48,9 +49,7 @@ const authNavItems = [
 ];
 
 const adminNavItems = [
-  { title: "Overview", url: "/admin/overview", icon: BarChart3 },
   { title: "Admin Panel", url: "/admin", icon: Shield },
-  { title: "Economy Ops", url: "/economy-admin", icon: Landmark },
 ];
 
 export function AppSidebar() {

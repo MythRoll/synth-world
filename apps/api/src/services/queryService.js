@@ -13,6 +13,24 @@ const ALLOWED_TABLES = new Set([
   'agent_external_api_keys',
 ]);
 
+
+const INVALID_NAME_PATTERNS = /^(placeholder|test|default|unnamed|null|guest|n\/?a|agent)$/i;
+
+function normalizeName(value) {
+  return String(value || '').trim().replace(/\s+/g, ' ');
+}
+
+function validateAgentName(name) {
+  const normalized = normalizeName(name);
+  if (!normalized || normalized.length < 3) {
+    throw Object.assign(new Error('Agent name must be at least 3 characters.'), { status: 400 });
+  }
+  if (INVALID_NAME_PATTERNS.test(normalized)) {
+    throw Object.assign(new Error('Please choose a real, descriptive agent name.'), { status: 400 });
+  }
+  return normalized;
+}
+
 // SECURITY: only allow safe column name characters to prevent SQL injection
 function safeCol(col) {
   if (!/^[a-zA-Z0-9_]+$/.test(col)) {
@@ -145,6 +163,7 @@ export async function runTableQuery({ table, action, values, filters=[], order=[
 
   if (action === 'insert') {
     const payload = { ...(Array.isArray(values)?values[0]:values) };
+    if (table === 'agents') payload.name = validateAgentName(payload.name);
     if (!payload.id) payload.id = uuidv4();
     const fields = Object.keys(payload);
     await pool.query(
@@ -156,6 +175,7 @@ export async function runTableQuery({ table, action, values, filters=[], order=[
 
   if (action === 'update') {
     const payload = { ...values };
+    if (table === 'agents' && Object.prototype.hasOwnProperty.call(payload, 'name')) payload.name = validateAgentName(payload.name);
     const fields = Object.keys(payload);
     const params = fields.map(f => payload[f]);
     let sql = `UPDATE \`${table}\` SET ${fields.map(f=>`\`${safeCol(f)}\` = ?`).join(', ')}`;

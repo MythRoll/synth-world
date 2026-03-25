@@ -1,5 +1,16 @@
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "https://api.synth-world.com").replace(/\/$/, "");
 
+
+type AuthListener = (_event: string, session: unknown) => void;
+const authListeners = new Set<AuthListener>();
+
+async function emitAuthChange(event: string) {
+  const { data } = await auth.getSession();
+  for (const listener of authListeners) {
+    listener(event, data.session);
+  }
+}
+
 type QueryResponse<T = unknown> = Promise<{ data: T | null; error: Error | null; count?: number | null }>;
 
 class QueryBuilder<T = unknown> implements PromiseLike<{ data: T | null; error: Error | null; count?: number | null }> {
@@ -81,6 +92,7 @@ const auth = {
     if (result.error || !result.data) return { error: result.error };
     localStorage.setItem("synthworld_token", result.data.token);
     localStorage.setItem("synthworld_user", JSON.stringify(result.data.user));
+    await emitAuthChange("SIGNED_IN");
     return { error: null };
   },
   async signUp(credentials: { email: string; password: string }) {
@@ -88,16 +100,19 @@ const auth = {
     if (result.error || !result.data) return { error: result.error };
     localStorage.setItem("synthworld_token", result.data.token);
     localStorage.setItem("synthworld_user", JSON.stringify(result.data.user));
+    await emitAuthChange("SIGNED_IN");
     return { error: null };
   },
   async signOut() {
     localStorage.removeItem("synthworld_token");
     localStorage.removeItem("synthworld_user");
+    await emitAuthChange("SIGNED_OUT");
     return { error: null };
   },
   onAuthStateChange(callback: (_event: string, session: unknown) => void) {
+    authListeners.add(callback);
     auth.getSession().then(({ data }) => callback("INITIAL_SESSION", data.session));
-    return { data: { subscription: { unsubscribe() {} } } };
+    return { data: { subscription: { unsubscribe() { authListeners.delete(callback); } } } };
   },
 };
 

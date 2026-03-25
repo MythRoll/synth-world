@@ -5,11 +5,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
-import { useAdminAccess } from "@/hooks/useAdminAccess";
 import Landing from "./pages/Landing";
 import Feed from "./pages/Feed";
 import Explore from "./pages/Explore";
 import Marketplace from "./pages/Marketplace";
+import Agents from "./pages/Agents";
 import RegisterAgent from "./pages/RegisterAgent";
 import AgentProfile from "./pages/AgentProfile";
 import Notifications from "./pages/Notifications";
@@ -36,12 +36,8 @@ import RealEstate from "./pages/RealEstate";
 import WorldMap from "./pages/WorldMap";
 import PlanetView from "./pages/PlanetView";
 import NotFound from "./pages/NotFound";
-import EconomyAdmin from "./pages/EconomyAdmin";
-import TreasuryAdmin from "./pages/TreasuryAdmin";
 import Stats from "./pages/Stats";
 import Leaderboard from "./pages/Leaderboard";
-import AdminAnalytics from "./pages/AdminAnalytics";
-import AdminOverview from "./pages/AdminOverview";
 import { trackPageView } from "@/modules/analytics";
 
 const queryClient = new QueryClient();
@@ -63,17 +59,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
-  const { checking, isAdmin, error } = useAdminAccess();
-
-  if (checking) return <div className="min-h-screen flex items-center justify-center"><div className="animate-pulse text-muted-foreground">Checking admin access...</div></div>;
-  if (!user) return <Navigate to="/" replace />;
-  if (error) return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">{error}</div>;
-  if (!isAdmin) return <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">You do not have admin access.</div>;
-  return <>{children}</>;
-}
-
 const AppRoutes = () => (
   <Routes>
     <Route path="/" element={<Landing />} />
@@ -82,6 +67,7 @@ const AppRoutes = () => (
     <Route path="/feed" element={<Feed />} />
     <Route path="/explore" element={<Explore />} />
     <Route path="/marketplace" element={<Marketplace />} />
+    <Route path="/agents" element={<Agents />} />
     <Route path="/agent/:id" element={<AgentProfile />} />
     <Route path="/agent/:id/dashboard" element={<AgentDashboard />} />
     <Route path="/pulse/:id" element={<PulseDetail />} />
@@ -109,11 +95,11 @@ const AppRoutes = () => (
     <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
     <Route path="/agent/:id/settings" element={<ProtectedRoute><AgentSettings /></ProtectedRoute>} />
-    <Route path="/admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
-    <Route path="/admin/overview" element={<AdminRoute><AdminOverview /></AdminRoute>} />
-    <Route path="/economy-admin" element={<AdminRoute><EconomyAdmin /></AdminRoute>} />
-    <Route path="/admin/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
-    <Route path="/admin/treasury" element={<AdminRoute><TreasuryAdmin /></AdminRoute>} />
+    <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
+    <Route path="/admin/overview" element={<Navigate to="/admin" replace />} />
+    <Route path="/economy-admin" element={<Navigate to="/admin" replace />} />
+    <Route path="/admin/analytics" element={<Navigate to="/admin" replace />} />
+    <Route path="/admin/treasury" element={<Navigate to="/admin" replace />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

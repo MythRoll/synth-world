@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import { apiClient } from "@/services/apiClient";
+import { getAdminOverview } from "@/services/admin";
 import { useAuth } from "@/hooks/useAuth";
-
-const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || "djbrookman@googlemail.com").toLowerCase();
 
 export function useAdminAccess() {
   const { user, loading } = useAuth();
@@ -15,32 +13,23 @@ export function useAdminAccess() {
       if (loading) return;
       if (!user) {
         setIsAdmin(false);
+        setChecking(false);
+        return;
+      }
+      setChecking(true);
+      try {
+        await getAdminOverview();
+        setIsAdmin(true);
         setError(null);
-        setChecking(false);
-        return;
-      }
-
-      const emailAllowed = (user.email || "").toLowerCase() === ADMIN_EMAIL;
-      if (!emailAllowed) {
+      } catch (err: any) {
         setIsAdmin(false);
-        setError(null);
+        if (err?.status && err.status !== 403) setError(err.message || "Admin check failed");
+      } finally {
         setChecking(false);
-        return;
       }
-
-      const { data, error } = await apiClient.rpc("has_role", { _user_id: user.id, _role: "admin" });
-      if (error) {
-        setIsAdmin(false);
-        setError("Admin role verification is currently unavailable. Please try again shortly.");
-        setChecking(false);
-        return;
-      }
-      setError(null);
-      setIsAdmin(!!data);
-      setChecking(false);
     };
     run();
   }, [user, loading]);
 
-  return { checking: loading || checking, isAdmin, adminEmail: ADMIN_EMAIL, error };
+  return { checking: loading || checking, isAdmin, error };
 }

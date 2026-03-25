@@ -3,6 +3,16 @@ import { pool } from '../db/pool.js';
 import { transferCredits } from './creditService.js';
 import { hasRole } from './authService.js';
 
+const INVALID_AGENT_NAMES = /^(placeholder|test|default|unnamed|null|guest|n\/?a|agent)$/i;
+
+function normalizeAgentName(name) {
+  const normalized = String(name || '').trim().replace(/\s+/g, ' ');
+  if (normalized.length < 3 || INVALID_AGENT_NAMES.test(normalized)) {
+    throw Object.assign(new Error('Please provide a valid descriptive agent name.'), { status: 400 });
+  }
+  return normalized;
+}
+
 // ─── Guard: caller must be admin ─────────────────────────────────────────────
 async function assertAdmin(userId) {
   const ok = await hasRole(userId, 'admin');
@@ -17,7 +27,7 @@ export async function handleAdminAgentAction(params, userId) {
   switch (action) {
     case 'flag':            return setAgentFlag(params, 'flagged');
     case 'verify':          return setAgentFlag(params, 'verified');
-    case 'moderator':       return setAgentFlag(params, 'is_moderator');
+    case 'moderator':       return setModeratorStatus(params, userId);
     case 'ban':             return banUser(params, userId);
     case 'unban':           return unbanUser(params);
     case 'reassign_owner':  return reassignOwner(params);
@@ -26,6 +36,22 @@ export async function handleAdminAgentAction(params, userId) {
     default:
       throw Object.assign(new Error(`Unknown admin action: ${action}`), { status: 400 });
   }
+}
+
+
+async function setModeratorStatus({ agentId, value }, actingAdminUserId) {
+  if (!agentId) throw Object.assign(new Error('agentId required.'), { status: 400 });
+  const asModerator = value ? 1 : 0;
+
+  if (asModerator) {
+    // Promote + attach to acting admin account so it appears under their managed agents.
+    await pool.query('UPDATE agents SET is_moderator = 1, owner_id = ? WHERE id = ?', [actingAdminUserId, agentId]);
+  } else {
+    await pool.query('UPDATE agents SET is_moderator = 0 WHERE id = ?', [agentId]);
+  }
+
+  const [[agent]] = await pool.query('SELECT id, owner_id, name, flagged, verified, is_moderator FROM agents WHERE id = ?', [agentId]);
+  return { data: agent };
 }
 
 async function setAgentFlag({ agentId, value }, field) {
@@ -79,13 +105,13 @@ async function reassignOwner({ agentId, targetOwnerId }) {
 }
 
 async function createHostedAgent({ name, framework, bio }, adminUserId) {
-  if (!name) throw Object.assign(new Error('name required.'), { status: 400 });
+  const safeName = normalizeAgentName(name);
 
   const id = uuidv4();
   await pool.query(
     `INSERT INTO agents (id, owner_id, name, framework, bio, verified)
      VALUES (?, ?, ?, ?, ?, 1)`,
-    [id, adminUserId, name, framework || 'custom', bio || 'Platform-hosted agent']
+    [id, adminUserId, safeName, framework || 'custom', bio || 'Platform-hosted agent']
   );
 
   const [[agent]] = await pool.query('SELECT * FROM agents WHERE id = ?', [id]);
@@ -348,4 +374,28 @@ export async function getPublicAnalyticsStats() {
     listings_today, games_played, marketplace_volume: Number(volume),
     credits_in_circulation: 0,
   }];
+}
+
+
+export async function handleAdminListingAction({ listingId, status }, userId) {
+  await assertAdmin(userId);
+
+  if (!listingId || !status) throw Object.assign(new Error('listingId and status required.'), { status: 400 });
+  const requestedStatus = String(status);
+  const statusMap = {
+    active: 'active',
+    sold: 'sold',
+    cancelled: 'cancelled',
+    rejected: 'cancelled',
+    paused: 'cancelled',
+  };
+  const nextStatus = statusMap[requestedStatus];
+  if (!nextStatus) {
+    throw Object.assign(new Error('Invalid listing status.'), { status: 400 });
+  }
+
+  await pool.query('UPDATE listings SET status = ? WHERE id = ?', [nextStatus, listingId]);
+  const [[listing]] = await pool.query('SELECT id, title, title AS skill_name, price AS price_credits, status, seller_agent_id, created_at FROM listings WHERE id = ?', [listingId]);
+  if (!listing) throw Object.assign(new Error('Listing not found.'), { status: 404 });
+  return { data: listing };
 }

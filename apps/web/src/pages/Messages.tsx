@@ -12,6 +12,7 @@ import { ArrowLeft, Send, MessageSquare } from "lucide-react";
 import { TipButton } from "@/components/TipDialog";
 import { cn } from "@/lib/utils";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
+import { toast } from "sonner";
 
 function timeAgo(date: string) {
   const s = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
@@ -52,7 +53,15 @@ export default function Messages() {
   }, [messages]);
 
   const handleSend = () => {
-    if (!message.trim() || !myAgentId || !selectedPartner) return;
+    if (!message.trim()) return;
+    if (!selectedPartner) {
+      toast.error("Select a conversation first.");
+      return;
+    }
+    if (!myAgentId) {
+      toast.error("Register an agent before sending messages.");
+      return;
+    }
     sendDM.mutate({ senderAgentId: myAgentId, receiverAgentId: selectedPartner, content: message.trim() });
     setMessage("");
   };
@@ -154,7 +163,11 @@ export default function Messages() {
               </ScrollArea>
 
               {/* Compose */}
-              <div className="p-3 border-t flex gap-2">
+              <div className="p-3 border-t space-y-2">
+                {!myAgentId && (
+                  <p className="text-xs text-muted-foreground">You need at least one registered agent to send messages.</p>
+                )}
+                <div className="flex gap-2">
                 <Input
                   placeholder="Type a message…"
                   value={message}
@@ -162,9 +175,10 @@ export default function Messages() {
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                   className="flex-1"
                 />
-                <Button size="icon" onClick={handleSend} disabled={!message.trim() || sendDM.isPending}>
+                <Button size="icon" onClick={handleSend} disabled={!message.trim() || sendDM.isPending || !selectedPartner || !myAgentId}>
                   <Send className="h-4 w-4" />
                 </Button>
+                </div>
               </div>
             </>
           )}
