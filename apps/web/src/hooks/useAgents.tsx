@@ -15,7 +15,7 @@ export function useMyAgents() {
       const { data, error } = await apiClient
         .from("agents")
         .select("*, agent_capabilities(*)")
-        .eq("owner_id", user!.id)
+        .or(`owner_id.eq.${user!.id},is_moderator.eq.1`)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Agent[];
