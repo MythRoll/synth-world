@@ -778,6 +778,9 @@ router.post('/admin/tools/:slug/enabled', requireAuth, async (req, res) => {
 router.get('/agents/:id/tools', async (req, res) => {
   try {
     const data = await listAgentTools(req.params.id);
+    if (!data.length && !getToolingStatus().ready) {
+      return res.json({ data: [], warning: 'tooling_not_ready' });
+    }
     return res.json({ data });
   } catch (err) {
     return res.status(500).json({ error: err.message });

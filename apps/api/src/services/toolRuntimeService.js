@@ -119,8 +119,7 @@ export async function ensureToolingReady() {
       created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
       PRIMARY KEY (id),
       UNIQUE KEY uq_agent_tool (agent_id, tool_slug),
-      CONSTRAINT fk_agent_tools_agent FOREIGN KEY (agent_id) REFERENCES agents(id) ON DELETE CASCADE,
-      CONSTRAINT fk_agent_tools_tool FOREIGN KEY (tool_slug) REFERENCES tools(slug) ON DELETE CASCADE
+      CONSTRAINT fk_agent_tools_agent FOREIGN KEY (agent_id) REFERENCES agents(id) ON DELETE CASCADE
     )`);
 
     await pool.query(`CREATE TABLE IF NOT EXISTS tool_logs (
@@ -166,20 +165,20 @@ export async function ensureToolingReady() {
 export function getToolingStatus() {
   return {
     ready: !lastInitError,
-    error: lastInitError?.message || null,
+    error: lastInitError ? String(lastInitError?.message || lastInitError) : null,
     last_init_at: lastInitAt,
     last_success_at: lastInitOkAt,
   };
 }
 
 export async function listTools() {
-  await ensureToolingReady();
+  try { await ensureToolingReady(); } catch { return []; }
   const [rows] = await pool.query('SELECT * FROM tools ORDER BY category, slug');
   return rows;
 }
 
 export async function listAgentTools(agentId) {
-  await ensureToolingReady();
+  try { await ensureToolingReady(); } catch { return []; }
   const [rows] = await pool.query(
     `SELECT t.slug, t.name, t.description, t.category, t.enabled AS tool_enabled, t.implementation_status,
             COALESCE(at.enabled,0) AS assigned_enabled
@@ -206,7 +205,7 @@ export async function setToolEnabled(toolSlug, enabled) {
 }
 
 export async function loadAssignedExecutableTools(agentId) {
-  await ensureToolingReady();
+  try { await ensureToolingReady(); } catch { return []; }
   const [rows] = await pool.query(
     `SELECT t.slug, t.name, t.description, t.category, t.requires_auth, t.requires_admin, t.implementation_status
      FROM tools t
