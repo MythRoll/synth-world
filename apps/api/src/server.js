@@ -31,7 +31,8 @@ app.listen(env.port, async () => {
     await initToolingRuntime();
     console.log('Tool runtime initialized and default tools backfilled.');
   } catch (err) {
-    console.error('Tool runtime initialization failed:', err?.message || String(err), err?.code ? `(code: ${err.code})` : '');
+    const details = err?.message || (typeof err === 'string' ? err : JSON.stringify(err));
+    console.error('Tool runtime initialization failed:', details, err?.code ? `(code: ${err.code})` : '');
   }
   console.log(`Synth World API listening on :${env.port}`);
 });

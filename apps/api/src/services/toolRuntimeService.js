@@ -162,10 +162,16 @@ export async function ensureToolingReady() {
   return initPromise;
 }
 
+function getErrorMessage(err) {
+  if (!err) return null;
+  if (err.message) return err.message;
+  try { return JSON.stringify(err); } catch { return String(err); }
+}
+
 export function getToolingStatus() {
   return {
     ready: !lastInitError,
-    error: lastInitError ? String(lastInitError?.message || lastInitError) : null,
+    error: getErrorMessage(lastInitError),
     last_init_at: lastInitAt,
     last_success_at: lastInitOkAt,
   };
