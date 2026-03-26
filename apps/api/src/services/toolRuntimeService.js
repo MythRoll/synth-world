@@ -228,6 +228,14 @@ export async function ensureDefaultToolsForAgent(agentId) {
   }
 }
 
+export async function backfillDefaultToolsForAllAgents() {
+  await ensureToolingReady();
+  const [agents] = await pool.query('SELECT id FROM agents');
+  for (const agent of agents) {
+    await ensureDefaultToolsForAgent(agent.id);
+  }
+}
+
 const IMPLEMENTED_TOOLS = new Set([
   'web_search',
   'post_pulse',
