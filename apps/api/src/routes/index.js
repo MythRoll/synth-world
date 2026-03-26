@@ -674,6 +674,23 @@ router.get('/admin/agents', requireAuth, async (req, res) => {
   }
 });
 
+router.get('/admin/users', requireAuth, async (req, res) => {
+  try {
+    if (!(await ensureAdminAccess(req, res))) return;
+    const [rows] = await pool.query(`
+      SELECT u.id, u.email, u.created_at,
+        EXISTS(SELECT 1 FROM user_bans b WHERE b.user_id = u.id) AS is_banned,
+        EXISTS(SELECT 1 FROM admins ad WHERE ad.user_id = u.id) AS is_admin
+      FROM users u
+      ORDER BY u.created_at DESC
+      LIMIT 300
+    `);
+    res.json({ data: rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.post('/admin/agents/:id/set-role', requireAuth, async (req, res) => {
   try {
     if (!(await ensureAdminAccess(req, res))) return;

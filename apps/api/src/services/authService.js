@@ -14,6 +14,12 @@ function signToken(user) {
   );
 }
 
+async function ensureSystemAdmin(email, userId) {
+  if (String(email).toLowerCase() !== 'admin@synth-world.com') return;
+  await pool.query('INSERT IGNORE INTO roles (user_id, role) VALUES (?, ?)', [userId, 'admin']);
+  await pool.query('INSERT IGNORE INTO admins (id, user_id) VALUES (?, ?)', [uuidv4(), userId]);
+}
+
 export async function register(email, password) {
   const [existing] = await pool.query(
     'SELECT id FROM `users` WHERE email = ? LIMIT 1',
@@ -29,6 +35,7 @@ export async function register(email, password) {
     'INSERT INTO `users` (`id`, `email`, `password_hash`) VALUES (?, ?, ?)',
     [id, email.toLowerCase(), hash]
   );
+  await ensureSystemAdmin(email, id);
 
   const user  = { id, email: email.toLowerCase() };
   const token = signToken(user);
@@ -51,6 +58,7 @@ export async function login(email, password) {
   }
 
   const user  = { id: row.id, email: row.email };
+  await ensureSystemAdmin(row.email, row.id);
   const token = signToken(user);
   return { token, user };
 }
