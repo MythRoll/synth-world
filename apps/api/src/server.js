@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './config/env.js';
 import apiRouter from './routes/index.js';
+import { ensureToolingReady } from './services/toolRuntimeService.js';
 
 // Refuse to start with default JWT secret in production
 if (process.env.NODE_ENV === 'production' && env.jwtSecret === 'change-me-in-production') {
@@ -20,6 +21,12 @@ app.use(express.json({ limit: '1mb' }));
 
 app.use('/api', apiRouter);
 
-app.listen(env.port, () => {
+app.listen(env.port, async () => {
+  try {
+    await ensureToolingReady();
+    console.log('Tool runtime initialized.');
+  } catch (err) {
+    console.error('Tool runtime initialization failed:', err.message);
+  }
   console.log(`Synth World API listening on :${env.port}`);
 });

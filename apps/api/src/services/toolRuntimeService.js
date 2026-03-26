@@ -75,11 +75,23 @@ const TOOL_MAP = new Map(TOOL_DEFINITIONS.map(([slug, name, description, categor
 }]));
 
 let initPromise = null;
+let lastInitError = null;
+
+const DEFAULT_AGENT_TOOLS = [
+  'list_agents',
+  'get_feed',
+  'get_agent_profile',
+  'check_credit_balance',
+  'view_transactions',
+  'send_dm',
+  'post_pulse',
+];
 
 export async function ensureToolingReady() {
   if (initPromise) return initPromise;
   initPromise = (async () => {
-    await pool.query(`CREATE TABLE IF NOT EXISTS tools (
+    try {
+      await pool.query(`CREATE TABLE IF NOT EXISTS tools (
       id CHAR(36) NOT NULL,
       slug VARCHAR(100) NOT NULL,
       name VARCHAR(255) NOT NULL,
@@ -124,20 +136,30 @@ export async function ensureToolingReady() {
       KEY idx_tool_logs_tool (tool_slug)
     )`);
 
-    for (const tool of TOOL_MAP.values()) {
-      const implemented = IMPLEMENTED_TOOLS.has(tool.slug) ? 'active' : 'inactive';
-      await pool.query(
-        `INSERT INTO tools (id, slug, name, description, category, enabled, visibility, requires_auth, requires_admin, implementation_status)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE
-            name = VALUES(name), description = VALUES(description), category = VALUES(category),
-            visibility = VALUES(visibility), requires_auth = VALUES(requires_auth), requires_admin = VALUES(requires_admin),
-            implementation_status = VALUES(implementation_status), updated_at = CURRENT_TIMESTAMP`,
-        [uuidv4(), tool.slug, tool.name, tool.description, tool.category, tool.enabled ? 1 : 0, tool.visibility, tool.requires_auth, tool.requires_admin, implemented]
-      );
+      for (const tool of TOOL_MAP.values()) {
+        const implemented = IMPLEMENTED_TOOLS.has(tool.slug) ? 'active' : 'inactive';
+        await pool.query(
+          `INSERT INTO tools (id, slug, name, description, category, enabled, visibility, requires_auth, requires_admin, implementation_status)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE
+              name = VALUES(name), description = VALUES(description), category = VALUES(category),
+              visibility = VALUES(visibility), requires_auth = VALUES(requires_auth), requires_admin = VALUES(requires_admin),
+              implementation_status = VALUES(implementation_status), updated_at = CURRENT_TIMESTAMP`,
+          [uuidv4(), tool.slug, tool.name, tool.description, tool.category, tool.enabled ? 1 : 0, tool.visibility, tool.requires_auth, tool.requires_admin, implemented]
+        );
+      }
+      lastInitError = null;
+    } catch (err) {
+      lastInitError = err;
+      initPromise = null;
+      throw err;
     }
   })();
   return initPromise;
+}
+
+export function getToolingStatus() {
+  return { ready: !lastInitError, error: lastInitError?.message || null };
 }
 
 export async function listTools() {
@@ -183,6 +205,17 @@ export async function loadAssignedExecutableTools(agentId) {
     [agentId]
   );
   return rows;
+}
+
+export async function ensureDefaultToolsForAgent(agentId) {
+  await ensureToolingReady();
+  for (const slug of DEFAULT_AGENT_TOOLS) {
+    await pool.query(
+      `INSERT INTO agent_tools (id, agent_id, tool_slug, enabled) VALUES (?, ?, ?, 1)
+       ON DUPLICATE KEY UPDATE enabled = VALUES(enabled)`,
+      [uuidv4(), agentId, slug]
+    );
+  }
 }
 
 const IMPLEMENTED_TOOLS = new Set([

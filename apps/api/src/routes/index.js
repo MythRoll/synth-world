@@ -15,7 +15,10 @@ import {
 } from '../services/adminService.js';
 import { v4 as uuidv4 } from 'uuid';
 import { runHostedAgent, getProviderStatus, getLastProviderError } from '../services/aiService.js';
-import { ensureToolingReady, listAgentTools, listTools, loadAssignedExecutableTools, setAgentTool, setToolEnabled } from '../services/toolRuntimeService.js';
+import {
+  ensureToolingReady, listAgentTools, listTools, loadAssignedExecutableTools, setAgentTool, setToolEnabled,
+  ensureDefaultToolsForAgent, getToolingStatus,
+} from '../services/toolRuntimeService.js';
 import adminOverviewRouter from './adminOverview.js';
 
 const router = Router();
@@ -50,20 +53,25 @@ async function userCanActAsAgent(userId, agentId) {
 }
 
 async function loadAgentRuntime(agentId) {
-  await ensureToolingReady();
   const [[agent]] = await pool.query('SELECT * FROM agents WHERE id = ? LIMIT 1', [agentId]);
   if (!agent) return null;
   const [capabilities] = await pool.query(
     'SELECT id, skill_name, category FROM agent_capabilities WHERE agent_id = ? ORDER BY created_at ASC',
     [agentId]
   );
-  const assignedTools = await loadAssignedExecutableTools(agentId);
+  let assignedTools = [];
+  try {
+    await ensureToolingReady();
+    await ensureDefaultToolsForAgent(agentId);
+    assignedTools = await loadAssignedExecutableTools(agentId);
+  } catch {
+    assignedTools = [];
+  }
   return { ...agent, agent_capabilities: capabilities, runtime_tools: assignedTools };
 }
 // Global rate limit on all API routes
 router.use(globalRateLimit);
 router.use(authMiddleware);
-router.use(async (_req, _res, next) => { await ensureToolingReady().catch(() => null); next(); });
 // ─── Ban check middleware ─────────────────────────────────────────────────────
 router.use(async (req, _res, next) => {
   if (!req.user) return next();
@@ -108,6 +116,7 @@ router.post('/agents/register', authRateLimit, async (req, res) => {
        VALUES (?, ?, ?, ?, ?, 10, 0)`,
       [agentId, userId, safeName, framework || 'custom', bio || '']
     );
+    await ensureDefaultToolsForAgent(agentId).catch(() => null);
     // Give starting credits from treasury
     await pool.query(
       `INSERT INTO transactions (id, from_agent_id, to_agent_id, amount, type, description)
@@ -319,6 +328,7 @@ router.post('/functions/:name', async (req, res) => {
          VALUES (?, ?, ?, ?, ?, ?)` ,
         [agentId, userId, safeName, (body.framework || 'custom'), body.bio || null, metadata]
       );
+      await ensureDefaultToolsForAgent(agentId).catch(() => null);
       const [[agent]] = await pool.query(
         'SELECT id, owner_id, name, framework, bio, verified, flagged, is_moderator, credits AS credit_balance, created_at, metadata FROM agents WHERE id = ? LIMIT 1',
         [agentId]
@@ -381,6 +391,7 @@ router.post('/agents', requireAuth, async (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?)`,
       [id, req.user.id, safeName, req.body?.framework || 'custom', req.body?.bio || null, metadata]
     );
+    await ensureDefaultToolsForAgent(id).catch(() => null);
     const [[agent]] = await pool.query(
       'SELECT id, owner_id, name, framework, bio, verified, flagged, is_moderator, credits AS credit_balance, created_at, metadata FROM agents WHERE id = ? LIMIT 1',
       [id]
@@ -703,7 +714,7 @@ router.get('/admin/treasury', requireAuth, async (req, res) => {
 
 router.get('/admin/provider-status', requireAuth, async (req, res) => {
   if (!(await ensureAdminAccess(req, res))) return;
-  return res.json({ data: getProviderStatus() });
+  return res.json({ data: { ...getProviderStatus(), tooling: getToolingStatus() } });
 });
 
 router.get('/admin/tools', requireAuth, async (req, res) => {
