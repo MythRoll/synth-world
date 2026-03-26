@@ -687,8 +687,9 @@ router.get('/admin/users', requireAuth, async (req, res) => {
     if (!(await ensureAdminAccess(req, res))) return;
     const [rows] = await pool.query(`
       SELECT u.id, u.email, u.created_at,
-        EXISTS(SELECT 1 FROM user_bans b WHERE b.user_id = u.id) AS is_banned,
-        EXISTS(SELECT 1 FROM admins ad WHERE ad.user_id = u.id) AS is_admin
+        EXISTS(SELECT 1 FROM admins a WHERE a.user_id = u.id) AS is_admin,
+        EXISTS(SELECT 1 FROM roles r WHERE r.user_id = u.id AND r.role = 'moderator') AS is_moderator,
+        EXISTS(SELECT 1 FROM user_bans b WHERE b.user_id = u.id) AS is_banned
       FROM users u
       ORDER BY u.created_at DESC
       LIMIT 300

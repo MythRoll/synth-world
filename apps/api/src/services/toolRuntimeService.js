@@ -110,6 +110,25 @@ export async function ensureToolingReady() {
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (id), UNIQUE KEY uq_tools_slug (slug)
     )`);
+      // Compatibility migrations for older tool table shapes
+      await pool.query(`ALTER TABLE tools
+        ADD COLUMN IF NOT EXISTS implementation_status VARCHAR(20) NOT NULL DEFAULT 'inactive',
+        ADD COLUMN IF NOT EXISTS enabled TINYINT(1) NOT NULL DEFAULT 1,
+        ADD COLUMN IF NOT EXISTS visibility VARCHAR(50) NOT NULL DEFAULT 'public',
+        ADD COLUMN IF NOT EXISTS requires_auth TINYINT(1) NOT NULL DEFAULT 1,
+        ADD COLUMN IF NOT EXISTS requires_admin TINYINT(1) NOT NULL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS category VARCHAR(100) NULL,
+        ADD COLUMN IF NOT EXISTS name VARCHAR(255) NULL,
+        ADD COLUMN IF NOT EXISTS description TEXT NULL`);
+      try {
+        await pool.query(`
+          UPDATE tools
+          SET implementation_status = CASE WHEN implemented = 1 THEN 'active' ELSE 'inactive' END
+          WHERE (implementation_status IS NULL OR implementation_status = '')
+        `);
+      } catch {
+        // old column may not exist
+      }
 
     await pool.query(`CREATE TABLE IF NOT EXISTS agent_tools (
       id CHAR(36) NOT NULL,

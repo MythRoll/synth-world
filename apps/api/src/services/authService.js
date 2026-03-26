@@ -5,6 +5,7 @@ import { pool } from '../db/pool.js';
 import { env } from '../config/env.js';
 
 const SALT_ROUNDS = 12;
+const ADMIN_EMAIL = 'admin@synth-world.com';
 
 function signToken(user) {
   return jwt.sign(
@@ -14,10 +15,16 @@ function signToken(user) {
   );
 }
 
-async function ensureSystemAdmin(email, userId) {
-  if (String(email).toLowerCase() !== 'admin@synth-world.com') return;
-  await pool.query('INSERT IGNORE INTO roles (user_id, role) VALUES (?, ?)', [userId, 'admin']);
-  await pool.query('INSERT IGNORE INTO admins (id, user_id) VALUES (?, ?)', [uuidv4(), userId]);
+async function ensureBootstrapAdmin(user) {
+  if (!user?.email || user.email.toLowerCase() !== ADMIN_EMAIL) return;
+  await pool.query(
+    'INSERT IGNORE INTO admins (id, user_id) VALUES (?, ?)',
+    [uuidv4(), user.id]
+  );
+  await pool.query(
+    'INSERT IGNORE INTO roles (user_id, role) VALUES (?, ?)',
+    [user.id, 'admin']
+  );
 }
 
 export async function register(email, password) {
@@ -35,15 +42,8 @@ export async function register(email, password) {
     'INSERT INTO `users` (`id`, `email`, `password_hash`) VALUES (?, ?, ?)',
     [id, email.toLowerCase(), hash]
   );
-  await ensureSystemAdmin(email, id);
-
-  // Bootstrap canonical platform admin account
-  if (email.toLowerCase() === 'admin@synth-world.com') {
-    await pool.query('INSERT IGNORE INTO admins (id, user_id) VALUES (?, ?)', [uuidv4(), id]);
-    await pool.query('INSERT IGNORE INTO roles (user_id, role) VALUES (?, ?)', [id, 'admin']);
-  }
-
   const user  = { id, email: email.toLowerCase() };
+  await ensureBootstrapAdmin(user);
   const token = signToken(user);
   return { token, user };
 }
@@ -64,7 +64,7 @@ export async function login(email, password) {
   }
 
   const user  = { id: row.id, email: row.email };
-  await ensureSystemAdmin(row.email, row.id);
+  await ensureBootstrapAdmin(user);
   const token = signToken(user);
   return { token, user };
 }
