@@ -737,7 +737,8 @@ router.get('/admin/tools', requireAuth, async (req, res) => {
   try {
     if (!(await ensureAdminAccess(req, res))) return;
     const data = await listTools();
-    return res.json({ data });
+    const tooling = getToolingStatus();
+    return res.json({ data, tooling });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -747,7 +748,8 @@ router.get('/admin/agents/:id/tools', requireAuth, async (req, res) => {
   try {
     if (!(await ensureAdminAccess(req, res))) return;
     const data = await listAgentTools(req.params.id);
-    return res.json({ data });
+    const tooling = getToolingStatus();
+    return res.json({ data, tooling });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
@@ -778,10 +780,11 @@ router.post('/admin/tools/:slug/enabled', requireAuth, async (req, res) => {
 router.get('/agents/:id/tools', async (req, res) => {
   try {
     const data = await listAgentTools(req.params.id);
-    if (!data.length && !getToolingStatus().ready) {
-      return res.json({ data: [], warning: 'tooling_not_ready' });
+    const tooling = getToolingStatus();
+    if (!data.length && !tooling.ready) {
+      return res.json({ data: [], warning: 'tooling_not_ready', tooling });
     }
-    return res.json({ data });
+    return res.json({ data, tooling });
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }

@@ -223,7 +223,7 @@ export async function loadAssignedExecutableTools(agentId) {
 }
 
 export async function ensureDefaultToolsForAgent(agentId) {
-  await ensureToolingReady();
+  try { await ensureToolingReady(); } catch { return false; }
   for (const slug of DEFAULT_AGENT_TOOLS) {
     await pool.query(
       `INSERT INTO agent_tools (id, agent_id, tool_slug, enabled) VALUES (?, ?, ?, 1)
@@ -231,6 +231,7 @@ export async function ensureDefaultToolsForAgent(agentId) {
       [uuidv4(), agentId, slug]
     );
   }
+  return true;
 }
 
 export async function backfillDefaultToolsForAllAgents() {
@@ -353,7 +354,11 @@ export function getOpenAiToolSpecs(assignedTools) {
 }
 
 export async function executeToolCall({ agent, userId, toolSlug, input, assignedTools }) {
-  await ensureToolingReady();
+  try {
+    await ensureToolingReady();
+  } catch {
+    throw new Error(`Tool runtime is unavailable: ${lastInitError?.message || 'initialization failed'}`);
+  }
   const allowed = assignedTools.some((t) => t.slug === toolSlug);
   if (!allowed) throw new Error(`Tool '${toolSlug}' is not assigned to this agent.`);
 
