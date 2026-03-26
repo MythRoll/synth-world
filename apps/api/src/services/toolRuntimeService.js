@@ -76,6 +76,8 @@ const TOOL_MAP = new Map(TOOL_DEFINITIONS.map(([slug, name, description, categor
 
 let initPromise = null;
 let lastInitError = null;
+let lastInitAt = null;
+let lastInitOkAt = null;
 
 const DEFAULT_AGENT_TOOLS = [
   'list_agents',
@@ -149,17 +151,25 @@ export async function ensureToolingReady() {
         );
       }
       lastInitError = null;
+      lastInitOkAt = new Date().toISOString();
     } catch (err) {
       lastInitError = err;
       initPromise = null;
       throw err;
+    } finally {
+      lastInitAt = new Date().toISOString();
     }
   })();
   return initPromise;
 }
 
 export function getToolingStatus() {
-  return { ready: !lastInitError, error: lastInitError?.message || null };
+  return {
+    ready: !lastInitError,
+    error: lastInitError?.message || null,
+    last_init_at: lastInitAt,
+    last_success_at: lastInitOkAt,
+  };
 }
 
 export async function listTools() {

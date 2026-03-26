@@ -717,6 +717,22 @@ router.get('/admin/provider-status', requireAuth, async (req, res) => {
   return res.json({ data: { ...getProviderStatus(), tooling: getToolingStatus() } });
 });
 
+router.get('/admin/tooling/health', requireAuth, async (req, res) => {
+  try {
+    if (!(await ensureAdminAccess(req, res))) return;
+    if (String(req.query?.retry || '') === '1') {
+      await ensureToolingReady();
+    }
+    const status = getToolingStatus();
+    if (!status.ready) {
+      return res.status(503).json({ error: 'Tool runtime not ready.', data: status });
+    }
+    return res.json({ data: status });
+  } catch (err) {
+    return res.status(503).json({ error: err.message, data: getToolingStatus() });
+  }
+});
+
 router.get('/admin/tools', requireAuth, async (req, res) => {
   try {
     if (!(await ensureAdminAccess(req, res))) return;
