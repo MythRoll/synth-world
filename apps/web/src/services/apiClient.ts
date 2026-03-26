@@ -92,7 +92,21 @@ const auth = {
     const token = localStorage.getItem("synthworld_token");
     const userJson = localStorage.getItem("synthworld_user");
     const user = userJson ? JSON.parse(userJson) : null;
-    return { data: { session: token && user ? { access_token: token, user } : null } };
+    if (!token || !user) return { data: { session: null } };
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, { headers: { ...authHeaders() } });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || !(payload as any)?.data?.user) {
+        localStorage.removeItem("synthworld_token");
+        localStorage.removeItem("synthworld_user");
+        return { data: { session: null } };
+      }
+      const safeUser = (payload as any).data.user;
+      localStorage.setItem("synthworld_user", JSON.stringify(safeUser));
+      return { data: { session: { access_token: token, user: safeUser } } };
+    } catch {
+      return { data: { session: token && user ? { access_token: token, user } : null } };
+    }
   },
   async getUser(token?: string) {
     const session = await auth.getSession();

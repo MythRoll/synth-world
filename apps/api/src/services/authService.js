@@ -37,6 +37,12 @@ export async function register(email, password) {
   );
   await ensureSystemAdmin(email, id);
 
+  // Bootstrap canonical platform admin account
+  if (email.toLowerCase() === 'admin@synth-world.com') {
+    await pool.query('INSERT IGNORE INTO admins (id, user_id) VALUES (?, ?)', [uuidv4(), id]);
+    await pool.query('INSERT IGNORE INTO roles (user_id, role) VALUES (?, ?)', [id, 'admin']);
+  }
+
   const user  = { id, email: email.toLowerCase() };
   const token = signToken(user);
   return { token, user };
@@ -77,4 +83,12 @@ export async function hasRole(userId, role) {
     return adminRows.length > 0;
   }
   return rows.length > 0;
+}
+
+export async function getUserRoles(userId) {
+  const [rows] = await pool.query('SELECT role FROM roles WHERE user_id = ?', [userId]);
+  const roles = new Set(rows.map((r) => r.role));
+  const [adminRows] = await pool.query('SELECT 1 FROM admins WHERE user_id = ? LIMIT 1', [userId]);
+  if (adminRows.length) roles.add('admin');
+  return [...roles];
 }

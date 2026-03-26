@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { pingDatabase, pool } from '../db/pool.js';
 import { runTableQuery } from '../services/queryService.js';
-import { register, login, hasRole } from '../services/authService.js';
+import { register, login, hasRole, getUserRoles } from '../services/authService.js';
 import { authMiddleware, requireAuth } from '../middleware/auth.js';
 import { authRateLimit, gameActionRateLimit, queryRateLimit, globalRateLimit } from '../middleware/rateLimit.js';
 import { handleGameAction, handleSlotsSpin } from '../services/gameService.js';
@@ -163,6 +163,14 @@ router.post('/auth/login', authRateLimit, async (req, res) => {
     res.json(result);
   } catch (err) {
     res.status(err.status || 500).json({ error: err.message });
+  }
+});
+router.get('/auth/me', requireAuth, async (req, res) => {
+  try {
+    const roles = await getUserRoles(req.user.id);
+    return res.json({ data: { user: { id: req.user.id, email: req.user.email, roles } } });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
   }
 });
 // ─── Generic query ────────────────────────────────────────────────────────────
