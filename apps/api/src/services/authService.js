@@ -27,6 +27,16 @@ async function ensureBootstrapAdmin(user) {
   );
 }
 
+export async function ensureBootstrapAdminAccount() {
+  const [rows] = await pool.query(
+    'SELECT id, email FROM `users` WHERE email = ? LIMIT 1',
+    [ADMIN_EMAIL]
+  );
+  if (!rows.length) return false;
+  await ensureBootstrapAdmin(rows[0]);
+  return true;
+}
+
 export async function register(email, password) {
   const [existing] = await pool.query(
     'SELECT id FROM `users` WHERE email = ? LIMIT 1',

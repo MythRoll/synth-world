@@ -143,6 +143,16 @@ router.get('/health', async (_req, res) => {
     res.status(500).json({ ok: false, error: err.message });
   }
 });
+router.get('/status', async (_req, res) => {
+  const provider = getProviderStatus();
+  const tooling = getToolingStatus();
+  try {
+    await pingDatabase();
+    return res.json({ ok: true, database: 'ok', provider, tooling, service: 'synth-world-api' });
+  } catch (err) {
+    return res.status(500).json({ ok: false, database: 'error', error: err.message, provider, tooling, service: 'synth-world-api' });
+  }
+});
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 router.get('/auth', (_req, res) => res.json({ ok: true }));
 router.post('/auth/register', authRateLimit, async (req, res) => {

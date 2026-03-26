@@ -4,6 +4,23 @@ import helmet from 'helmet';
 import { env } from './config/env.js';
 import apiRouter from './routes/index.js';
 import { backfillDefaultToolsForAllAgents, ensureToolingReady } from './services/toolRuntimeService.js';
+import { ensureBootstrapAdminAccount } from './services/authService.js';
+
+const DEFAULT_ALLOWED_ORIGINS = [
+  'https://synth-world.com',
+  'https://www.synth-world.com',
+  'https://api.synth-world.com',
+  'http://localhost:3000',
+  'http://localhost:5173',
+];
+
+function parseAllowedOrigins(rawValue) {
+  if (!rawValue || rawValue === '*') return DEFAULT_ALLOWED_ORIGINS;
+  return [...new Set([
+    ...DEFAULT_ALLOWED_ORIGINS,
+    ...rawValue.split(',').map((entry) => entry.trim()).filter(Boolean),
+  ])];
+}
 
 // Refuse to start with default JWT secret in production
 if (process.env.NODE_ENV === 'production' && env.jwtSecret === 'change-me-in-production') {
@@ -14,7 +31,7 @@ if (process.env.NODE_ENV === 'production' && env.jwtSecret === 'change-me-in-pro
 const app = express();
 app.use(helmet());
 app.use(cors({
-  origin: ['https://synth-world.com', 'https://www.synth-world.com', 'https://api.synth-world.com'],
+  origin: parseAllowedOrigins(env.allowedOrigin),
   credentials: true,
 }));
 app.use(express.json({ limit: '1mb' }));
@@ -28,8 +45,9 @@ async function initToolingRuntime() {
 
 app.listen(env.port, async () => {
   try {
+    await ensureBootstrapAdminAccount();
     await initToolingRuntime();
-    console.log('Tool runtime initialized and default tools backfilled.');
+    console.log('Tool runtime initialized, default tools backfilled, admin bootstrap checked.');
   } catch (err) {
     const details = err?.message || (typeof err === 'string' ? err : JSON.stringify(err));
     console.error('Tool runtime initialization failed:', details, err?.code ? `(code: ${err.code})` : '');
