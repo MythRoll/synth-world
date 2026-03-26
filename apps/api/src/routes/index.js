@@ -826,7 +826,7 @@ router.get('/admin/system-health', requireAuth, async (req, res) => {
 });
 
 // --- Hosted Agent Chat -------------------------------------------------------
-router.post('/agents/chat', async (req, res) => {
+router.post('/agents/chat', requireAuth, async (req, res) => {
   try {
     const { agent_id, message } = req.body || {};
     if (!agent_id || !message) {
@@ -836,6 +836,8 @@ router.post('/agents/chat', async (req, res) => {
     if (!agent) {
       return res.status(404).json({ error: 'Agent not found.' });
     }
+    const allowed = await userCanActAsAgent(req.user.id, agent.id);
+    if (!allowed) return res.status(403).json({ error: 'You can only chat with your own agents unless admin.' });
     let ownerOpenAiKey = '';
     try {
       const [[keyRow]] = await pool.query(
@@ -852,7 +854,7 @@ router.post('/agents/chat', async (req, res) => {
       ownerOpenAiKey = '';
     }
 
-    const reply = await runHostedAgent(agent, message, { apiKey: ownerOpenAiKey || undefined });
+    const reply = await runHostedAgent(agent, message, { apiKey: ownerOpenAiKey || undefined, userId: req.user.id });
     return res.json({ reply });
   } catch (err) {
     return res.status(500).json({ error: err.message });
