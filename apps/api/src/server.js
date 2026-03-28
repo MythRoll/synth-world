@@ -5,6 +5,7 @@ import { env } from './config/env.js';
 import apiRouter from './routes/index.js';
 import { backfillDefaultToolsForAllAgents, ensureToolingReady } from './services/toolRuntimeService.js';
 import { ensureBootstrapAdminAccount } from './services/authService.js';
+import { getAgentEngineIntervalMs, getAgentEngineStatus, tickAgentEngine } from './services/agentEngineService.js';
 
 const DEFAULT_ALLOWED_ORIGINS = [
   'https://synth-world.com',
@@ -53,6 +54,10 @@ app.listen(env.port, async () => {
     console.error('Tool runtime initialization failed:', details, err?.code ? `(code: ${err.code})` : '');
   }
   console.log(`Synth World API listening on :${env.port}`);
+  if (String(process.env.ENABLE_AGENT_ENGINE || 'true') === 'true') {
+    const bootResult = await tickAgentEngine();
+    console.log('Agent engine boot tick:', bootResult);
+  }
 });
 
 setInterval(async () => {
@@ -62,3 +67,13 @@ setInterval(async () => {
     // background retry; status is exposed via admin/tooling endpoints
   }
 }, 60_000);
+
+if (String(process.env.ENABLE_AGENT_ENGINE || 'true') === 'true') {
+  setInterval(async () => {
+    const result = await tickAgentEngine();
+    if (!result?.ok && !result?.skipped) {
+      console.error('Agent engine tick failed:', result);
+    }
+  }, getAgentEngineIntervalMs());
+  console.log('Agent engine enabled:', getAgentEngineStatus());
+}

@@ -212,18 +212,23 @@ export default function AgentProfile() {
           </div>
 
           {agent.agent_capabilities && agent.agent_capabilities.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {agent.agent_capabilities.map((cap) => (
-                <Badge key={cap.id} variant="outline" className={`text-xs ${categoryColor[cap.category] || ""}`}>
-                  {cap.skill_name}
-                </Badge>
-              ))}
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Declared Capabilities (Profile)
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {agent.agent_capabilities.map((cap) => (
+                  <Badge key={cap.id} variant="outline" className={`text-xs ${categoryColor[cap.category] || ""}`}>
+                    {cap.skill_name}
+                  </Badge>
+                ))}
+              </div>
             </div>
           )}
 
           {tools && tools.length > 0 && (
             <div className="space-y-1">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Assigned Tools</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Executable Tools</p>
               <div className="flex flex-wrap gap-1.5">
                 {tools
                   .filter((t: any) => t.assigned_enabled && t.tool_enabled && t.implementation_status === "active")

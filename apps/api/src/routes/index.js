@@ -14,11 +14,12 @@ import {
   getPublicAnalyticsStats, handleAdminListingAction,
 } from '../services/adminService.js';
 import { v4 as uuidv4 } from 'uuid';
-import { runHostedAgent, getProviderStatus, getLastProviderError } from '../services/aiService.js';
+import { runHostedAgent, getProviderStatus, getLastProviderError, getDefaultOpenAiModel } from '../services/aiService.js';
 import {
   ensureToolingReady, listAgentTools, listTools, loadAssignedExecutableTools, setAgentTool, setToolEnabled,
-  ensureDefaultToolsForAgent, getToolingStatus,
+  ensureDefaultToolsForAgent, getToolingStatus, executeToolCall,
 } from '../services/toolRuntimeService.js';
+import { getAgentEngineStatus, tickAgentEngine } from '../services/agentEngineService.js';
 import adminOverviewRouter from './adminOverview.js';
 
 const router = Router();
@@ -59,14 +60,17 @@ async function loadAgentRuntime(agentId) {
     'SELECT id, skill_name, category FROM agent_capabilities WHERE agent_id = ? ORDER BY created_at ASC',
     [agentId]
   );
-  let assignedTools = [];
   try {
     await ensureToolingReady();
     await ensureDefaultToolsForAgent(agentId);
-    assignedTools = await loadAssignedExecutableTools(agentId);
-  } catch {
-    assignedTools = [];
+  } catch (err) {
+    throw Object.assign(new Error(`Tool runtime unavailable: ${err.message}`), {
+      status: 503,
+      code: 'TOOLING_UNAVAILABLE',
+      tooling: getToolingStatus(),
+    });
   }
+  const assignedTools = await loadAssignedExecutableTools(agentId);
   return { ...agent, agent_capabilities: capabilities, runtime_tools: assignedTools };
 }
 // Global rate limit on all API routes
@@ -146,11 +150,12 @@ router.get('/health', async (_req, res) => {
 router.get('/status', async (_req, res) => {
   const provider = getProviderStatus();
   const tooling = getToolingStatus();
+  const agentEngine = getAgentEngineStatus();
   try {
     await pingDatabase();
-    return res.json({ ok: true, database: 'ok', provider, tooling, service: 'synth-world-api' });
+    return res.json({ ok: true, database: 'ok', provider, tooling, agent_engine: agentEngine, service: 'synth-world-api' });
   } catch (err) {
-    return res.status(500).json({ ok: false, database: 'error', error: err.message, provider, tooling, service: 'synth-world-api' });
+    return res.status(500).json({ ok: false, database: 'error', error: err.message, provider, tooling, agent_engine: agentEngine, service: 'synth-world-api' });
   }
 });
 // ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -295,43 +300,9 @@ router.post('/functions/:name', async (req, res) => {
   const body = req.body || {};
   // Public or auth-optional functions first
   if (fn === 'play-games') {
-    // Auto-spawn tables if none exist (anyone can trigger, idempotent)
-    try {
-      const [[{ poker_count }]] = await pool.query(
-        "SELECT COUNT(*) AS poker_count FROM game_tables WHERE game_type = 'poker' AND status = 'waiting'"
-      );
-      const [[{ trivia_count }]] = await pool.query(
-        "SELECT COUNT(*) AS trivia_count FROM game_tables WHERE game_type = 'trivia' AND status = 'waiting'"
-      );
-      const created = [];
-      if (Number(poker_count) < 3) {
-        const stakes = [5, 20, 50];
-        for (const stake of stakes.slice(0, 3 - Number(poker_count))) {
-          const id = uuidv4();
-          const state = JSON.stringify({ name: `Poker Table (${stake}₢ min)`, created_by: 'system' });
-          await pool.query(
-            "INSERT INTO game_tables (id, game_type, status, min_bet, max_players, name, rake_percent, state) VALUES (?,?,?,?,?,?,?,?)",
-            [id, 'poker', 'waiting', stake, 6, `Poker Table (${stake}₢ min)`, 5, state]
-          );
-          created.push({ id, type: 'poker', stake });
-        }
-      }
-      if (Number(trivia_count) < 2) {
-        const stakes = [10, 25];
-        for (const stake of stakes.slice(0, 2 - Number(trivia_count))) {
-          const id = uuidv4();
-          const state = JSON.stringify({ name: `Trivia Arena (${stake}₢)`, created_by: 'system' });
-          await pool.query(
-            "INSERT INTO game_tables (id, game_type, status, min_bet, max_players, name, rake_percent, state) VALUES (?,?,?,?,?,?,?,?)",
-            [id, 'trivia', 'waiting', stake, 8, `Trivia Arena (${stake}₢)`, 5, state]
-          );
-          created.push({ id, type: 'trivia', stake });
-        }
-      }
-      return res.json({ data: { spawned: created } });
-    } catch (err) {
-      return res.status(500).json({ error: err.message });
-    }
+    return res.status(403).json({
+      error: 'System game auto-spawn is disabled. Create games via agent tools or game-action API.',
+    });
   }
   // All remaining functions require auth
   if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
@@ -454,10 +425,16 @@ router.post('/agents/:id/chat', requireAuth, async (req, res) => {
     const [caps] = await pool.query('SELECT skill_name, category FROM agent_capabilities WHERE agent_id = ? ORDER BY created_at ASC', [agent.id]);
     agent.agent_capabilities = caps || [];
 
-    const reply = await runHostedAgent(agent, message);
-    return res.json({ data: { agent_id: agent.id, provider: 'openai', model: process.env.OPENAI_MODEL || 'gpt-4o', message, reply } });
+    const reply = await runHostedAgent(agent, message, { userId: req.user.id, sessionId: uuidv4() });
+    return res.json({ data: { agent_id: agent.id, provider: 'openai', model: getDefaultOpenAiModel(), message, reply } });
   } catch (err) {
-    return res.status(500).json({ error: err.message, details: getLastProviderError() || null });
+    const status = err.status || 500;
+    return res.status(status).json({
+      error: err.message,
+      code: err.code || null,
+      tooling: err.tooling || getToolingStatus(),
+      details: getLastProviderError() || null,
+    });
   }
 });
 // ─── Leaderboard ──────────────────────────────────────────────────────────────
@@ -520,7 +497,7 @@ router.post('/messages/agent-chat', requireAuth, async (req, res) => {
       [userMessageId, senderAgentId, receiverAgentId, content]
     );
 
-    const reply = await runHostedAgent(receiverAgent, content);
+    const reply = await runHostedAgent(receiverAgent, content, { userId: req.user.id, sessionId: uuidv4() });
     const replyId = uuidv4();
     await pool.query(
       'INSERT INTO direct_messages (id, sender_agent_id, receiver_agent_id, content, `read`) VALUES (?, ?, ?, ?, 0)',
@@ -537,7 +514,13 @@ router.post('/messages/agent-chat', requireAuth, async (req, res) => {
     );
     return res.json({ data: { messages: rows, reply } });
   } catch (err) {
-    return res.status(500).json({ error: err.message, details: getLastProviderError() || null });
+    const status = err.status || 500;
+    return res.status(status).json({
+      error: err.message,
+      code: err.code || null,
+      tooling: err.tooling || getToolingStatus(),
+      details: getLastProviderError() || null,
+    });
   }
 });
 // ─── Economy ──────────────────────────────────────────────────────────────────
@@ -817,12 +800,33 @@ router.get('/agents/:id/tools', async (req, res) => {
   try {
     const data = await listAgentTools(req.params.id);
     const tooling = getToolingStatus();
-    if (!data.length && !tooling.ready) {
-      return res.json({ data: [], warning: 'tooling_not_ready', tooling });
-    }
     return res.json({ data, tooling });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(503).json({ error: err.message, tooling: getToolingStatus() });
+  }
+});
+
+router.post('/agents/:id/tools/execute', requireAuth, async (req, res) => {
+  try {
+    const toolSlug = String(req.body?.tool_slug || '').trim();
+    const input = req.body?.input || {};
+    if (!toolSlug) return res.status(400).json({ error: 'tool_slug required.' });
+
+    const allowed = await userCanActAsAgent(req.user.id, req.params.id);
+    if (!allowed) return res.status(403).json({ error: 'Not authorized for this agent.' });
+
+    const agent = await loadAgentRuntime(req.params.id);
+    if (!agent) return res.status(404).json({ error: 'Agent not found.' });
+    const output = await executeToolCall({
+      agent,
+      userId: req.user.id,
+      toolSlug,
+      input,
+      assignedTools: agent.runtime_tools || [],
+    });
+    return res.json({ data: { tool_slug: toolSlug, output } });
+  } catch (err) {
+    return res.status(err.status || 500).json({ error: err.message, tooling: getToolingStatus() });
   }
 });
 
@@ -830,10 +834,21 @@ router.get('/admin/system-health', requireAuth, async (req, res) => {
   try {
     if (!(await ensureAdminAccess(req, res))) return;
     await pingDatabase();
-    return res.json({ data: { api: 'ok', database: 'ok', provider: getProviderStatus(), uptime_seconds: Math.floor(process.uptime()) } });
+    return res.json({ data: { api: 'ok', database: 'ok', provider: getProviderStatus(), tooling: getToolingStatus(), agent_engine: getAgentEngineStatus(), uptime_seconds: Math.floor(process.uptime()) } });
   } catch (err) {
-    return res.status(500).json({ error: err.message, data: { api: 'degraded', database: 'error', provider: getProviderStatus() } });
+    return res.status(500).json({ error: err.message, data: { api: 'degraded', database: 'error', provider: getProviderStatus(), tooling: getToolingStatus(), agent_engine: getAgentEngineStatus() } });
   }
+});
+
+router.get('/admin/agent-engine', requireAuth, async (req, res) => {
+  if (!(await ensureAdminAccess(req, res))) return;
+  return res.json({ data: getAgentEngineStatus() });
+});
+
+router.post('/admin/agent-engine/tick', requireAuth, async (req, res) => {
+  if (!(await ensureAdminAccess(req, res))) return;
+  const data = await tickAgentEngine();
+  return res.json({ data, status: getAgentEngineStatus() });
 });
 
 // --- Hosted Agent Chat -------------------------------------------------------
@@ -865,10 +880,15 @@ router.post('/agents/chat', requireAuth, async (req, res) => {
       ownerOpenAiKey = '';
     }
 
-    const reply = await runHostedAgent(agent, message, { apiKey: ownerOpenAiKey || undefined, userId: req.user.id });
+    const reply = await runHostedAgent(agent, message, { apiKey: ownerOpenAiKey || undefined, userId: req.user.id, sessionId: uuidv4() });
     return res.json({ reply });
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    const status = err.status || 500;
+    return res.status(status).json({
+      error: err.message,
+      code: err.code || null,
+      tooling: err.tooling || getToolingStatus(),
+    });
   }
 });
 export default router;

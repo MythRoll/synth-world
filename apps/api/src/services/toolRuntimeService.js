@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { pool } from '../db/pool.js';
+import { transferCredits } from './creditService.js';
 
 const TOOL_DEFINITIONS = [
   // INFORMATION / WEB
@@ -44,8 +45,12 @@ const TOOL_DEFINITIONS = [
   ['rate_agent','Rate Agent','Rate another agent','jobs',false],
   ['view_job_history','View Job History','View completed jobs','jobs',false],
   ['hire_agent','Hire Agent','Hire agent for work','jobs',false],
+  ['list_jobs','List Jobs','List currently open jobs','jobs',true],
   ['cancel_job','Cancel Job','Cancel a job','jobs',false],
   ['submit_work','Submit Work','Submit deliverable for job','jobs',false],
+  // GAMES
+  ['create_game','Create Game','Create a new game table','games',true],
+  ['join_game','Join Game','Join an existing waiting game table','games',true],
   // ECONOMY
   ['check_credit_balance','Check Credit Balance','View agent credit balance','economy',true],
   ['transfer_credits','Transfer Credits','Transfer credits to another agent','economy',false],
@@ -80,6 +85,7 @@ let lastInitAt = null;
 let lastInitOkAt = null;
 
 const DEFAULT_AGENT_TOOLS = [
+  'web_search',
   'list_agents',
   'get_feed',
   'get_agent_profile',
@@ -87,7 +93,56 @@ const DEFAULT_AGENT_TOOLS = [
   'view_transactions',
   'send_dm',
   'post_pulse',
+  'list_jobs',
+  'join_game',
 ];
+
+const CAPABILITY_TOOLS = new Map([
+  ['web_search', ['web_search']],
+  ['websearch', ['web_search']],
+  ['search', ['web_search']],
+  ['lead_generator', ['web_search', 'list_jobs']],
+  ['making_money', ['list_jobs', 'hire_agent']],
+  ['customer_service', ['send_dm', 'post_pulse']],
+  ['top_mod', ['get_feed']],
+  ['coding', ['list_jobs']],
+]);
+
+function normalizeCapabilityName(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+async function hasColumn(table, column) {
+  const [rows] = await pool.query(
+    `SELECT 1
+     FROM INFORMATION_SCHEMA.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?
+     LIMIT 1`,
+    [table, column]
+  );
+  return rows.length > 0;
+}
+
+async function addColumnIfMissing(table, column, definition) {
+  const exists = await hasColumn(table, column);
+  if (exists) return;
+  await pool.query(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+}
+
+async function ensureToolsTableColumns() {
+  await addColumnIfMissing('tools', 'implementation_status', `VARCHAR(20) NOT NULL DEFAULT 'inactive'`);
+  await addColumnIfMissing('tools', 'enabled', `TINYINT(1) NOT NULL DEFAULT 1`);
+  await addColumnIfMissing('tools', 'visibility', `VARCHAR(50) NOT NULL DEFAULT 'public'`);
+  await addColumnIfMissing('tools', 'requires_auth', `TINYINT(1) NOT NULL DEFAULT 1`);
+  await addColumnIfMissing('tools', 'requires_admin', `TINYINT(1) NOT NULL DEFAULT 0`);
+  await addColumnIfMissing('tools', 'category', `VARCHAR(100) NULL`);
+  await addColumnIfMissing('tools', 'name', `VARCHAR(255) NULL`);
+  await addColumnIfMissing('tools', 'description', `TEXT NULL`);
+}
 
 export async function ensureToolingReady() {
   if (initPromise) return initPromise;
@@ -110,16 +165,8 @@ export async function ensureToolingReady() {
       updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
       PRIMARY KEY (id), UNIQUE KEY uq_tools_slug (slug)
     )`);
-      // Compatibility migrations for older tool table shapes
-      await pool.query(`ALTER TABLE tools
-        ADD COLUMN IF NOT EXISTS implementation_status VARCHAR(20) NOT NULL DEFAULT 'inactive',
-        ADD COLUMN IF NOT EXISTS enabled TINYINT(1) NOT NULL DEFAULT 1,
-        ADD COLUMN IF NOT EXISTS visibility VARCHAR(50) NOT NULL DEFAULT 'public',
-        ADD COLUMN IF NOT EXISTS requires_auth TINYINT(1) NOT NULL DEFAULT 1,
-        ADD COLUMN IF NOT EXISTS requires_admin TINYINT(1) NOT NULL DEFAULT 0,
-        ADD COLUMN IF NOT EXISTS category VARCHAR(100) NULL,
-        ADD COLUMN IF NOT EXISTS name VARCHAR(255) NULL,
-        ADD COLUMN IF NOT EXISTS description TEXT NULL`);
+      // Compatibility migrations for older MySQL/MariaDB versions.
+      await ensureToolsTableColumns();
       try {
         await pool.query(`
           UPDATE tools
@@ -157,7 +204,7 @@ export async function ensureToolingReady() {
     )`);
 
       for (const tool of TOOL_MAP.values()) {
-        const implemented = IMPLEMENTED_TOOLS.has(tool.slug) ? 'active' : 'inactive';
+        const implemented = isToolImplemented(tool.slug) ? 'active' : 'inactive';
         await pool.query(
           `INSERT INTO tools (id, slug, name, description, category, enabled, visibility, requires_auth, requires_admin, implementation_status)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -170,6 +217,14 @@ export async function ensureToolingReady() {
       }
       lastInitError = null;
       lastInitOkAt = new Date().toISOString();
+      const [counts] = await pool.query(
+        `SELECT
+            (SELECT COUNT(*) FROM tools) AS tools_count,
+            (SELECT COUNT(*) FROM agent_tools) AS agent_tools_count,
+            (SELECT COUNT(*) FROM tool_logs) AS tool_logs_count`
+      );
+      const totals = counts?.[0] || {};
+      console.log(`[toolRuntime] ready tools=${totals.tools_count || 0} agent_tools=${totals.agent_tools_count || 0} tool_logs=${totals.tool_logs_count || 0}`);
     } catch (err) {
       lastInitError = err;
       initPromise = null;
@@ -191,19 +246,20 @@ export function getToolingStatus() {
   return {
     ready: !lastInitError,
     error: getErrorMessage(lastInitError),
+    error_code: lastInitError?.code || null,
     last_init_at: lastInitAt,
     last_success_at: lastInitOkAt,
   };
 }
 
 export async function listTools() {
-  try { await ensureToolingReady(); } catch { return []; }
+  await ensureToolingReady();
   const [rows] = await pool.query('SELECT * FROM tools ORDER BY category, slug');
   return rows;
 }
 
 export async function listAgentTools(agentId) {
-  try { await ensureToolingReady(); } catch { return []; }
+  await ensureToolingReady();
   const [rows] = await pool.query(
     `SELECT t.slug, t.name, t.description, t.category, t.enabled AS tool_enabled, t.implementation_status,
             COALESCE(at.enabled,0) AS assigned_enabled
@@ -230,7 +286,7 @@ export async function setToolEnabled(toolSlug, enabled) {
 }
 
 export async function loadAssignedExecutableTools(agentId) {
-  try { await ensureToolingReady(); } catch { return []; }
+  await ensureToolingReady();
   const [rows] = await pool.query(
     `SELECT t.slug, t.name, t.description, t.category, t.requires_auth, t.requires_admin, t.implementation_status
      FROM tools t
@@ -242,8 +298,16 @@ export async function loadAssignedExecutableTools(agentId) {
 }
 
 export async function ensureDefaultToolsForAgent(agentId) {
-  try { await ensureToolingReady(); } catch { return false; }
-  for (const slug of DEFAULT_AGENT_TOOLS) {
+  await ensureToolingReady();
+  const toolsToAssign = new Set(DEFAULT_AGENT_TOOLS);
+  const [caps] = await pool.query('SELECT skill_name FROM agent_capabilities WHERE agent_id = ?', [agentId]);
+  for (const cap of caps) {
+    const normalized = normalizeCapabilityName(cap.skill_name);
+    const mapped = CAPABILITY_TOOLS.get(normalized) || [];
+    for (const slug of mapped) toolsToAssign.add(slug);
+  }
+
+  for (const slug of toolsToAssign) {
     await pool.query(
       `INSERT INTO agent_tools (id, agent_id, tool_slug, enabled) VALUES (?, ?, ?, 1)
        ON DUPLICATE KEY UPDATE enabled = VALUES(enabled)`,
@@ -260,17 +324,6 @@ export async function backfillDefaultToolsForAllAgents() {
     await ensureDefaultToolsForAgent(agent.id);
   }
 }
-
-const IMPLEMENTED_TOOLS = new Set([
-  'web_search',
-  'post_pulse',
-  'send_dm',
-  'list_agents',
-  'get_feed',
-  'get_agent_profile',
-  'check_credit_balance',
-  'view_transactions',
-]);
 
 function safeJsonSummary(obj) {
   const raw = JSON.stringify(obj);
@@ -357,9 +410,132 @@ const HANDLERS = {
     );
     return rows;
   },
+  async list_jobs({ input }) {
+    const limit = Math.min(Math.max(Number(input?.limit || 20), 1), 100);
+    const [rows] = await pool.query(
+      `SELECT id, poster_agent_id, title, description, budget, status, created_at
+       FROM jobs
+       WHERE status = 'open'
+       ORDER BY created_at DESC LIMIT ?`,
+      [limit]
+    );
+    return rows;
+  },
+  async hire_agent({ agent, input }) {
+    const title = String(input?.title || '').trim() || `${agent.name} hiring request`;
+    const description = String(input?.description || '').trim() || 'Autonomous hiring request.';
+    const budget = Number(input?.budget || 10);
+    if (budget < 1) throw new Error('budget must be at least 1');
+    await transferCredits(agent.id, null, budget, 'job_escrow', `Escrow for job: ${title}`);
+    const id = uuidv4();
+    await pool.query(
+      `INSERT INTO jobs (id, poster_agent_id, title, description, budget, status)
+       VALUES (?, ?, ?, ?, ?, 'open')`,
+      [id, agent.id, title, description, budget]
+    );
+    return { id, poster_agent_id: agent.id, title, budget, status: 'open' };
+  },
+  async create_game({ agent, input }) {
+    const validTypes = new Set(['blackjack', 'poker', 'roulette', 'trivia', 'crash']);
+    const gameType = String(input?.game_type || 'trivia').toLowerCase();
+    if (!validTypes.has(gameType)) throw new Error('invalid game_type');
+    const minBet = Math.max(1, Number(input?.min_bet || 5));
+    const maxPlayers = Math.max(2, Math.min(12, Number(input?.max_players || 6)));
+    const id = uuidv4();
+    const name = String(input?.name || `${agent.name} ${gameType} table`).slice(0, 255);
+    const state = JSON.stringify({ created_by: agent.id, source: 'tool:create_game' });
+    await pool.query(
+      `INSERT INTO game_tables (id, game_type, name, status, min_bet, max_players, state)
+       VALUES (?, ?, ?, 'waiting', ?, ?, ?)`,
+      [id, gameType, name, minBet, maxPlayers, state]
+    );
+    return { id, game_type: gameType, status: 'waiting', min_bet: minBet, max_players: maxPlayers };
+  },
+  async join_game({ agent, input }) {
+    const tableId = String(input?.table_id || '').trim();
+    if (!tableId) throw new Error('table_id is required');
+    const [[table]] = await pool.query('SELECT * FROM game_tables WHERE id = ? LIMIT 1', [tableId]);
+    if (!table) throw new Error('table not found');
+    if (table.status !== 'waiting') throw new Error('table is not accepting players');
+
+    const [[existing]] = await pool.query('SELECT id FROM game_players WHERE table_id = ? AND agent_id = ? LIMIT 1', [tableId, agent.id]);
+    if (existing) return { joined: false, reason: 'already_joined', table_id: tableId };
+
+    const [[{ count }]] = await pool.query('SELECT COUNT(*) AS count FROM game_players WHERE table_id = ?', [tableId]);
+    if (Number(count) >= Number(table.max_players || 0)) throw new Error('table is full');
+
+    const stake = Number(table.min_bet || 0);
+    if (stake > 0) {
+      await transferCredits(agent.id, null, stake, 'game_stake', `Tool join game ${tableId}`);
+    }
+    await pool.query(
+      `INSERT INTO game_players (id, table_id, agent_id, seat_number, chips, status)
+       VALUES (?, ?, ?, ?, ?, 'waiting')`,
+      [uuidv4(), tableId, agent.id, Number(count) + 1, stake]
+    );
+    return { joined: true, table_id: tableId, stake };
+  },
 };
 
+function isToolImplemented(toolSlug) {
+  return Boolean(HANDLERS[toolSlug]);
+}
+
 export function getOpenAiToolSpecs(assignedTools) {
+  const parameterSchemas = {
+    web_search: {
+      type: 'object',
+      properties: { query: { type: 'string', description: 'Search query' } },
+      required: ['query'],
+      additionalProperties: false,
+    },
+    post_pulse: {
+      type: 'object',
+      properties: { content: { type: 'string', description: 'Short social pulse content' } },
+      required: ['content'],
+      additionalProperties: false,
+    },
+    send_dm: {
+      type: 'object',
+      properties: {
+        receiver_agent_id: { type: 'string' },
+        content: { type: 'string' },
+      },
+      required: ['receiver_agent_id', 'content'],
+      additionalProperties: false,
+    },
+    hire_agent: {
+      type: 'object',
+      properties: {
+        title: { type: 'string' },
+        description: { type: 'string' },
+        budget: { type: 'number' },
+      },
+      additionalProperties: false,
+    },
+    create_game: {
+      type: 'object',
+      properties: {
+        game_type: { type: 'string' },
+        min_bet: { type: 'number' },
+        max_players: { type: 'number' },
+        name: { type: 'string' },
+      },
+      additionalProperties: false,
+    },
+    join_game: {
+      type: 'object',
+      properties: { table_id: { type: 'string' } },
+      required: ['table_id'],
+      additionalProperties: false,
+    },
+    list_jobs: {
+      type: 'object',
+      properties: { limit: { type: 'number' } },
+      additionalProperties: false,
+    },
+  };
+
   return assignedTools
     .filter((t) => HANDLERS[t.slug])
     .map((t) => ({
@@ -367,7 +543,7 @@ export function getOpenAiToolSpecs(assignedTools) {
       function: {
         name: t.slug,
         description: t.description,
-        parameters: { type: 'object', properties: {}, additionalProperties: true },
+        parameters: parameterSchemas[t.slug] || { type: 'object', properties: {}, additionalProperties: true },
       },
     }));
 }
