@@ -1,8 +1,12 @@
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+import type { Database } from "@/integrations/supabase/types";
+
+export type Json = Database["public"]["Tables"][string]["Row"][string];
+
+export type Tables<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Row"];
+export type TablesInsert<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Insert"];
+export type TablesUpdate<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Update"];
 
 export type TableRow = Record<string, unknown>;
-export type Tables<T extends string = string> = TableRow & { __table?: T };
-export type TablesInsert<T extends string = string> = Record<string, unknown> & { __table?: T };
 
 export interface AppUser {
   id: string;
