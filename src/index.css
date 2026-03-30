@@ -1,0 +1,232 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 220 20% 10%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 10%;
+
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 215 20% 95%;
+    --secondary-foreground: 220 20% 20%;
+
+    --muted: 215 20% 95%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 215 20% 95%;
+    --accent-foreground: 220 20% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 221 83% 53%;
+
+    --radius: 0.625rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 20% 25%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 20% 95%;
+    --sidebar-accent-foreground: 220 20% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 221 83% 53%;
+
+    /* Synth World custom tokens */
+    --synth-mesh: 160 84% 39%;
+    --synth-compute: 262 83% 58%;
+    --synth-search: 38 92% 50%;
+    --synth-action: 0 84% 60%;
+    --synth-validation: 160 84% 39%;
+
+    /* Casino tokens */
+    --casino-felt: 160 30% 12%;
+    --casino-felt-light: 160 25% 18%;
+    --casino-gold: 43 96% 56%;
+    --casino-gold-dim: 43 70% 40%;
+    --casino-card: 0 0% 97%;
+    --casino-card-red: 0 80% 50%;
+    --casino-card-black: 0 0% 10%;
+    --casino-surface: 220 25% 8%;
+    --casino-surface-light: 220 20% 12%;
+    --casino-border: 43 50% 25%;
+    --casino-neon: 170 90% 50%;
+    --casino-neon-pink: 330 85% 60%;
+
+    /* Cyberpunk tokens */
+    --cyber-neon-blue: 200 100% 60%;
+    --cyber-neon-green: 150 100% 50%;
+    --cyber-neon-pink: 330 100% 65%;
+    --cyber-grid: 220 20% 12%;
+  }
+
+  .dark {
+    --background: 224 20% 4%;
+    --foreground: 210 20% 95%;
+
+    --card: 224 20% 6%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 224 20% 6%;
+    --popover-foreground: 210 20% 95%;
+
+    --primary: 200 100% 55%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 220 20% 10%;
+    --secondary-foreground: 210 20% 90%;
+
+    --muted: 220 20% 10%;
+    --muted-foreground: 215 16% 55%;
+
+    --accent: 220 20% 10%;
+    --accent-foreground: 210 20% 95%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 20% 95%;
+
+    --border: 220 20% 12%;
+    --input: 220 20% 12%;
+    --ring: 200 100% 55%;
+
+    --sidebar-background: 224 20% 5%;
+    --sidebar-foreground: 210 20% 85%;
+    --sidebar-primary: 200 100% 55%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 220 20% 8%;
+    --sidebar-accent-foreground: 210 20% 90%;
+    --sidebar-border: 220 20% 12%;
+    --sidebar-ring: 200 100% 55%;
+
+    /* Casino in dark - more vivid */
+    --casino-surface: 224 20% 6%;
+    --casino-surface-light: 224 20% 8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Cyberpunk utility classes */
+.neon-glow {
+  text-shadow: 0 0 7px hsl(var(--primary)), 0 0 10px hsl(var(--primary)), 0 0 21px hsl(var(--primary));
+}
+
+.neon-border {
+  transition: box-shadow 0.3s ease;
+}
+.neon-border:hover {
+  box-shadow: 0 0 5px hsl(var(--primary) / 0.3), 0 0 20px hsl(var(--primary) / 0.1), inset 0 0 5px hsl(var(--primary) / 0.05);
+}
+
+.cyber-card {
+  background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.8) 100%);
+  border: 1px solid hsl(var(--border));
+  position: relative;
+  overflow: hidden;
+}
+.cyber-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.5), transparent);
+}
+
+/* Scanline effect */
+.scanline::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    hsl(var(--primary) / 0.03) 2px,
+    hsl(var(--primary) / 0.03) 4px
+  );
+  pointer-events: none;
+}
+
+/* Pulsing neon text */
+.neon-text {
+  animation: neon-pulse 2s ease-in-out infinite;
+}
+@keyframes neon-pulse {
+  0%, 100% { text-shadow: 0 0 4px hsl(var(--primary) / 0.5); }
+  50% { text-shadow: 0 0 8px hsl(var(--primary)), 0 0 16px hsl(var(--primary) / 0.3); }
+}
+
+/* Landing page utilities */
+.landing-glass {
+  background: hsl(var(--card) / 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes ticker {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-20px) translateX(10px); }
+}
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  50% { transform: translateY(-15px) translateX(-8px); }
+}
+@keyframes float-fast {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-25px); }
+}
+
+.animate-ticker {
+  animation: ticker 30s linear infinite;
+}
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+.animate-float-medium {
+  animation: float-medium 4s ease-in-out infinite;
+}
+.animate-float-fast {
+  animation: float-fast 3s ease-in-out infinite;
+}
