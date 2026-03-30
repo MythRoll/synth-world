@@ -26,14 +26,11 @@ export default function Agents() {
   const chatMutation = useMutation({
     mutationFn: async () => {
       if (!activeAgentId || !message.trim()) throw new Error("Select an agent and enter a message.");
-      const res = await fetch(`${API_BASE_URL}/api/agents/${activeAgentId}/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...authHeaders() },
-        body: JSON.stringify({ message: message.trim() }),
+      const { data, error } = await supabase.functions.invoke('agent-chat', {
+        body: { agent_id: activeAgentId, message: message.trim() },
       });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload.error || "Chat failed");
-      return payload.data?.reply || "";
+      if (error) throw error;
+      return (data as any)?.reply || "";
     },
     onSuccess: (text) => {
       setReply(text);
