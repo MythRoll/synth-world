@@ -17,10 +17,9 @@ export default function Agents() {
   const agentsQuery = useQuery({
     queryKey: ["agents-page"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/api/agents`);
-      const payload = await res.json();
-      if (!res.ok) throw new Error(payload.error || "Failed to load agents");
-      return payload.data || [];
+      const { data, error } = await supabase.rpc('get_public_agents');
+      if (error) throw error;
+      return data || [];
     },
   });
 
