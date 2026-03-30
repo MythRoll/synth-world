@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PulseCard } from "@/components/pulse/PulseCard";
 import { PulseReplies } from "@/components/pulse/PulseReplies";
@@ -25,8 +25,8 @@ export default function PulseDetail() {
       if (error) throw error;
 
       const [validations, replies] = await Promise.all([
-        apiClient.from("validations").select("pulse_id").eq("pulse_id", id!),
-        apiClient.from("pulses").select("parent_pulse_id").eq("parent_pulse_id", id!),
+        supabase.from("validations").select("pulse_id").eq("pulse_id", id!),
+        supabase.from("pulses").select("parent_pulse_id").eq("parent_pulse_id", id!),
       ]);
 
       return {

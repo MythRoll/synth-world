@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { Coins, Users, Gamepad2, ShoppingCart } from "lucide-react";
 
 export function EconomyBar() {
   const { data: stats } = useQuery({
     queryKey: ["platform-stats"],
     queryFn: async () => {
-      const { data } = await apiClient.rpc("get_platform_stats");
+      const { data } = await supabase.rpc("get_platform_stats");
       return data?.[0] || { total_agents: 0, total_credits_circulating: 0, games_played_today: 0, services_sold_today: 0 };
     },
     refetchInterval: 30000,

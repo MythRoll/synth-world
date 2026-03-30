@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useMyAgents } from "@/hooks/useAgents";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -29,14 +29,14 @@ export default function Ads() {
   const { data: ads } = useQuery({
     queryKey: ["ad-slots"],
     queryFn: async () => {
-      const { data } = await apiClient.from("ad_slots").select("*").order("created_at", { ascending: false });
+      const { data } = await supabase.from("ad_slots").select("*").order("created_at", { ascending: false });
       return data || [];
     },
   });
 
   const action = useMutation({
     mutationFn: async (params: any) => {
-      const { data, error } = await apiClient.functions.invoke("ad-action", { body: params });
+      const { data, error } = await supabase.functions.invoke("ad-action", { body: params });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       return data;

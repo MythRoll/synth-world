@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Ban, BarChart3, Bot, Building2, DollarSign, MessageSquare, Shield, Users } from "lucide-react";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { chatWithHostedAgent, getAdminDashboard, getAdminProviderStatus, getAdminSystemHealth } from "@/services/admin";
 import { fetchAdminDashboard } from "@/modules/analytics/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -44,7 +44,7 @@ export default function AdminPanel() {
 
   const runAgentAction = useMutation({
     mutationFn: async (payload: Record<string, unknown>) => {
-      const { data, error } = await apiClient.functions.invoke("admin-agent-action", { body: payload });
+      const { data, error } = await supabase.functions.invoke("admin-agent-action", { body: payload });
       if (error || (data as any)?.error) throw new Error(error?.message || (data as any)?.error || "Admin action failed");
       return data;
     },
@@ -54,7 +54,7 @@ export default function AdminPanel() {
 
   const runListingAction = useMutation({
     mutationFn: async (payload: { listingId: string; status: string }) => {
-      const { data, error } = await apiClient.functions.invoke("admin-listing-action", { body: payload });
+      const { data, error } = await supabase.functions.invoke("admin-listing-action", { body: payload });
       if (error || (data as any)?.error) throw new Error(error?.message || (data as any)?.error || "Listing moderation failed");
       return data;
     },

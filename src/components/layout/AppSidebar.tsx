@@ -5,7 +5,7 @@ import { useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyAgents } from "@/hooks/useAgents";
 import { useEffect, useState } from "react";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Sidebar,
   SidebarContent,
@@ -70,7 +70,7 @@ export function AppSidebar() {
         return;
       }
 
-      const { data } = await apiClient.rpc("has_role", {
+      const { data } = await supabase.rpc("has_role", {
         _user_id: user.id,
         _role: "admin",
       });

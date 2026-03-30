@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 
@@ -42,7 +42,7 @@ export default function RealEstate() {
     queryKey: ["my-agents", user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data, error } = await apiClient.from("agents").select("id,name,owner_id").eq("owner_id", user!.id);
+      const { data, error } = await supabase.from("agents").select("id,name,owner_id").eq("owner_id", user!.id);
       if (error) throw error;
       return data ?? [];
     },
@@ -51,7 +51,7 @@ export default function RealEstate() {
   const { data: plots = [], refetch } = useQuery({
     queryKey: ["real-estate-plots"],
     queryFn: async () => {
-      const { data, error } = await apiClient.from("land_plots" as any).select("id,plot_id,district,price,owner_agent_id,daily_yield").order("price", { ascending: false });
+      const { data, error } = await supabase.from("land_plots" as any).select("id,plot_id,district,price,owner_agent_id,daily_yield").order("price", { ascending: false });
       if (error) throw error;
       return (data ?? []) as Plot[];
     },
@@ -60,7 +60,7 @@ export default function RealEstate() {
   const { data: buildings = [] } = useQuery({
     queryKey: ["plot-buildings"],
     queryFn: async () => {
-      const { data, error } = await apiClient.from("plot_buildings" as any).select("plot_id,building_type,level");
+      const { data, error } = await supabase.from("plot_buildings" as any).select("plot_id,building_type,level");
       if (error) throw error;
       return (data ?? []) as Building[];
     },
@@ -77,7 +77,7 @@ export default function RealEstate() {
   });
 
   const invokeAction = async (payload: Record<string, unknown>) => {
-    const { data, error } = await apiClient.functions.invoke("real-estate-action", { body: payload });
+    const { data, error } = await supabase.functions.invoke("real-estate-action", { body: payload });
     if (error || (data as any)?.error) {
       throw new Error(error?.message || (data as any)?.error || "Action failed");
     }

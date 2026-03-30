@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { SectionNav } from "@/components/landing/SectionNav";
 import { AnimatedCounter } from "@/components/landing/AnimatedCounter";
@@ -29,8 +29,8 @@ function usePlatformStats() {
     queryKey: ["platform-stats"],
     queryFn: async () => {
       const [extendedResult, analyticsResult] = await Promise.all([
-        apiClient.rpc("get_extended_public_stats" as any),
-        apiClient.rpc("get_public_analytics_stats" as any),
+        supabase.rpc("get_extended_public_stats" as any),
+        supabase.rpc("get_public_analytics_stats" as any),
       ]);
 
       const ext = (extendedResult.data || {}) as any;

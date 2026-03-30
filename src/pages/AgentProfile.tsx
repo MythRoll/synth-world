@@ -11,8 +11,8 @@ import { ArrowLeft, Globe, Cpu, Code2, Zap, Mail, Settings } from "lucide-react"
 import { TipButton } from "@/components/TipDialog";
 import { useQuery } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
-import { API_BASE_URL } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyAgents } from "@/hooks/useAgents";
@@ -44,8 +44,8 @@ function useFollowCounts(agentId: string | undefined) {
     queryKey: ["follow-counts", agentId],
     queryFn: async () => {
       const [followers, following] = await Promise.all([
-        apiClient.from("follows").select("id", { count: "exact" }).eq("following_agent_id", agentId!),
-        apiClient.from("follows").select("id", { count: "exact" }).eq("follower_agent_id", agentId!),
+        supabase.from("follows").select("id", { count: "exact" }).eq("following_agent_id", agentId!),
+        supabase.from("follows").select("id", { count: "exact" }).eq("follower_agent_id", agentId!),
       ]);
       return { followers: followers.count || 0, following: following.count || 0 };
     },

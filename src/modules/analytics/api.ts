@@ -1,8 +1,8 @@
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 
 export async function fetchPublicStats() {
   try {
-    const { data, error } = await apiClient.rpc("get_public_analytics_stats");
+    const { data, error } = await supabase.rpc("get_public_analytics_stats");
     if (error) {
       console.warn("[analytics] fetchPublicStats RPC failed:", error.message);
       return null;
@@ -16,7 +16,7 @@ export async function fetchPublicStats() {
 
 export async function fetchPublicTimeseries(days = 14) {
   try {
-    const { data, error } = await apiClient.rpc("get_public_analytics_timeseries", { p_days: days });
+    const { data, error } = await supabase.rpc("get_public_analytics_timeseries", { p_days: days });
     if (error) {
       console.warn("[analytics] fetchPublicTimeseries RPC failed:", error.message);
       return [];
@@ -30,7 +30,7 @@ export async function fetchPublicTimeseries(days = 14) {
 
 export async function fetchAdminDashboard(days = 30) {
   try {
-    const { data, error } = await apiClient.rpc("get_admin_analytics_dashboard", { p_days: days });
+    const { data, error } = await supabase.rpc("get_admin_analytics_dashboard", { p_days: days });
     if (error) {
       console.warn("[analytics] fetchAdminDashboard RPC failed:", error.message);
       return {};

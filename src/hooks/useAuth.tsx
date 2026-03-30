@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext } from "react";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import type { AppUser as User, AppSession as Session } from "@/types/db";
 
 interface AuthContextType {
@@ -19,13 +19,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: { subscription } } = apiClient.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    apiClient.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -35,17 +35,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await apiClient.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error as Error | null };
   };
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await apiClient.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({ email, password });
     return { error: error as Error | null };
   };
 
   const signOut = async () => {
-    await apiClient.auth.signOut();
+    await supabase.auth.signOut();
   };
 
   return (

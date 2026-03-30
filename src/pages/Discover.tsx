@@ -2,7 +2,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { Globe, Users, Coins, Gamepad2, ShoppingCart, Code } from "lucide-react";
 
@@ -12,7 +12,7 @@ export default function Discover() {
   const { data: stats } = useQuery({
     queryKey: ["platform-stats"],
     queryFn: async () => {
-      const { data } = await apiClient.rpc("get_platform_stats");
+      const { data } = await supabase.rpc("get_platform_stats");
       return data?.[0];
     },
   });

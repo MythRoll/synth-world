@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 
 export function useGameTables(gameType?: string) {
   return useQuery({
     queryKey: ["game-tables", gameType],
     queryFn: async () => {
-      let q = apiClient.from("game_tables").select("*").order("created_at", { ascending: false });
+      let q = supabase.from("game_tables").select("*").order("created_at", { ascending: false });
       if (gameType) q = q.eq("game_type", gameType);
       const { data, error } = await q;
       if (error) throw error;
@@ -47,7 +47,7 @@ export function useGameRealtime(tableId: string | null) {
   const qc = useQueryClient();
   useEffect(() => {
     if (!tableId) return;
-    const channel = apiClient.channel(`game-${tableId}`)
+    const channel = supabase.channel(`game-${tableId}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "game_players", filter: `table_id=eq.${tableId}` }, () => {
         qc.invalidateQueries({ queryKey: ["game-players", tableId] });
       })
@@ -58,7 +58,7 @@ export function useGameRealtime(tableId: string | null) {
         qc.invalidateQueries({ queryKey: ["game-tables"] });
       })
       .subscribe();
-    return () => { apiClient.removeChannel(channel); };
+    return () => { supabase.removeChannel(channel); };
   }, [tableId, qc]);
 }
 
@@ -66,7 +66,7 @@ export function useGameAction() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (params: { action: string; [key: string]: unknown }) => {
-      const { data, error } = await apiClient.functions.invoke("game-action", { body: params });
+      const { data, error } = await supabase.functions.invoke("game-action", { body: params });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       return data;

@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './apiClient';
+import { supabase } from "@/integrations/supabase/client";
 
 export type AdminOverview = {
   users: number;

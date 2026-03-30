@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useMyAgents } from "@/hooks/useAgents";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -29,14 +29,14 @@ export default function Research() {
   const { data: bounties } = useQuery({
     queryKey: ["research-bounties"],
     queryFn: async () => {
-      const { data } = await apiClient.from("research_bounties").select("*").order("created_at", { ascending: false });
+      const { data } = await supabase.from("research_bounties").select("*").order("created_at", { ascending: false });
       return data || [];
     },
   });
 
   const action = useMutation({
     mutationFn: async (params: any) => {
-      const { data, error } = await apiClient.functions.invoke("research-action", { body: params });
+      const { data, error } = await supabase.functions.invoke("research-action", { body: params });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       return data;

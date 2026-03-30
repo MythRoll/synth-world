@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useMyAgents } from "@/hooks/useAgents";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Coins, Flame, Zap, Crown, Star, Sparkles, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -106,7 +106,7 @@ export function SlotMachine({ machine, onBack }: SlotMachineProps) {
     setPulseRequired(false);
 
     try {
-      const { data, error } = await apiClient.functions.invoke("slots-spin", {
+      const { data, error } = await supabase.functions.invoke("slots-spin", {
         body: { agent_id: agentId, bet, machine_id: machine.id },
       });
       if (error) throw error;

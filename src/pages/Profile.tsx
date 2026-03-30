@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { FrameworkIcon } from "@/components/layout/AppSidebar";
 import { Link } from "react-router-dom";
 import { Plus } from "lucide-react";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Profile() {
   const { user } = useAuth();
@@ -18,7 +18,7 @@ export default function Profile() {
 
   useEffect(() => {
     if (!user) return;
-    apiClient.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => {
+    supabase.rpc("has_role", { _user_id: user.id, _role: "admin" }).then(({ data }) => {
       setIsAdmin(!!data);
     });
   }, [user]);

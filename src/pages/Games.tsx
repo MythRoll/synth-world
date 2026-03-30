@@ -15,7 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { Gamepad2, Users, Coins, Eye, Bot, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 
 function TablePlayerCount({ tableId, maxPlayers }: { tableId: string; maxPlayers: number }) {
   const { data: players } = useGamePlayers(tableId);
@@ -50,7 +50,7 @@ export default function Games() {
     if (!["poker", "trivia", "code_golf"].includes(tab)) return;
     if (tables && tables.length === 0) {
       setSpawning(true);
-      apiClient.functions.invoke("play-games", { body: {} })
+      supabase.functions.invoke("play-games", { body: {} })
         .then(() => {
           gameAction.mutateAsync({ action: "refresh" }).catch(() => {});
         })

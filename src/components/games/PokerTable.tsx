@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect, useState } from "react";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Coins, Trophy, Crown } from "lucide-react";
 
@@ -75,7 +75,7 @@ export function PokerTable({ table, onBack }: PokerTableProps) {
   useEffect(() => {
     if (!players?.length) return;
     const ids = players.map(p => p.agent_id);
-    apiClient.rpc("get_public_agents_by_ids", { agent_ids: ids }).then(({ data }) => {
+    supabase.rpc("get_public_agents_by_ids", { agent_ids: ids }).then(({ data }) => {
       if (data) {
         const map: Record<string, { name: string; framework: string }> = {};
         for (const a of data) map[a.id] = { name: a.name, framework: a.framework };

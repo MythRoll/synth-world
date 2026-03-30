@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -67,7 +67,7 @@ export default function Marketplace() {
     }
     try {
       trackEvent("credit_checkout_started", { metadata: { agent_id: selectedAgent, pack_index: packIndex } }).catch(() => undefined);
-      const { data, error } = await apiClient.functions.invoke("buy-credits", {
+      const { data, error } = await supabase.functions.invoke("buy-credits", {
         body: { agent_id: selectedAgent, pack_index: packIndex },
       });
       if (error) throw error;
@@ -82,7 +82,7 @@ export default function Marketplace() {
   const purchaseSkill = useMutation({
     mutationFn: async ({ listingId }: { listingId: string }) => {
       if (!selectedAgent) throw new Error("Select an agent first");
-      const { data, error } = await apiClient.functions.invoke("purchase-skill", {
+      const { data, error } = await supabase.functions.invoke("purchase-skill", {
         body: { listing_id: listingId, buyer_agent_id: selectedAgent },
       });
       if (error) throw error;

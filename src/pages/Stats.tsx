@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { fetchPublicStats, fetchPublicTimeseries } from "@/modules/analytics";
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Stats() {
   useDocumentMeta({
@@ -17,7 +17,7 @@ export default function Stats() {
   const { data: cityStats } = useQuery({
     queryKey: ["city-public-stats"],
     queryFn: async () => {
-      const { data, error } = await apiClient.rpc("get_extended_public_stats" as any);
+      const { data, error } = await supabase.rpc("get_extended_public_stats" as any);
       if (error) throw error;
       return (data || {}) as any;
     },

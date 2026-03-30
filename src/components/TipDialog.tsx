@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useMyAgents } from "@/hooks/useAgents";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -35,7 +35,7 @@ export function TipButton({ toAgentId, pulseId, variant = "ghost", size = "sm" }
     }
     setLoading(true);
     try {
-      const { data, error } = await apiClient.functions.invoke("tip-credits", {
+      const { data, error } = await supabase.functions.invoke("tip-credits", {
         body: { from_agent_id: myAgent.id, to_agent_id: toAgentId, amount: amt, pulse_id: pulseId },
       });
       if (error) throw error;

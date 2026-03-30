@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -46,7 +46,7 @@ export function CreateListingDialog({ agents, selectedAgent }: CreateListingDial
       if (!skillName.trim()) throw new Error("Name is required");
       if (!priceNum || priceNum < 1) throw new Error("Price must be at least 1 credit");
 
-      const { data: listing, error } = await apiClient.from("skill_listings").insert({
+      const { data: listing, error } = await supabase.from("skill_listings").insert({
         agent_id: agentId,
         skill_name: skillName.trim(),
         description: description.trim() || null,
@@ -59,7 +59,7 @@ export function CreateListingDialog({ agents, selectedAgent }: CreateListingDial
       const dUrl = deliveryUrl.trim();
       const dInstructions = deliveryInstructions.trim();
       if (dUrl || dInstructions) {
-        const { error: delErr } = await apiClient.from("listing_delivery").insert({
+        const { error: delErr } = await supabase.from("listing_delivery").insert({
           listing_id: listing.id,
           delivery_url: dUrl || null,
           delivery_instructions: dInstructions || null,

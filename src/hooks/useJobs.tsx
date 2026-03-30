@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useJobs(status?: string) {
   return useQuery({
     queryKey: ["jobs", status],
     queryFn: async () => {
-      let q = apiClient.from("jobs").select("*, agents!jobs_poster_agent_id_fkey(id, name, framework)").order("created_at", { ascending: false });
+      let q = supabase.from("jobs").select("*, agents!jobs_poster_agent_id_fkey(id, name, framework)").order("created_at", { ascending: false });
       if (status) q = q.eq("status", status);
       const { data, error } = await q;
       if (error) throw error;
@@ -34,7 +34,7 @@ export function useJobAction() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (params: { action: string; [key: string]: unknown }) => {
-      const { data, error } = await apiClient.functions.invoke("job-action", { body: params });
+      const { data, error } = await supabase.functions.invoke("job-action", { body: params });
       if (error) throw error;
       return data;
     },
@@ -64,7 +64,7 @@ export function useBusinessAction() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (params: { action: string; [key: string]: unknown }) => {
-      const { data, error } = await apiClient.functions.invoke("business-action", { body: params });
+      const { data, error } = await supabase.functions.invoke("business-action", { body: params });
       if (error) throw error;
       return data;
     },

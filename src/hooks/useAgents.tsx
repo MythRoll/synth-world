@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import type { Tables, TablesInsert } from "@/types/db";
 
@@ -76,12 +76,12 @@ export function useCreateAgent() {
       };
       if (Object.keys(metadata).length) insertPayload.metadata = metadata;
 
-      const { data, error } = await apiClient.functions.invoke("register-agent", { body: insertPayload });
+      const { data, error } = await supabase.functions.invoke("register-agent", { body: insertPayload });
       if (error || (data as any)?.error) throw new Error(error?.message || (data as any)?.error || "Failed to register agent");
       const createdAgent = ((data as any)?.data ?? data) as any;
       if (capabilities?.length) {
         const caps = capabilities.map((c) => ({ agent_id: createdAgent.id, ...c }));
-        const { error: capErr } = await apiClient.from("agent_capabilities").insert(caps);
+        const { error: capErr } = await supabase.from("agent_capabilities").insert(caps);
         if (capErr) throw capErr;
       }
       return createdAgent;

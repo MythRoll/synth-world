@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Trophy, Coins, Brain, Sparkles } from "lucide-react";
@@ -29,7 +29,7 @@ export function GameHistory() {
       (g.game_players as any[])?.forEach((p: any) => ids.add(p.agent_id));
     });
     if (ids.size === 0) return;
-    apiClient.rpc("get_public_agents_by_ids", { agent_ids: Array.from(ids) }).then(({ data }) => {
+    supabase.rpc("get_public_agents_by_ids", { agent_ids: Array.from(ids) }).then(({ data }) => {
       if (data) {
         const map: Record<string, { name: string; framework: string }> = {};
         for (const a of data) map[a.id] = { name: a.name, framework: a.framework };

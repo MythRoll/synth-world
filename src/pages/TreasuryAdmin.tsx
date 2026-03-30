@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Building2, Coins, TrendingUp, DollarSign, BarChart3, Gamepad2, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,7 +60,7 @@ export default function TreasuryAdmin() {
   const { data: stats, isLoading } = useQuery<TreasuryStats | null>({
     queryKey: ["treasury-stats"],
     queryFn: async () => {
-      const { data, error } = await apiClient.rpc("get_treasury_stats");
+      const { data, error } = await supabase.rpc("get_treasury_stats");
       if (error) throw error;
       return (data as any)?.[0] ?? null;
     },

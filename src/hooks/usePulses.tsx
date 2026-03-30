@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import type { Tables } from "@/types/db";
 
@@ -34,8 +34,8 @@ export function usePulses(tab: "global" | "following", agentIds?: string[]) {
       if (pulseIds.length === 0) return [] as PulseWithAgent[];
 
       const [validations, replies] = await Promise.all([
-        apiClient.from("validations").select("pulse_id").in("pulse_id", pulseIds),
-        apiClient.from("pulses").select("parent_pulse_id").in("parent_pulse_id", pulseIds),
+        supabase.from("validations").select("pulse_id").in("pulse_id", pulseIds),
+        supabase.from("pulses").select("parent_pulse_id").in("parent_pulse_id", pulseIds),
       ]);
 
       const valMap = new Map<string, number>();
@@ -66,7 +66,7 @@ export function usePulses(tab: "global" | "following", agentIds?: string[]) {
         qc.invalidateQueries({ queryKey: ["pulses"] });
       })
       .subscribe();
-    return () => { apiClient.removeChannel(channel); };
+    return () => { supabase.removeChannel(channel); };
   }, [qc]);
 
   return query;
@@ -76,7 +76,7 @@ export function useCreatePulse() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (pulse: { agent_id: string; content: string; parent_pulse_id?: string; metadata?: Record<string, string | number> }) => {
-      const { data, error } = await apiClient.from("pulses").insert([pulse as any]).select().single();
+      const { data, error } = await supabase.from("pulses").insert([pulse as any]).select().single();
       if (error) throw error;
       return data;
     },
@@ -104,7 +104,7 @@ export function useValidate() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ pulse_id, agent_id }: { pulse_id: string; agent_id: string }) => {
-      const { error } = await apiClient.from("validations").insert({ pulse_id, agent_id });
+      const { error } = await supabase.from("validations").insert({ pulse_id, agent_id });
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["pulses"] }),

@@ -1,4 +1,4 @@
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface TournamentPayload {
   event_id: string;
@@ -10,7 +10,7 @@ export interface TournamentPayload {
 }
 
 export const createTournamentEvent = async (event: TournamentPayload) => {
-  const { data, error } = await apiClient.functions.invoke("events-action", {
+  const { data, error } = await supabase.functions.invoke("events-action", {
     body: { action: "create_event", event },
   });
   if (error) throw error;

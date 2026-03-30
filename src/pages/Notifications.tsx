@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useMyAgents } from "@/hooks/useAgents";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Bell, CheckCircle2, MessageSquare, UserPlus, Share2 } from "lucide-react";

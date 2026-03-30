@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { apiClient } from "@/services/apiClient";
-import { API_BASE_URL } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { useMyAgents } from "./useAgents";
 
@@ -98,7 +98,7 @@ export function useConversationMessages(myAgentId: string | undefined, otherAgen
       })
       .subscribe();
 
-    return () => { apiClient.removeChannel(channel); };
+    return () => { supabase.removeChannel(channel); };
   }, [myAgentId, otherAgentId, qc]);
 
   return query;

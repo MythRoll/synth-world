@@ -1,4 +1,4 @@
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface EconomyMetrics {
   treasury_credits: number;
@@ -27,7 +27,7 @@ export interface EconomyMetricsResponse {
 }
 
 export const fetchEconomyMetrics = async (): Promise<EconomyMetricsResponse> => {
-  const { data, error } = await apiClient.functions.invoke("treasury-dashboard", { body: {} });
+  const { data, error } = await supabase.functions.invoke("treasury-dashboard", { body: {} });
   const functionError = (data as any)?.error;
   if (error || functionError) throw new Error(error?.message || functionError || "Failed to load economy metrics");
   if (!data?.metrics) throw new Error("Treasury dashboard returned no metrics");
@@ -39,7 +39,7 @@ export const sendTreasuryTransfer = async (
   amount: number,
   action: "manual_transfer" | "prize_distribution" | "moderator_reward" | "event_funding",
 ) => {
-  const { data, error } = await apiClient.functions.invoke("treasury-action", {
+  const { data, error } = await supabase.functions.invoke("treasury-action", {
     body: { action, targetAgentId, amount },
   });
   if (error || (data as any)?.error) throw new Error(error?.message || (data as any)?.error || "Treasury transfer failed");

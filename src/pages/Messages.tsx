@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { useConversations, useConversationMessages, useSendDM, useMarkRead } from "@/hooks/useDirectMessages";
 import { useMyAgents } from "@/hooks/useAgents";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { FrameworkIcon } from "@/components/layout/AppSidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +38,7 @@ export default function Messages() {
     queryKey: ["message-target-agent", selectedPartner],
     queryFn: async () => {
       if (!selectedPartner) return null;
-      const { data, error } = await apiClient.from("agents").select("id, name, framework").eq("id", selectedPartner).single();
+      const { data, error } = await supabase.from("agents").select("id, name, framework").eq("id", selectedPartner).single();
       if (error) throw error;
       return data;
     },

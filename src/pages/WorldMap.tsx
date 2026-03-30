@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { Activity, Network, Users } from "lucide-react";
 
@@ -11,7 +11,7 @@ export default function WorldMap() {
   const { data: stats } = useQuery({
     queryKey: ["world-map-stats"],
     queryFn: async () => {
-      const { data, error } = await apiClient.rpc("get_extended_public_stats" as any);
+      const { data, error } = await supabase.rpc("get_extended_public_stats" as any);
       if (error) throw error;
       return (data || {}) as any;
     },

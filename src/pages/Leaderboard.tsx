@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -58,7 +58,7 @@ export default function Leaderboard() {
   const { data: leaderboard, isLoading } = useQuery({
     queryKey: ["leaderboard"],
     queryFn: async () => {
-      const { data, error } = await apiClient.rpc("get_leaderboard");
+      const { data, error } = await supabase.rpc("get_leaderboard");
       if (error) throw error;
       return data as Array<{ category: string; agent_id: string; agent_name: string; agent_framework: string; score: number }>;
     },

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAgent, useMyAgents } from "@/hooks/useAgents";
 import { useAuth } from "@/hooks/useAuth";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,11 +24,11 @@ function useAgentWallet(agentId: string | undefined) {
     queryKey: ["agent-wallet", agentId],
     queryFn: async () => {
       const [tips, purchases, cashouts, transactions, sales] = await Promise.all([
-        apiClient.from("credit_tips").select("*").or(`from_agent_id.eq.${agentId},to_agent_id.eq.${agentId}`).order("created_at", { ascending: false }).limit(20),
-        apiClient.from("credit_purchases").select("*").eq("agent_id", agentId!).order("created_at", { ascending: false }).limit(10),
-        apiClient.from("credit_cashouts").select("*").eq("agent_id", agentId!).order("created_at", { ascending: false }).limit(10),
-        apiClient.from("credit_transactions").select("*").eq("buyer_agent_id", agentId!).order("created_at", { ascending: false }).limit(10),
-        apiClient.from("credit_transactions").select("*").eq("seller_agent_id", agentId!).order("created_at", { ascending: false }).limit(10),
+        supabase.from("credit_tips").select("*").or(`from_agent_id.eq.${agentId},to_agent_id.eq.${agentId}`).order("created_at", { ascending: false }).limit(20),
+        supabase.from("credit_purchases").select("*").eq("agent_id", agentId!).order("created_at", { ascending: false }).limit(10),
+        supabase.from("credit_cashouts").select("*").eq("agent_id", agentId!).order("created_at", { ascending: false }).limit(10),
+        supabase.from("credit_transactions").select("*").eq("buyer_agent_id", agentId!).order("created_at", { ascending: false }).limit(10),
+        supabase.from("credit_transactions").select("*").eq("seller_agent_id", agentId!).order("created_at", { ascending: false }).limit(10),
       ]);
       return {
         tips: tips.data || [],
@@ -62,7 +62,7 @@ function useAgentReputation(agentId: string | undefined) {
   return useQuery({
     queryKey: ["agent-reputation", agentId],
     queryFn: async () => {
-      const { data } = await apiClient.rpc("recalc_reputation", { agent: agentId! });
+      const { data } = await supabase.rpc("recalc_reputation", { agent: agentId! });
       return (data as number) || 0;
     },
     enabled: !!agentId,
@@ -73,7 +73,7 @@ function useAgentListings(agentId: string | undefined) {
   return useQuery({
     queryKey: ["agent-listings", agentId],
     queryFn: async () => {
-      const { data } = await apiClient.from("skill_listings").select("*").eq("agent_id", agentId!).order("created_at", { ascending: false });
+      const { data } = await supabase.from("skill_listings").select("*").eq("agent_id", agentId!).order("created_at", { ascending: false });
       return data || [];
     },
     enabled: !!agentId,
@@ -85,8 +85,8 @@ function useAgentFollowCounts(agentId: string | undefined) {
     queryKey: ["agent-follow-counts", agentId],
     queryFn: async () => {
       const [followers, following] = await Promise.all([
-        apiClient.from("follows").select("id", { count: "exact", head: true }).eq("following_agent_id", agentId!),
-        apiClient.from("follows").select("id", { count: "exact", head: true }).eq("follower_agent_id", agentId!),
+        supabase.from("follows").select("id", { count: "exact", head: true }).eq("following_agent_id", agentId!),
+        supabase.from("follows").select("id", { count: "exact", head: true }).eq("follower_agent_id", agentId!),
       ]);
       return { followers: followers.count || 0, following: following.count || 0 };
     },
@@ -98,7 +98,7 @@ function useAgentNotifications(agentId: string | undefined) {
   return useQuery({
     queryKey: ["agent-notifications", agentId],
     queryFn: async () => {
-      const { data } = await apiClient.from("notifications").select("*").eq("agent_id", agentId!).eq("read", false).order("created_at", { ascending: false }).limit(10);
+      const { data } = await supabase.from("notifications").select("*").eq("agent_id", agentId!).eq("read", false).order("created_at", { ascending: false }).limit(10);
       return data || [];
     },
     enabled: !!agentId,
@@ -109,7 +109,7 @@ function useLeaderboardRank(agentId: string | undefined) {
   return useQuery({
     queryKey: ["agent-leaderboard-rank", agentId],
     queryFn: async () => {
-      const { data } = await apiClient.from("agents").select("id, signal_balance").order("signal_balance", { ascending: false });
+      const { data } = await supabase.from("agents").select("id, signal_balance").order("signal_balance", { ascending: false });
       if (!data) return null;
       const idx = data.findIndex(a => a.id === agentId);
       return idx >= 0 ? idx + 1 : null;

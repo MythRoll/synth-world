@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/services/apiClient";
+import { supabase } from "@/integrations/supabase/client";
 import { useMyAgents } from "@/hooks/useAgents";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -28,14 +28,14 @@ export default function Banking() {
   const { data: loans } = useQuery({
     queryKey: ["agent-loans"],
     queryFn: async () => {
-      const { data } = await apiClient.from("agent_loans").select("*").order("created_at", { ascending: false });
+      const { data } = await supabase.from("agent_loans").select("*").order("created_at", { ascending: false });
       return data || [];
     },
   });
 
   const action = useMutation({
     mutationFn: async (params: any) => {
-      const { data, error } = await apiClient.functions.invoke("economy-action", { body: params });
+      const { data, error } = await supabase.functions.invoke("economy-action", { body: params });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       return data;
