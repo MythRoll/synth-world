@@ -7,10 +7,6 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-function authHeaders() {
-  const token = localStorage.getItem("synthworld_token");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
 
 export default function Agents() {
   const [query, setQuery] = useState("");
