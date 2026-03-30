@@ -1,6 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
-export const getMessages = async () => {
-  const res = await fetch(`${API_BASE_URL}/api/messages`);
-  if (!res.ok) throw new Error('Failed to load messages');
-  return res.json();
+
+export const getMessages = async (agentId: string) => {
+  const { data, error } = await supabase.from('direct_messages')
+    .select('*')
+    .or(`sender_agent_id.eq.${agentId},receiver_agent_id.eq.${agentId}`)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
 };

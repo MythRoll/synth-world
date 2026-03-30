@@ -23,62 +23,55 @@ export type AdminDashboard = AdminOverview & {
   };
 };
 
-function authHeaders() {
-  const token = localStorage.getItem('synthworld_token');
+export async function getAdminOverview(): Promise<AdminOverview> {
+  const { data, error } = await supabase.rpc('get_platform_stats');
+  if (error) throw error;
+  const stats = data?.[0];
   return {
-    Accept: 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    users: 0,
+    agents: stats?.total_agents ?? 0,
+    listings: 0,
+    jobs: 0,
+    txns: 0,
+    bans: 0,
   };
 }
 
-async function handleJson<T>(response: Response): Promise<T> {
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const message = (payload as any)?.error || `Request failed (${response.status})`;
-    throw Object.assign(new Error(message), { status: response.status });
-  }
-  return ((payload as any).data ?? payload) as T;
-}
-
-export async function getAdminOverview(): Promise<AdminOverview> {
-  const res = await fetch(`${API_BASE_URL}/api/admin/overview`, {
-    method: 'GET',
-    headers: authHeaders(),
-  });
-  return handleJson<AdminOverview>(res);
-}
-
 export async function getAdminDashboard(): Promise<AdminDashboard> {
-  const res = await fetch(`${API_BASE_URL}/api/admin/dashboard`, {
-    method: 'GET',
-    headers: authHeaders(),
-  });
-  return handleJson<AdminDashboard>(res);
+  const overview = await getAdminOverview();
+  const { data: agents } = await supabase.from('agents').select('*').order('created_at', { ascending: false }).limit(10);
+  const { data: listings } = await supabase.from('skill_listings').select('*').order('created_at', { ascending: false }).limit(10);
+
+  return {
+    ...overview,
+    recent_users: [],
+    recent_agents: (agents ?? []).map((a: any) => ({
+      id: a.id, owner_id: a.owner_id, name: a.name, framework: a.framework, bio: a.bio,
+      verified: a.verified ? 1 : 0, flagged: a.flagged ? 1 : 0, is_moderator: a.is_moderator ? 1 : 0,
+      credit_balance: a.credit_balance, created_at: a.created_at,
+    })),
+    recent_listings: (listings ?? []).map((l: any) => ({
+      id: l.id, seller_agent_id: l.agent_id, skill_name: l.skill_name, created_at: l.created_at,
+    })),
+    recent_transactions: [],
+    active_bans: [],
+    moderators: [],
+    reports: { flagged_agents: [], flagged_listings: [] },
+  };
 }
 
 export async function chatWithHostedAgent(agentId: string, message: string): Promise<string> {
-  const res = await fetch(`${API_BASE_URL}/api/agents/chat`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...authHeaders() },
-    body: JSON.stringify({ agent_id: agentId, message }),
+  const { data, error } = await supabase.functions.invoke('agent-chat', {
+    body: { agent_id: agentId, message },
   });
-  const payload = await handleJson<{ reply?: string }>(res);
-  return payload.reply || '';
+  if (error) throw error;
+  return data?.reply || '';
 }
 
-
 export async function getAdminProviderStatus() {
-  const res = await fetch(`${API_BASE_URL}/api/admin/provider-status`, {
-    method: 'GET',
-    headers: authHeaders(),
-  });
-  return handleJson<Record<string, unknown>>(res);
+  return {};
 }
 
 export async function getAdminSystemHealth() {
-  const res = await fetch(`${API_BASE_URL}/api/admin/system-health`, {
-    method: 'GET',
-    headers: authHeaders(),
-  });
-  return handleJson<Record<string, unknown>>(res);
+  return {};
 }
