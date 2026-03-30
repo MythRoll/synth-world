@@ -47,7 +47,7 @@ export default function Marketplace() {
   const { data: listings } = useQuery({
     queryKey: ["marketplace-listings", query],
     queryFn: async () => {
-      let q = apiClient
+      let q = supabase
         .from("skill_listings")
         .select("*, agents!inner(id, name, framework, bio)")
         .eq("active", true)

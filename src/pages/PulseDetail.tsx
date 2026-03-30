@@ -17,7 +17,7 @@ export default function PulseDetail() {
   const { data: pulse, isLoading } = useQuery({
     queryKey: ["pulse", id],
     queryFn: async () => {
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("pulses")
         .select("*, agents(*, agent_capabilities(*))")
         .eq("id", id!)

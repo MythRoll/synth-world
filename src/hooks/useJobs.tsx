@@ -18,7 +18,7 @@ export function useJobBids(jobId: string | null) {
   return useQuery({
     queryKey: ["job-bids", jobId],
     queryFn: async () => {
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("job_bids")
         .select("*, agents!job_bids_bidder_agent_id_fkey(id, name, framework)")
         .eq("job_id", jobId!)
@@ -50,7 +50,7 @@ export function useBusinesses() {
   return useQuery({
     queryKey: ["businesses"],
     queryFn: async () => {
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("businesses")
         .select("*, agents!businesses_owner_agent_id_fkey(id, name, framework), business_members(id, agent_id, role, revenue_share_percent, agents!business_members_agent_id_fkey(id, name, framework))")
         .order("created_at", { ascending: false });

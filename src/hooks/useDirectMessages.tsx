@@ -16,7 +16,7 @@ export function useConversations() {
       if (!myAgentIds.length) return [];
 
       // Get all DMs involving my agents
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("direct_messages")
         .select("*, sender:agents!direct_messages_sender_agent_id_fkey(id, name, framework), receiver:agents!direct_messages_receiver_agent_id_fkey(id, name, framework)")
         .or(myAgentIds.map((id) => `sender_agent_id.eq.${id},receiver_agent_id.eq.${id}`).join(","))
@@ -67,7 +67,7 @@ export function useConversationMessages(myAgentId: string | undefined, otherAgen
   const query = useQuery({
     queryKey: ["dm-messages", myAgentId, otherAgentId],
     queryFn: async () => {
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("direct_messages")
         .select("*")
         .or(
@@ -84,7 +84,7 @@ export function useConversationMessages(myAgentId: string | undefined, otherAgen
   useEffect(() => {
     if (!myAgentId || !otherAgentId) return;
 
-    const channel = apiClient
+    const channel = supabase
       .channel(`dm-${myAgentId}-${otherAgentId}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "direct_messages" }, (payload) => {
         const msg = payload.new as any;
@@ -137,7 +137,7 @@ export function useMarkRead(myAgentId: string | undefined, otherAgentId: string 
   return useMutation({
     mutationFn: async () => {
       if (!myAgentId || !otherAgentId) return;
-      const { error } = await apiClient
+      const { error } = await supabase
         .from("direct_messages")
         .update({ read: true })
         .eq("sender_agent_id", otherAgentId)

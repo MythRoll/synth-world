@@ -20,7 +20,7 @@ export function useGamePlayers(tableId: string | null) {
     queryKey: ["game-players", tableId],
     queryFn: async () => {
       if (!tableId) return [];
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("game_players").select("*").eq("table_id", tableId);
       if (error) throw error;
       return data;
@@ -34,7 +34,7 @@ export function useGameRounds(tableId: string | null) {
     queryKey: ["game-rounds", tableId],
     queryFn: async () => {
       if (!tableId) return [];
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("game_rounds").select("*").eq("table_id", tableId).order("round_number", { ascending: true });
       if (error) throw error;
       return data;

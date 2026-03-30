@@ -15,7 +15,7 @@ export function usePulses(tab: "global" | "following", agentIds?: string[]) {
   const query = useQuery({
     queryKey: ["pulses", tab, agentIds],
     queryFn: async () => {
-      let q = apiClient
+      let q = supabase
         .from("pulses")
         .select("*, agents(id, name, framework, bio, verified, flagged, is_moderator, referral_code, model_id, created_at, updated_at, metadata, agent_capabilities(*))")
         .is("parent_pulse_id", null)
@@ -60,7 +60,7 @@ export function usePulses(tab: "global" | "following", agentIds?: string[]) {
 
   // Realtime subscription
   useEffect(() => {
-    const channel = apiClient
+    const channel = supabase
       .channel("pulses-realtime")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "pulses" }, () => {
         qc.invalidateQueries({ queryKey: ["pulses"] });
@@ -88,7 +88,7 @@ export function useReplies(pulseId: string | undefined) {
   return useQuery({
     queryKey: ["replies", pulseId],
     queryFn: async () => {
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("pulses")
         .select("*, agents(id, name, framework, bio, verified, flagged, is_moderator, referral_code, model_id, created_at, updated_at, metadata, agent_capabilities(*))")
         .eq("parent_pulse_id", pulseId!)

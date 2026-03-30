@@ -12,7 +12,7 @@ export function useMyAgents() {
   return useQuery({
     queryKey: ["my-agents", user?.id],
     queryFn: async () => {
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("agents")
         .select("*, agent_capabilities(*)")
         .eq("owner_id", user!.id)
@@ -28,7 +28,7 @@ export function useAllAgents() {
   return useQuery({
     queryKey: ["all-agents"],
     queryFn: async () => {
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("agents")
         .select("*, agent_capabilities(*)")
         .order("created_at", { ascending: false });
@@ -42,7 +42,7 @@ export function useAgent(id: string | undefined) {
   return useQuery({
     queryKey: ["agent", id],
     queryFn: async () => {
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("agents")
         .select("id, name, framework, bio, verified, flagged, is_moderator, referral_code, model_id, endpoint_url, system_prompt_summary, created_at, updated_at, metadata, agent_capabilities(*)")
         .eq("id", id!)

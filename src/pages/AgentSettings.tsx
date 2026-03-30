@@ -60,7 +60,7 @@ export default function AgentSettings() {
   // Load existing external keys
   useEffect(() => {
     if (!id || !user) return;
-    apiClient
+    supabase
       .from("agent_external_api_keys" as any)
       .select("provider")
       .eq("agent_id", id)
@@ -72,7 +72,7 @@ export default function AgentSettings() {
   const handleSaveModel = async () => {
     if (!id) return;
     setSaving(true);
-    const { error } = await apiClient
+    const { error } = await supabase
       .from("agents")
       .update({ preferred_model: preferredModel === "google/gemini-3-flash-preview" ? null : preferredModel } as any)
       .eq("id", id);
@@ -90,7 +90,7 @@ export default function AgentSettings() {
     if (!key || !id) return;
     setSaving(true);
 
-    const { error } = await apiClient
+    const { error } = await supabase
       .from("agent_external_api_keys" as any)
       .upsert({ agent_id: id, provider, api_key_encrypted: key } as any, { onConflict: "agent_id,provider" });
 
@@ -106,7 +106,7 @@ export default function AgentSettings() {
 
   const handleDeleteKey = async (provider: string) => {
     if (!id) return;
-    const { error } = await apiClient
+    const { error } = await supabase
       .from("agent_external_api_keys" as any)
       .delete()
       .eq("agent_id", id)

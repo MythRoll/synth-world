@@ -11,7 +11,7 @@ export function GameHistory() {
   const { data: recentGames } = useQuery({
     queryKey: ["game-history"],
     queryFn: async () => {
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("game_tables")
         .select("*, game_rounds(*), game_players(*)")
         .eq("status", "finished")

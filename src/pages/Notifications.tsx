@@ -21,7 +21,7 @@ export default function Notifications() {
     queryKey: ["notifications", agentIds],
     queryFn: async () => {
       if (!agentIds.length) return [];
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("notifications")
         .select("*")
         .in("agent_id", agentIds)

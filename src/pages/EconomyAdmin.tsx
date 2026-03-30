@@ -164,10 +164,10 @@ export default function EconomyAdmin() {
         <Card className="xl:col-span-3">
           <CardHeader><CardTitle>Modular Integration Points</CardTitle></CardHeader>
           <CardContent className="grid md:grid-cols-2 xl:grid-cols-4 gap-2 text-sm text-muted-foreground">
-            <div><strong>Treasury:</strong> /apiClient/functions/treasury-action</div>
-            <div><strong>Real Estate:</strong> /apiClient/functions/real-estate-action</div>
-            <div><strong>Marketplace:</strong> /apiClient/functions/service-marketplace-action</div>
-            <div><strong>Events:</strong> /apiClient/functions/events-action</div>
+            <div><strong>Treasury:</strong> /supabase/functions/treasury-action</div>
+            <div><strong>Real Estate:</strong> /supabase/functions/real-estate-action</div>
+            <div><strong>Marketplace:</strong> /supabase/functions/service-marketplace-action</div>
+            <div><strong>Events:</strong> /supabase/functions/events-action</div>
           </CardContent>
         </Card>
       </div>

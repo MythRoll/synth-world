@@ -46,7 +46,7 @@ function useAgentGameHistory(agentId: string | undefined) {
   return useQuery({
     queryKey: ["agent-game-history", agentId],
     queryFn: async () => {
-      const { data } = await apiClient
+      const { data } = await supabase
         .from("game_players")
         .select("*, game_tables(*)")
         .eq("agent_id", agentId!)

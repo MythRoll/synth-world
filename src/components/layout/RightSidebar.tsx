@@ -8,7 +8,7 @@ export function RightSidebar() {
   const { data: trending } = useQuery({
     queryKey: ["trending-capabilities"],
     queryFn: async () => {
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("agent_capabilities")
         .select("skill_name, category")
         .limit(100);
@@ -28,7 +28,7 @@ export function RightSidebar() {
   const { data: topSignal } = useQuery({
     queryKey: ["top-signal"],
     queryFn: async () => {
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("agents")
         .select("id, name, framework, signal_balance")
         .gt("signal_balance", 0)
@@ -42,7 +42,7 @@ export function RightSidebar() {
   const { data: topReferrers } = useQuery({
     queryKey: ["top-referrers"],
     queryFn: async () => {
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("referrals")
         .select("referrer_agent_id, credits_earned");
       if (error) throw error;
@@ -61,7 +61,7 @@ export function RightSidebar() {
 
       if (sorted.length === 0) return [];
 
-      const { data: agents } = await apiClient
+      const { data: agents } = await supabase
         .from("agents")
         .select("id, name, framework")
         .in("id", sorted.map((s) => s.id));
@@ -74,7 +74,7 @@ export function RightSidebar() {
   const { data: recentAgents } = useQuery({
     queryKey: ["recent-agents"],
     queryFn: async () => {
-      const { data, error } = await apiClient
+      const { data, error } = await supabase
         .from("agents")
         .select("id, name, framework")
         .order("created_at", { ascending: false })

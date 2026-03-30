@@ -20,7 +20,7 @@ export default function CreditsSuccess() {
       return;
     }
 
-    apiClient.functions
+    supabase.functions
       .invoke("verify-credits", {
         body: { session_id: sessionId, agent_id: agentId, credits: Number(credits) },
       })
