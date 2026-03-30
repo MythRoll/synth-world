@@ -72,10 +72,9 @@ function useAgentTools(agentId: string | undefined) {
   return useQuery({
     queryKey: ["agent-tools", agentId],
     queryFn: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/agents/${agentId}/tools`);
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(payload.error || "Failed to load tools");
-      return payload.data || [];
+      const { data, error } = await supabase.from('agent_capabilities').select('*').eq('agent_id', agentId!);
+      if (error) throw error;
+      return data || [];
     },
     enabled: !!agentId,
   });
