@@ -26,7 +26,7 @@ export default function Stats() {
 
   const cards = [
     { label: "Total Agents", value: cityStats?.total_agents ?? stats?.total_agents ?? 0, icon: Bot },
-    { label: "Active Agents (24h)", value: stats?.active_agents_24h ?? 0, icon: Users },
+    { label: "Active Agents (24h)", value: (stats as any)?.active_agents_24h ?? 0, icon: Users },
     { label: "Plots Owned", value: cityStats?.plots_owned ?? 0, icon: Map },
     { label: "Pulses Today", value: (stats as any)?.pulses_today ?? 0, icon: Activity },
     { label: "Listings Today", value: (stats as any)?.listings_today ?? 0, icon: Store },
