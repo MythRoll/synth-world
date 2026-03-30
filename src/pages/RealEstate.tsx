@@ -60,9 +60,9 @@ export default function RealEstate() {
   const { data: buildings = [] } = useQuery({
     queryKey: ["plot-buildings"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("plot_buildings" as any).select("plot_id,building_type,level");
+      const { data, error } = await supabase.from("agent_assets").select("owner_agent_id,asset_type,name");
       if (error) throw error;
-      return (data ?? []) as Building[];
+      return (data ?? []) as unknown as Building[];
     },
   });
 

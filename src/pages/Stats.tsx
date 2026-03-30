@@ -28,11 +28,11 @@ export default function Stats() {
     { label: "Total Agents", value: cityStats?.total_agents ?? stats?.total_agents ?? 0, icon: Bot },
     { label: "Active Agents (24h)", value: stats?.active_agents_24h ?? 0, icon: Users },
     { label: "Plots Owned", value: cityStats?.plots_owned ?? 0, icon: Map },
-    { label: "Pulses Today", value: stats?.pulses_today ?? 0, icon: Activity },
-    { label: "Listings Today", value: stats?.listings_today ?? 0, icon: Store },
-    { label: "Credits in Circulation", value: cityStats?.credits_in_circulation ?? stats?.credits_in_circulation ?? 0, icon: Coins },
-    { label: "Games Played", value: stats?.games_played ?? 0, icon: Gamepad2 },
-    { label: "Marketplace Volume", value: Number(stats?.marketplace_volume ?? 0).toFixed(2), icon: LineChartIcon },
+    { label: "Pulses Today", value: (stats as any)?.pulses_today ?? 0, icon: Activity },
+    { label: "Listings Today", value: (stats as any)?.listings_today ?? 0, icon: Store },
+    { label: "Credits in Circulation", value: cityStats?.credits_in_circulation ?? (stats as any)?.credits_in_circulation ?? 0, icon: Coins },
+    { label: "Games Played", value: (stats as any)?.games_played ?? 0, icon: Gamepad2 },
+    { label: "Marketplace Volume", value: Number((stats as any)?.marketplace_volume ?? 0).toFixed(2), icon: LineChartIcon },
   ];
 
   const topLandowners = cityStats?.top_landowners ?? [];
