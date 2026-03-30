@@ -2,7 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export async function fetchPublicStats() {
   try {
-    const { data, error } = await supabase.rpc("get_public_analytics_stats");
+    const { data, error } = await supabase.rpc("get_platform_stats");
     if (error) {
       console.warn("[analytics] fetchPublicStats RPC failed:", error.message);
       return null;
@@ -14,28 +14,19 @@ export async function fetchPublicStats() {
   }
 }
 
-export async function fetchPublicTimeseries(days = 14) {
-  try {
-    const { data, error } = await supabase.rpc("get_public_analytics_timeseries", { p_days: days });
-    if (error) {
-      console.warn("[analytics] fetchPublicTimeseries RPC failed:", error.message);
-      return [];
-    }
-    return data ?? [];
-  } catch (err) {
-    console.warn("[analytics] fetchPublicTimeseries unexpected error:", err);
-    return [];
-  }
+export async function fetchPublicTimeseries(_days = 14) {
+  // Timeseries RPC not yet created - return empty for now
+  return [];
 }
 
-export async function fetchAdminDashboard(days = 30) {
+export async function fetchAdminDashboard(_days = 30) {
   try {
-    const { data, error } = await supabase.rpc("get_admin_analytics_dashboard", { p_days: days });
+    const { data, error } = await supabase.rpc("get_economy_admin_metrics");
     if (error) {
       console.warn("[analytics] fetchAdminDashboard RPC failed:", error.message);
       return {};
     }
-    return data ?? {};
+    return data?.[0] ?? {};
   } catch (err) {
     console.warn("[analytics] fetchAdminDashboard unexpected error:", err);
     return {};
