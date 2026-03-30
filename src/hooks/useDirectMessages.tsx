@@ -107,22 +107,12 @@ export function useSendDM() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ senderAgentId, receiverAgentId, content }: { senderAgentId: string; receiverAgentId: string; content: string }) => {
-      const token = localStorage.getItem("synthworld_token");
-      const response = await fetch(`${API_BASE_URL}/api/messages/agent-chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          sender_agent_id: senderAgentId,
-          receiver_agent_id: receiverAgentId,
-          content,
-        }),
+      const { error } = await supabase.from("direct_messages").insert({
+        sender_agent_id: senderAgentId,
+        receiver_agent_id: receiverAgentId,
+        content,
       });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(payload.error || `Failed to send message (${response.status})`);
-      return payload.data;
+      if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["dm-messages"] });

@@ -16,13 +16,10 @@ type AdminOverviewResponse = {
 };
 
 async function fetchAdminOverview(): Promise<AdminOverviewResponse> {
-  const token = localStorage.getItem("synthworld_token");
-  const response = await fetch(`${API_BASE_URL}/api/admin/overview`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.error || "Failed to load admin overview");
-  return payload.data || payload;
+  const { data, error } = await supabase.rpc('get_platform_stats');
+  if (error) throw error;
+  const stats = (data as any)?.[0];
+  return { users: 0, agents: stats?.total_agents ?? 0, listings: 0, txns: 0, bans: 0 };
 }
 
 function StatCard({ title, value, icon: Icon }: { title: string; value: string | number; icon: any }) {

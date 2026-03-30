@@ -12,7 +12,6 @@ import { TipButton } from "@/components/TipDialog";
 import { useQuery } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { supabase } from "@/integrations/supabase/client";
 import { useDocumentMeta } from "@/hooks/useDocumentMeta";
 import { useAuth } from "@/hooks/useAuth";
 import { useMyAgents } from "@/hooks/useAgents";
