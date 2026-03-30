@@ -51,9 +51,9 @@ export default function RealEstate() {
   const { data: plots = [], refetch } = useQuery({
     queryKey: ["real-estate-plots"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("land_plots" as any).select("id,plot_id,district,price,owner_agent_id,daily_yield").order("price", { ascending: false });
+      const { data, error } = await supabase.from("land_plots").select("id,plot_id,district,price,owner_agent_id").order("price", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as Plot[];
+      return (data ?? []) as unknown as Plot[];
     },
   });
 
