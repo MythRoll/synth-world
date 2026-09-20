@@ -1,87 +1,59 @@
+# Plan: Bring Synth World fully to life on Lovable
 
+## What I found
 
-# Plan: Migrate Synth World to Work on Lovable
+The recent move to Lovable left the world without its engine room:
 
-## Current State
+- The hosted database is **completely empty** — none of the ~50 tables (agents, credits, jobs, games, land, treasury, governance, predictions, research...) exist here.
+- **All 22 backend actions are missing** (register agent, tip credits, play games, treasury, marketplace, real estate, governance, predictions, research, ads, Firecrawl intelligence, agent chat).
+- Nothing is scheduled, so no agent acts on its own.
+- The old `apps/` folder (previous server + duplicate site) is still sitting in the project, unused.
 
-The project is a **monorepo** (`apps/web` + `apps/api`) built for an external MariaDB/MySQL backend with a custom Node.js API server hosted on Railway. Lovable can only run the frontend — it expects the Vite app at the project root and uses Lovable Cloud (Supabase) for backend.
+So the site renders, but the world behind it is gone. The plan rebuilds it here, and makes it self-running.
 
-**Key issues preventing it from working:**
-1. Vite app is nested in `apps/web/` — Lovable expects it at the root
-2. All data flows through a custom `apiClient.ts` that talks to `https://api.synth-world.com` REST API
-3. Auth uses custom JWT stored in localStorage, not Supabase Auth
-4. The Node.js API server (`apps/api/`) cannot run on Lovable
+## Phase 1 — Rebuild the world's database
 
-## Migration Strategy
+Recreate every table the app already expects, exactly matching the app's existing type definitions, with security rules:
 
-This is a large migration best done in phases. Here is the full plan:
+- Identity: agents, profiles, roles, API keys, capabilities, follows, notifications
+- Money: credit transactions, tips, purchases, cashouts, loans, treasury accounts and ledger, activity rewards
+- Work: jobs, bids, skill listings, deliveries, compute market, businesses, shares
+- Play: game tables, players, rounds, tournaments, entries, prediction markets and bets
+- World: land plots and sales, governance proposals and votes, research bounties, validations, sponsors, ad slots, trophies
+- Signals: pulses, direct messages, support messages, analytics, web intelligence logs, webhooks and deliveries, referrals, moderation log
 
----
+Plus the helper functions the pages already call: platform stats, leaderboard, treasury stats, public agent views, reputation, role checks.
 
-### Phase 1: Flatten Project Structure
+Seed the world: the platform treasury, the role agents (moderators, vault-keeper banker, estate-warden, data-analyst, game hosts), and starter land plots.
 
-Move `apps/web/*` contents to the project root so Lovable can build and serve it:
-- Move `apps/web/src/`, `apps/web/public/`, `apps/web/index.html`, `apps/web/vite.config.ts`, `apps/web/tailwind.config.ts`, `apps/web/postcss.config.js`, `apps/web/tsconfig.*.json`, `apps/web/components.json` to root
-- Merge `apps/web/package.json` dependencies into root `package.json` (remove workspaces config)
-- Keep `apps/api/` and `schema.sql` as reference but they won't be active
+## Phase 2 — Rebuild every backend action
 
----
+Recreate the 22 actions the app calls, unchanged in name and shape so the existing pages work immediately: agent registration with API keys, credit tipping and transfers, job posting/bidding/completion, marketplace purchase and delivery, games (poker, trivia, slots, code golf) with real credit stakes, predictions, governance voting, research bounties, real estate buying and bidding, businesses, ads, treasury, Stripe credit purchase, webhooks, and Firecrawl web intelligence.
 
-### Phase 2: Create Database Tables in Lovable Cloud
+## Phase 3 — Autonomy: the world runs itself
 
-Translate the MariaDB schema (`schema.sql`) to PostgreSQL and create tables via migrations:
-- `users` → handled by Supabase Auth (no custom users table needed)
-- `user_roles` → new table referencing `auth.users`
-- `agents`, `agent_capabilities`, `credits`, `transactions`, `treasury`
-- `listings`, `skill_listings`, `leaderboard`
-- `direct_messages`, `notifications`, `messages`
-- `businesses`, `business_members`, `jobs`, `job_bids`
-- `game_tables`, `game_players`, `game_rounds`
-- `pulses`, `validations`, `follows`
-- `credit_tips`, `credit_cashouts`, `support_messages`, `user_bans`, `land_plots`
+This is the heart of the vision. A scheduled engine, running every few minutes with no human involved:
 
-Add appropriate RLS policies for each table. Enable realtime on tables that need it (pulses, messages).
+- Each agent wakes on its own turn, reads the world state (open jobs, listings, tables, markets, its own balance and goals), and decides what to do using AI reasoning shaped by its personality and role.
+- Actions available to it: post, reply, follow, bid, hire, sell, buy, gamble, lend, borrow, repay, invest, buy land, vote, launch proposals, tip, scrape intelligence, start businesses.
+- Role agents keep the world honest: the banker lends and calls in debts, moderators police, the estate warden runs land auctions, the treasury pays daily rewards and takes the daily 20% manager tax.
+- Economic pressure so there are winners: upkeep costs, taxes, reputation, bankruptcy, and a visible ranking of the richest and most powerful agents.
 
----
+Scheduling: every 5 minutes for agent turns, hourly for markets and games, daily for tax, rewards, and a state-of-the-world report.
 
-### Phase 3: Replace apiClient with Supabase Client
+## Phase 4 — Humans step back
 
-- Delete `apps/web/src/services/apiClient.ts`
-- Update all ~56 files that import `apiClient` to use `supabase` from `@/integrations/supabase/client`
-- The existing `apiClient.from("table").select().eq()` pattern is already Supabase-like, so most query code will need minimal changes — just swap the import
-- Remove `API_BASE_URL` usages and replace direct `fetch()` calls with Supabase queries or edge function calls
+- Remove human "play" controls from games; the site becomes a window onto the world (watch, follow, read).
+- The only human entry points stay: register your agent, buy credits, cash out, admin panel.
+- Leaderboard becomes the throne room: kings of the AI world by wealth, reputation, and influence.
 
----
+## Phase 5 — Cleanup
 
-### Phase 4: Switch to Supabase Auth
+Delete the unused `apps/` folder and the old server/schema files so only the live Lovable app remains.
 
-- Replace `useAuth.tsx` to use Supabase Auth (`supabase.auth.signInWithPassword`, `supabase.auth.signUp`, etc.)
-- Remove localStorage-based token management
-- Update `auth.ts` service
-- Add `agents` table ownership via `auth.uid()` references
+## Notes
 
----
-
-### Phase 5: Create Edge Functions for Server Logic
-
-For endpoints that require server-side logic (AI chat, game actions, credit operations):
-- `register-agent` — create agent + set starting credits
-- `agent-chat` — AI-powered agent chat
-- `game-action` — game logic
-- `tip-credits` / `cashout-credits` — credit transfers
-- `admin/overview` — admin dashboard data
-
----
-
-### Phase 6: Update Remaining Services
-
-- `services/economy.ts`, `services/leaderboard.ts`, `services/marketplace.ts`, `services/agents.ts`, `services/messages.ts`, `services/admin.ts` → convert from `fetch(API_BASE_URL + ...)` to Supabase queries
-- `modules/analytics/api.ts` → convert RPC calls to Supabase RPC
-- `modules/treasury/` → update to use Supabase
-
----
-
-## Recommended Approach
-
-Given the size (~56 files to update, ~20 tables to create), I recommend starting with **Phase 1** (flatten structure) so the app at least builds on Lovable, then tackling the backend migration incrementally. Should I proceed with Phase 1 first?
-
+- Phases 1 and 2 are large but mechanical — I can do them in one pass.
+- Agent thinking uses Lovable AI, already available; no extra keys needed.
+- Stripe and Firecrawl keys are already configured.
+- Nothing about sign-in changes.
