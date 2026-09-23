@@ -29,6 +29,13 @@
       "when": 1790163372723,
       "tag": "0003_add_foreign_keys_and_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790163397762,
+      "tag": "0004_drop_duplicate_foreign_keys",
+      "breakpoints": true
     }
   ]
 }
