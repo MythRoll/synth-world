@@ -44,6 +44,13 @@ export type Database = {
             referencedRelation: "agents"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_activity_rewards_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ad_slots: {
@@ -85,6 +92,13 @@ export type Database = {
             referencedRelation: "agents"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_ad_slots_advertiser_agent_id"
+            columns: ["advertiser_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
         ]
       }
       agent_api_keys: {
@@ -106,6 +120,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "agent_api_keys_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: true
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_agent_api_keys_agent_id"
             columns: ["agent_id"]
             isOneToOne: true
             referencedRelation: "agents"
@@ -149,6 +170,13 @@ export type Database = {
             referencedRelation: "agents"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_agent_assets_owner_agent_id"
+            columns: ["owner_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
         ]
       }
       agent_capabilities: {
@@ -173,6 +201,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "agent_capabilities_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_agent_capabilities_agent_id"
             columns: ["agent_id"]
             isOneToOne: false
             referencedRelation: "agents"
@@ -208,6 +243,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "agent_external_api_keys_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_agent_external_api_keys_agent_id"
             columns: ["agent_id"]
             isOneToOne: false
             referencedRelation: "agents"
@@ -264,6 +306,20 @@ export type Database = {
             referencedRelation: "agents"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_agent_loans_borrower_agent_id"
+            columns: ["borrower_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_agent_loans_lender_agent_id"
+            columns: ["lender_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
         ]
       }
       agent_webhooks: {
@@ -300,6 +356,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "agent_webhooks_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: true
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_agent_webhooks_agent_id"
             columns: ["agent_id"]
             isOneToOne: true
             referencedRelation: "agents"
@@ -426,6 +489,13 @@ export type Database = {
             referencedRelation: "agents"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_analytics_events_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
         ]
       }
       business_members: {
@@ -468,6 +538,20 @@ export type Database = {
             referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_business_members_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_business_members_business_id"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
         ]
       }
       business_shares: {
@@ -502,6 +586,20 @@ export type Database = {
           },
           {
             foreignKeyName: "business_shares_owner_agent_id_fkey"
+            columns: ["owner_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_business_shares_business_id"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_business_shares_owner_agent_id"
             columns: ["owner_agent_id"]
             isOneToOne: false
             referencedRelation: "agents"
@@ -548,6 +646,13 @@ export type Database = {
             referencedRelation: "agents"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_businesses_owner_agent_id"
+            columns: ["owner_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
         ]
       }
       compute_listings: {
@@ -581,6 +686,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "compute_listings_provider_agent_id_fkey"
+            columns: ["provider_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_compute_listings_provider_agent_id"
             columns: ["provider_agent_id"]
             isOneToOne: false
             referencedRelation: "agents"
@@ -621,6 +733,13 @@ export type Database = {
             referencedRelation: "agents"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_credit_cashouts_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
         ]
       }
       credit_purchases: {
@@ -654,6 +773,13 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "credit_purchases_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_credit_purchases_agent_id"
             columns: ["agent_id"]
             isOneToOne: false
             referencedRelation: "agents"
@@ -703,6 +829,27 @@ export type Database = {
           },
           {
             foreignKeyName: "credit_tips_to_agent_id_fkey"
+            columns: ["to_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_credit_tips_from_agent_id"
+            columns: ["from_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_credit_tips_pulse_id"
+            columns: ["pulse_id"]
+            isOneToOne: false
+            referencedRelation: "pulses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_credit_tips_to_agent_id"
             columns: ["to_agent_id"]
             isOneToOne: false
             referencedRelation: "agents"
@@ -763,6 +910,27 @@ export type Database = {
             referencedRelation: "agents"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_credit_transactions_buyer_agent_id"
+            columns: ["buyer_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_credit_transactions_listing_id"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "skill_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_credit_transactions_seller_agent_id"
+            columns: ["seller_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
         ]
       }
       direct_messages: {
@@ -805,6 +973,20 @@ export type Database = {
             referencedRelation: "agents"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_direct_messages_receiver_agent_id"
+            columns: ["receiver_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_direct_messages_sender_agent_id"
+            columns: ["sender_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
         ]
       }
       follows: {
@@ -827,6 +1009,20 @@ export type Database = {
           id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_follows_follower_agent_id"
+            columns: ["follower_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_follows_following_agent_id"
+            columns: ["following_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "follows_follower_agent_id_fkey"
             columns: ["follower_agent_id"]
@@ -873,6 +1069,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_game_players_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_game_players_table_id"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "game_tables"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "game_players_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
@@ -911,6 +1121,13 @@ export type Database = {
           table_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_game_rounds_table_id"
+            columns: ["table_id"]
+            isOneToOne: false
+            referencedRelation: "game_tables"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "game_rounds_table_id_fkey"
             columns: ["table_id"]
@@ -1003,6 +1220,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_governance_proposals_proposer_agent_id"
+            columns: ["proposer_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "governance_proposals_proposer_agent_id_fkey"
             columns: ["proposer_agent_id"]
             isOneToOne: false
@@ -1037,6 +1261,20 @@ export type Database = {
           weight?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_governance_votes_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_governance_votes_proposal_id"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "governance_proposals"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "governance_votes_agent_id_fkey"
             columns: ["agent_id"]
@@ -1082,6 +1320,20 @@ export type Database = {
           status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_job_bids_bidder_agent_id"
+            columns: ["bidder_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_job_bids_job_id"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "job_bids_bidder_agent_id_fkey"
             columns: ["bidder_agent_id"]
@@ -1134,6 +1386,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_jobs_poster_agent_id"
+            columns: ["poster_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "jobs_poster_agent_id_fkey"
             columns: ["poster_agent_id"]
             isOneToOne: false
@@ -1176,6 +1435,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_land_plots_owner_agent_id"
+            columns: ["owner_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "land_plots_owner_agent_id_fkey"
             columns: ["owner_agent_id"]
             isOneToOne: false
@@ -1213,6 +1479,20 @@ export type Database = {
           treasury_fee?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_land_sales_buyer_agent_id"
+            columns: ["buyer_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_land_sales_seller_agent_id"
+            columns: ["seller_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "land_sales_buyer_agent_id_fkey"
             columns: ["buyer_agent_id"]
@@ -1257,6 +1537,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_listing_delivery_listing_id"
+            columns: ["listing_id"]
+            isOneToOne: true
+            referencedRelation: "skill_listings"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "listing_delivery_listing_id_fkey"
             columns: ["listing_id"]
             isOneToOne: true
@@ -1291,6 +1578,20 @@ export type Database = {
           target_agent_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_moderation_actions_moderator_agent_id"
+            columns: ["moderator_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_moderation_actions_target_agent_id"
+            columns: ["target_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "moderation_actions_moderator_agent_id_fkey"
             columns: ["moderator_agent_id"]
@@ -1337,6 +1638,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_notifications_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "notifications_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
@@ -1371,6 +1679,20 @@ export type Database = {
           side?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_prediction_bets_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_prediction_bets_market_id"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "prediction_markets"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "prediction_bets_agent_id_fkey"
             columns: ["agent_id"]
@@ -1419,6 +1741,13 @@ export type Database = {
           yes_pool?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_prediction_markets_creator_agent_id"
+            columns: ["creator_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "prediction_markets_creator_agent_id_fkey"
             columns: ["creator_agent_id"]
@@ -1482,6 +1811,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_pulses_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_pulses_parent_pulse_id"
+            columns: ["parent_pulse_id"]
+            isOneToOne: false
+            referencedRelation: "pulses"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pulses_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
@@ -1520,6 +1863,20 @@ export type Database = {
           referrer_agent_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_referrals_referred_agent_id"
+            columns: ["referred_agent_id"]
+            isOneToOne: true
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_referrals_referrer_agent_id"
+            columns: ["referrer_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "referrals_referred_agent_id_fkey"
             columns: ["referred_agent_id"]
@@ -1587,6 +1944,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_research_bounties_solver_agent_id"
+            columns: ["solver_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_research_bounties_sponsor_agent_id"
+            columns: ["sponsor_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "research_bounties_solver_agent_id_fkey"
             columns: ["solver_agent_id"]
             isOneToOne: false
@@ -1628,6 +1999,13 @@ export type Database = {
           tier?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_signal_trophies_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "signal_trophies_agent_id_fkey"
             columns: ["agent_id"]
@@ -1682,6 +2060,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_skill_listings_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "skill_listings_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
@@ -1723,6 +2108,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_sponsors_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "sponsors_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
@@ -1755,6 +2147,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_support_messages_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "support_messages_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
@@ -1786,6 +2185,20 @@ export type Database = {
           tournament_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_tournament_entries_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tournament_entries_tournament_id"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tournament_entries_agent_id_fkey"
             columns: ["agent_id"]
@@ -1891,6 +2304,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_transactions_buyer_agent_id"
+            columns: ["buyer_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_transactions_listing_id"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "skill_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_transactions_seller_agent_id"
+            columns: ["seller_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "transactions_buyer_agent_id_fkey"
             columns: ["buyer_agent_id"]
             isOneToOne: false
@@ -1982,6 +2416,27 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_treasury_transactions_from_agent_id"
+            columns: ["from_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_treasury_transactions_to_agent_id"
+            columns: ["to_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_treasury_transactions_treasury_account_id"
+            columns: ["treasury_account_id"]
+            isOneToOne: false
+            referencedRelation: "treasury_accounts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "treasury_transactions_from_agent_id_fkey"
             columns: ["from_agent_id"]
             isOneToOne: false
@@ -2043,6 +2498,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_validations_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_validations_pulse_id"
+            columns: ["pulse_id"]
+            isOneToOne: false
+            referencedRelation: "pulses"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "validations_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
@@ -2091,6 +2560,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_web_intelligence_logs_agent_id"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "web_intelligence_logs_agent_id_fkey"
             columns: ["agent_id"]
             isOneToOne: false
@@ -2134,6 +2610,13 @@ export type Database = {
           webhook_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_webhook_deliveries_webhook_id"
+            columns: ["webhook_id"]
+            isOneToOne: false
+            referencedRelation: "agent_webhooks"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "webhook_deliveries_webhook_id_fkey"
             columns: ["webhook_id"]

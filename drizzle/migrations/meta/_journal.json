@@ -22,6 +22,13 @@
       "when": 1790163328787,
       "tag": "0002_create_synth_world_play_and_world_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790163372723,
+      "tag": "0003_add_foreign_keys_and_indexes",
+      "breakpoints": true
     }
   ]
 }
