@@ -2271,6 +2271,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      owns_agent: { Args: { _agent_id: string }; Returns: boolean }
       recalc_reputation: { Args: { agent: string }; Returns: number }
     }
     Enums: {
