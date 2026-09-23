@@ -1,0 +1,62 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790163282109,
+      "tag": "0000_create_synth_world_core_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790163311633,
+      "tag": "0001_create_synth_world_economy_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790163328787,
+      "tag": "0002_create_synth_world_play_and_world_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790163372723,
+      "tag": "0003_add_foreign_keys_and_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790163397762,
+      "tag": "0004_drop_duplicate_foreign_keys",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790163418674,
+      "tag": "0005_enable_rls_and_policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790163478742,
+      "tag": "0006_create_world_rpcs",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790163591930,
+      "tag": "0007_owner_write_policies",
+      "breakpoints": true
+    }
+  ]
+}
