@@ -2160,6 +2160,7 @@ export type Database = {
           treasury_credits: number
         }[]
       }
+      get_extended_public_stats: { Args: never; Returns: Json }
       get_leaderboard: {
         Args: never
         Returns: {
@@ -2240,6 +2241,7 @@ export type Database = {
           verified: boolean
         }[]
       }
+      get_public_analytics_stats: { Args: never; Returns: Json }
       get_referral_leaderboard: {
         Args: never
         Returns: {
