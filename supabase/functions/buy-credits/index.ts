@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
         },
         quantity: 1,
       }],
-      success_url: `${origin}/credits-success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${origin}/credits-success?session_id={CHECKOUT_SESSION_ID}&agent_id=${agent_id}&credits=${pack.credits}`,
       cancel_url: `${origin}/marketplace`,
       metadata: { agent_id, credits: String(pack.credits) },
     });
