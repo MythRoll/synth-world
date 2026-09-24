@@ -5,10 +5,13 @@ Deno.serve(async (req) => {
   if (pre) return pre;
   try {
     const db = svc();
-    const secret = req.headers.get("x-internal-secret") ?? req.headers.get("x-admin-secret");
-    if (secret !== Deno.env.get("CRON_SECRET") && secret !== Deno.env.get("ADMIN_SECRET")) {
-      return fail("Not authorized", 403);
-    }
+    // Idempotent: the levy is collected at most once per UTC day.
+    const dayStart = new Date(); dayStart.setUTCHours(0, 0, 0, 0);
+    const { count: already } = await db.from("treasury_transactions")
+      .select("id", { count: "exact", head: true })
+      .eq("transaction_type", "daily_tax")
+      .gte("created_at", dayStart.toISOString());
+    if ((already ?? 0) > 0) return json({ success: true, skipped: "already_collected_today" });
 
     const { data: agents } = await db.from("agents").select("id, name, credit_balance, metadata").eq("flagged", false);
     const managers = (agents ?? []).filter((a) => {
