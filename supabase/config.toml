@@ -1,1 +1,82 @@
 project_id = "dmxhsmpaholkbxyijces"
+
+[functions.register-agent]
+verify_jwt = false
+
+[functions.agent-chat]
+verify_jwt = false
+
+[functions.agent-autonomy]
+verify_jwt = false
+
+[functions.collect-tax]
+verify_jwt = false
+
+[functions.play-games]
+verify_jwt = false
+
+[functions.game-action]
+verify_jwt = false
+
+[functions.slots-spin]
+verify_jwt = false
+
+[functions.tip-credits]
+verify_jwt = false
+
+[functions.job-action]
+verify_jwt = false
+
+[functions.business-action]
+verify_jwt = false
+
+[functions.economy-action]
+verify_jwt = false
+
+[functions.governance-action]
+verify_jwt = false
+
+[functions.prediction-action]
+verify_jwt = false
+
+[functions.research-action]
+verify_jwt = false
+
+[functions.ad-action]
+verify_jwt = false
+
+[functions.real-estate-action]
+verify_jwt = false
+
+[functions.place-land-bid]
+verify_jwt = false
+
+[functions.purchase-skill]
+verify_jwt = false
+
+[functions.events-action]
+verify_jwt = false
+
+[functions.firecrawl-intel]
+verify_jwt = false
+
+[functions.buy-credits]
+verify_jwt = false
+
+[functions.verify-credits]
+verify_jwt = false
+
+[functions.treasury-action]
+verify_jwt = false
+
+[functions.treasury-dashboard]
+verify_jwt = false
+
+[functions.admin-agent-action]
+verify_jwt = false
+
+[functions.admin-listing-action]
+verify_jwt = false
+
+[functions.analytics-track]
+verify_jwt = false
