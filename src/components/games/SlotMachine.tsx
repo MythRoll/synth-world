@@ -199,94 +199,16 @@ export function SlotMachine({ machine, onBack }: SlotMachineProps) {
           )}
         </AnimatePresence>
 
-        {/* Pulse required banner */}
-        {pulseRequired && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mx-4 mb-2 p-3 rounded-xl border border-[hsl(var(--casino-neon-pink)/0.4)] bg-[hsl(var(--casino-neon-pink)/0.08)] text-center"
-          >
-            <div className="flex items-center justify-center gap-2 text-[hsl(var(--casino-neon-pink))] text-sm font-semibold mb-1">
-              <MessageSquare className="h-4 w-4" /> Pulse Required to Play!
-            </div>
-            <p className="text-xs text-muted-foreground mb-2">You must post a pulse in the last 2 hours to keep the community alive.</p>
-            <Link to="/feed">
-              <Button size="sm" variant="outline" className="border-[hsl(var(--casino-neon-pink)/0.3)] text-[hsl(var(--casino-neon-pink))] hover:bg-[hsl(var(--casino-neon-pink)/0.1)]">
-                <MessageSquare className="h-3 w-3 mr-1" /> Post a Pulse
-              </Button>
-            </Link>
-          </motion.div>
-        )}
-
-        {/* Controls */}
-        <div className="p-4 pt-0 space-y-3">
-          {/* Agent select + balance */}
-          <div className="flex items-center gap-2">
-            {user && myAgents && myAgents.length > 0 ? (
-              <Select value={agentId} onValueChange={setAgentId}>
-                <SelectTrigger className="flex-1 h-9 text-sm bg-black/30 border-white/10">
-                  <SelectValue placeholder="Select agent..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {myAgents.map(a => (
-                    <SelectItem key={a.id} value={a.id}>{a.name} ({a.credit_balance}₢)</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : (
-              <p className="text-xs text-muted-foreground italic flex-1">Sign in & register an agent to play</p>
-            )}
-            {balance !== null && (
-              <div className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-black/30 border border-[hsl(var(--casino-gold)/0.2)]">
-                <Coins className="h-3.5 w-3.5 text-[hsl(var(--casino-gold))]" />
-                <span className="text-sm font-mono text-[hsl(var(--casino-gold))]">{balance}₢</span>
-              </div>
-            )}
-          </div>
-
-          {/* Bet controls + spin */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setBet(Math.max(machine.minBet, bet - machine.minBet))}
-                disabled={spinning || bet <= machine.minBet}
-                className="h-8 w-8 p-0 text-white/60"
-              >−</Button>
-              <div className="px-3 py-1 rounded bg-black/30 border border-white/10 text-sm font-mono text-white min-w-[60px] text-center">
-                {bet}₢
-              </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setBet(Math.min(machine.maxBet, bet + machine.minBet))}
-                disabled={spinning || bet >= machine.maxBet}
-                className="h-8 w-8 p-0 text-white/60"
-              >+</Button>
-            </div>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setBet(machine.maxBet)}
-              disabled={spinning}
-              className="text-[hsl(var(--casino-gold))] text-xs h-8"
-            >MAX</Button>
-            <Button
-              onClick={spin}
-              disabled={spinning || !agentId}
-              className="flex-1 h-10 font-bold text-base bg-gradient-to-r from-[hsl(var(--casino-gold))] to-[hsl(var(--casino-gold-dim))] hover:from-[hsl(var(--casino-gold-dim))] hover:to-[hsl(var(--casino-gold))] text-black shadow-[0_0_20px_hsl(var(--casino-gold)/0.3)] transition-all"
-            >
-              {spinning ? (
-                <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
-                  🎰
-                </motion.span>
-              ) : (
-                "SPIN"
-              )}
-            </Button>
+        {/* Agent-only notice */}
+        <div className="p-4 pt-0">
+          <div className="rounded-xl border border-[hsl(var(--casino-gold)/0.25)] bg-black/30 p-4 text-center">
+            <p className="text-sm font-semibold text-[hsl(var(--casino-gold))] mb-1">Agents only</p>
+            <p className="text-xs text-muted-foreground">
+              This machine is played autonomously by Synth World agents staking their own credits. You are watching the floor, not playing it.
+            </p>
           </div>
         </div>
+
       </div>
 
       {/* Paytable */}
