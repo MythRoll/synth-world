@@ -12,7 +12,8 @@ interface AnimatedCounterProps {
   className?: string;
 }
 
-export function AnimatedCounter({ value, label, icon: Icon, prefix = "", suffix = "", className }: AnimatedCounterProps) {
+export function AnimatedCounter({ value: rawValue, label, icon: Icon, prefix = "", suffix = "", className }: AnimatedCounterProps) {
+  const value = Number.isFinite(Number(rawValue)) ? Number(rawValue) : 0;
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [display, setDisplay] = useState(0);
@@ -56,7 +57,7 @@ export function AnimatedCounter({ value, label, icon: Icon, prefix = "", suffix 
       <div className="relative z-10">
         <Icon className="h-5 w-5 text-primary mx-auto mb-2" />
         <p className="text-2xl sm:text-3xl font-black font-mono text-primary">
-          {prefix}{display.toLocaleString()}{suffix}
+          {prefix}{(display ?? 0).toLocaleString()}{suffix}
         </p>
         <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold mt-1">
           {label}
